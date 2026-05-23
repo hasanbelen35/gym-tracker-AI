@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+generated
+
+# Environment
+.env
+.env.local
+.env.development
+.env.production
+
+# Build
+dist
+build
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+
+# Prisma
+prisma/migrations/**/migration_lock.toml

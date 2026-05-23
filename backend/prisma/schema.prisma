@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Gym {
+  id        Int      @id @default(autoincrement())
+  name      String
+  address   String?
+  phone     String?
+  email     String   @unique
+  password  String
+  qrToken   String   @unique @default(uuid())
+  createdAt DateTime @default(now())
+  members   Member[]
+  sessions  Session[]
+  trainers  Trainer[]
+}
+
+model Trainer {
+  id        Int      @id @default(autoincrement())
+  gymId     Int
+  name      String
+  surname   String
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  gym       Gym      @relation(fields: [gymId], references: [id])
+}
+
+model Member {
+  id        Int       @id @default(autoincrement())
+  gymId     Int
+  name      String
+  surname   String
+  email     String    @unique
+  password  String
+  age       Int?
+  height    Float?
+  weight    Float?
+  phone     String?
+  createdAt DateTime  @default(now())
+  gym       Gym       @relation(fields: [gymId], references: [id])
+  sessions  Session[]
+}
+
+model Session {
+  id        Int       @id @default(autoincrement())
+  memberId  Int
+  gymId     Int
+  checkIn   DateTime  @default(now())
+  checkOut  DateTime?
+  duration  Int?
+  member    Member    @relation(fields: [memberId], references: [id])
+  gym       Gym       @relation(fields: [gymId], references: [id])
+}
