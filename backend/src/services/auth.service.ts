@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import prisma from "../lib/db";
 
 export class AuthService {
+  // --- GYM METHODS ---
+
   async registerGym(data: {
     name: string;
     email: string;
@@ -19,9 +21,7 @@ export class AuthService {
       data: { ...data, password: hashedPassword },
     });
 
-    const token = jwt.sign({ id: gym.id, role: "gym" }, process.env.JWT_SECRET!, { expiresIn: "7d" });
-
-    return { token, gym: { id: gym.id, name: gym.name, email: gym.email } };
+    return { gym: { id: gym.id, name: gym.name, email: gym.email } };
   }
 
   async loginGym(data: { email: string; password: string }) {
@@ -35,6 +35,8 @@ export class AuthService {
 
     return { token, gym: { id: gym.id, name: gym.name, email: gym.email } };
   }
+
+  // --- MEMBER METHODS ---
 
   async registerMember(data: {
     name: string;
@@ -56,9 +58,7 @@ export class AuthService {
       data: { ...data, password: hashedPassword },
     });
 
-    const token = jwt.sign({ id: member.id, role: "member" }, process.env.JWT_SECRET!, { expiresIn: "7d" });
-
-    return { token, member: { id: member.id, name: member.name, email: member.email } };
+    return { member: { id: member.id, name: member.name, email: member.email } };
   }
 
   async loginMember(data: { email: string; password: string }) {

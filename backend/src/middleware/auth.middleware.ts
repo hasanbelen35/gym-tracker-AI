@@ -5,12 +5,18 @@ export interface AuthRequest extends Request {
   user?: { id: number; role: string };
 }
 
-// Verify JWT token from Authorization header and attach user to request
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const token = req.headers.authorization?.split(" ")[1];
+  let token: string | undefined = undefined;
+
+  if (req.cookies?.auth_token) {
+    token = req.cookies.auth_token;
+  } 
+  else if (req.headers.authorization?.startsWith("Bearer ")) {
+    token = req.headers.authorization.split(" ")[1];
+  }
 
   if (!token) {
-    res.status(401).json({ error: "No token provided" });
+    res.status(401).json({ error: "No token provided or invalid format" });
     return;
   }
 

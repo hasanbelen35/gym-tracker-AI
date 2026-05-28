@@ -5,7 +5,7 @@ import prisma from "./lib/db";
 import authRouter from "./routes/auth.routes";
 import { errorHandler } from "./middleware/errorHandler";
 import sessionRouter from "./routes/session.route";
-
+import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-
+app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/session", sessionRouter);
 app.get("/", (req, res) => {
