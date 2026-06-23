@@ -1,10 +1,9 @@
-import LoginGym from '@/components/login/LoginGym'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <LoginGym />
+      WELCOME TO  GYM
     </div>
   )
 }

@@ -12,8 +12,7 @@ router.post("/checkin", authenticate, authorizeMember, (req, res, next) => sessi
 router.post("/checkout", authenticate, authorizeMember, (req, res, next) => session.checkOut(req, res, next));
 
 // Member views their own session history
-router.get("/my", authenticate, authorizeMember, (req, res, next) => session.getMemberSessions(req, res, next));
- 
+router.get("/my", authenticate, authorizeMember, (req, res, next) => session.getMemberSessions(req, res, next)); 
 // Gym owner views all sessions in their gym
 router.get("/gym", authenticate, authorizeGym, (req, res, next) => session.getGymSessions(req, res, next));
 

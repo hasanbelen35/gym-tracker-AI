@@ -44,6 +44,7 @@ export class SessionService {
   async getMemberSessions(memberId: number) {
     return prisma.session.findMany({
       where: { memberId },
+      include: { gym: { select: { name: true } } }, 
       orderBy: { checkIn: "desc" },
     });
   }

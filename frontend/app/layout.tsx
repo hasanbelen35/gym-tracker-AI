@@ -2,7 +2,7 @@
 import type { Metadata } from "next";
 import { Syne, DM_Sans } from "next/font/google";
 import "./globals.css";
-
+import { ReduxProvider } from "@/components/ReduxProvider";
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm" });
 
@@ -16,8 +16,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="tr" className={`${syne.variable} ${dmSans.variable}`}>
-      <body className="min-h-full flex flex-col antialiased">
-        {children}
+      <body suppressHydrationWarning={true} className="min-h-full flex flex-col antialiased">
+        <ReduxProvider>
+          {children}
+        </ReduxProvider>
       </body>
     </html>
   );

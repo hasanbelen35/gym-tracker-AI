@@ -6,16 +6,26 @@ import authRouter from "./routes/auth.routes";
 import { errorHandler } from "./middleware/errorHandler";
 import sessionRouter from "./routes/session.route";
 import cookieParser from "cookie-parser";
+
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// CORS yapılandırması
+app.use(cors({
+  origin: process.env.CLIENT_URL,
+  credentials: true, 
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 app.use(express.json());
 app.use(cookieParser());
+
 app.use("/api/auth", authRouter);
 app.use("/api/session", sessionRouter);
+
 app.get("/", (req, res) => {
   res.json({ message: "GymTrack API is running 🚀" });
 });
