@@ -38,7 +38,7 @@ export const registerGym = createAsyncThunk('auth/registerGym', async (data: Rec
     try {
         const response = await API.post('/auth/gym/register', data);
         return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Kayıt sırasında bir hata oluştu.");
     }
@@ -49,7 +49,7 @@ export const loginGym = createAsyncThunk('auth/loginGym', async (data: Record<st
     try {
         const response = await API.post('/auth/gym/login', data);
         return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Giriş yapılamadı.");
     }
@@ -60,7 +60,7 @@ export const registerMember = createAsyncThunk('auth/registerMember', async (dat
     try {
         const response = await API.post('/auth/member/register', data);
         return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Üye kaydı sırasında hata oluştu.");
     }
@@ -71,7 +71,17 @@ export const loginMember = createAsyncThunk('auth/loginMember', async (data: Rec
     try {
         const response = await API.post('/auth/member/login', data);
         return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.message || "Üye girişi yapılamadı.");
+    }
+});
+
+// LOGOUT USER 
+export const logoutUser = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
+    try {
+        await API.post('/auth/logout');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         return rejectWithValue(error.response?.data?.message || "Üye girişi yapılamadı.");
     }
@@ -95,6 +105,10 @@ const authSlice = createSlice({
                 state.user = action.payload.gym;
                 state.role = 'gym';
             })
+            .addCase(logoutUser.fulfilled, (state) => {
+                state.user = null;
+                state.role = null;
+            })
             .addCase(loginMember.fulfilled, (state, action: PayloadAction<{ member: Member }>) => {
                 state.loading = false;
                 state.user = action.payload.member;
@@ -108,6 +122,7 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string || 'Beklenmedik bir hata oluştu.';
             });
+
     },
 });
 

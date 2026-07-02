@@ -15,12 +15,15 @@ export default function DashboardPage() {
   return (
     <div>
       <Navbar />
-      <h1>Merhaba, {user.name} {user.surname} 👋</h1>
-      <p>Rolünüz: {user.role}</p>
-      
-      {user.role === "gym" && (
-        <button>Salon İstatistiklerini Görüntüle</button>
-      )}
+      <div className="bg-black text-white  ">
+        <h1>Merhaba, {user.name} {user.surname} 👋</h1>
+        <p>Rolünüz: {user.role}</p>
+
+        {user.role === "gym" && (
+          <button>Salon İstatistiklerini Görüntüle</button>
+        )}
+      </div>
+
     </div>
   );
 }

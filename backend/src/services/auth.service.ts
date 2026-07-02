@@ -31,7 +31,7 @@ export class AuthService {
     const valid = await bcrypt.compare(data.password, gym.password);
     if (!valid) throw new Error("Invalid password");
 
-    const token = jwt.sign({ id: gym.id, role: "gym" }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+    const token = jwt.sign({ id: gym.id, role: "gym", name: gym.name }, process.env.JWT_SECRET!, { expiresIn: "7d" });
 
     return { token, gym: { id: gym.id, name: gym.name, email: gym.email } };
   }
@@ -68,8 +68,9 @@ export class AuthService {
     const valid = await bcrypt.compare(data.password, member.password);
     if (!valid) throw new Error("Invalid password");
 
-    const token = jwt.sign({ id: member.id, role: "member" }, process.env.JWT_SECRET!, { expiresIn: "7d" });
+    const token = jwt.sign({ id: member.id, role: "member", name: member.name , surname: member.surname}, process.env.JWT_SECRET!, { expiresIn: "7d" });
 
     return { token, member: { id: member.id, name: member.name, email: member.email } };
   }
+  
 }

@@ -8,5 +8,5 @@ router.post("/gym/register", (req, res, next) => authController.registerGym(req,
 router.post("/gym/login", (req, res, next) => authController.loginGym(req, res, next));
 router.post("/member/register", (req, res, next) => authController.registerMember(req, res, next));
 router.post("/member/login", (req, res, next) => authController.loginMember(req, res, next));
-
+router.post("/logout", authController.logout);
 export default router;

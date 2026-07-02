@@ -1,26 +1,62 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-border: var(--nav-border);
+
+  --color-brand-50: var(--brand-50);
+  --color-brand-100: var(--brand-100);
+  --color-brand-400: var(--brand-400);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-text: var(--brand-text);
+
+  --shadow-nav: 0 1px 2px 0 rgba(46, 111, 242, 0.06);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---- LIGHT MODE (default) ---- */
+:root {
+  --background: #dfe4eb;
+  --foreground: #1E293B;
+
+  --nav-bg: #F7F9FC;
+  --nav-border: #E1E8F5;
+
+  --brand-50: #EFF6FF;
+  --brand-100: #DBEAFE;
+  --brand-400: #4F94F5;
+  --brand-500: #2E6FF2;
+  --brand-600: #1E56D6;
+  --brand-dark: #16357A;
+  --brand-text: #334155;
+}
+
+/* ---- DARK MODE ---- */
+.dark {
+  --background: #0F1B3D;      /* siyah değil, derin lacivert */
+  --foreground: #E4EAF6;      /* soft mavimsi beyaz metin */
+
+  --nav-bg: #14224C;          /* navbar zemini — arka plandan biraz açık */
+  --nav-border: #22336B;      /* çizgi — mavi ailesinde kalır */
+
+  --brand-50: #1B2A5C;        /* hover zemini (dark'ta koyu-mavi) */
+  --brand-100: #22336B;
+  --brand-400: #6FA3F7;       /* dark zeminde daha parlak görünsün diye açıldı */
+  --brand-500: #4F86F0;
+  --brand-600: #3B6EE0;
+  --brand-dark: #A9C4FA;      /* dark'ta "koyu vurgu" artık en açık ton — kontrast için ters çevrildi */
+  --brand-text: #C7D2E8;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
