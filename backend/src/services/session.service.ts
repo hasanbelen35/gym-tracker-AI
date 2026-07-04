@@ -18,9 +18,9 @@ export class SessionService {
   }
 
   // Find the active session and close it with checkOut time and duration
-  async checkOut(memberId: number, gymId: number) {
+  async checkOut(memberId: number) {
     const activeSession = await prisma.session.findFirst({
-      where: { memberId, gymId, checkOut: null },
+      where: { memberId,  checkOut: null },
     });
 
     if (!activeSession) throw new Error("No active session found");
@@ -48,6 +48,7 @@ export class SessionService {
       orderBy: { checkIn: "desc" },
     });
   }
+  
 
   // Get all sessions for a specific gym including member name and surname
   async getGymSessions(gymId: number) {

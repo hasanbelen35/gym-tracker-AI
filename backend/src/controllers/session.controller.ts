@@ -12,6 +12,7 @@ export class SessionController {
       const memberId = req.user!.id;
       const { gymId } = req.body;
       const session = await sessionService.checkIn(memberId, gymId);
+      console.log("Session has started!")
       res.status(201).json(session);
     } catch (err) {
       next(err);
@@ -22,8 +23,8 @@ export class SessionController {
   async checkOut(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const memberId = req.user!.id;
-      const { gymId } = req.body;
-      const session = await sessionService.checkOut(memberId, gymId);
+      const session = await sessionService.checkOut(memberId);
+      console.log("Session has ended!")
       res.json(session);
     } catch (err) {
       next(err);

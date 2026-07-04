@@ -16,13 +16,13 @@ const Dashboard = () => {
         <div>
             <div className="flex">
                 {/* LEFT SIDEBAR */}
-                <aside className="  w-64 min-h-[calc(100vh-68px)]   bg-white dark:bg-nav-bg  border-nav-bordershadow-sm transition-colors">
+                <aside className="  w-64 min-h-[calc(100vh-68px)]   bg-white dark:bg-nav-bg  border-nav-border shadow-sm transition-colors">
                     <div className="flex flex-col p-4 gap-2 ">
                         {leftNavData.map((item, index) => (
                             <button
                                 key={index}
                                 onClick={() => router.push(item.route)}
-                                className=" w-full cursor-pointer text-left px-4 py-3 rounded-xl text-brand textfont-medium transition-all hover:bg-brand-50 dark:hover:bg-brand-100 hover:text-brand-600cursor-pointer"
+                                className=" w-full cursor-pointer text-left px-4 py-3 rounded-xl text-brand-text font-medium transition-all hover:bg-brand-50 dark:hover:bg-brand-100 hover:text-brand-600 cursor-pointer"
                             >
                                 {item.name}
                             </button>
