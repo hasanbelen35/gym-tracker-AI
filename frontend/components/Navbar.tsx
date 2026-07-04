@@ -42,12 +42,12 @@ export const Navbar = () => {
     <nav className="flex items-center justify-between px-8 py-3 bg-nav-bg border-b border-nav-border shadow-nav transition-colors">
       
       {/* Logo + Rol Badge */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3 ">
+        <div className="flex items-center gap-2 cursor-pointer">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-sm">
             <span className="text-white text-sm font-bold">G</span>
           </div>
-          <span className="text-xl font-bold tracking-tight text-brand-600">
+          <span className="text-xl font-bold tracking-tight text-brand-600 ">
             GymTracker<span className="text-brand-dark">AI</span>
           </span>
         </div>

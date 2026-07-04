@@ -1,0 +1,50 @@
+"use client";
+import React from 'react'
+import { useAuth } from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
+import { LeftNavDataAthlete, LeftNavDataGym } from '@/config/dashboardConfig'
+const Dashboard = () => {
+    const { user, loading } = useAuth();
+    const router = useRouter();
+    if (loading) return <p>Yükleniyor...</p>;
+    if (!user) return <p>Lütfen giriş yapın.</p>;
+
+    const { name, surname, role } = user;
+    {/* PICK AS A ROLE  */ }
+    const leftNavData = role === "gym" ? LeftNavDataGym : LeftNavDataAthlete;
+    return (
+        <div>
+            <div className="flex">
+                {/* LEFT SIDEBAR */}
+                <aside className="  w-64 min-h-[calc(100vh-68px)]   bg-white dark:bg-nav-bg  border-nav-bordershadow-sm transition-colors">
+                    <div className="flex flex-col p-4 gap-2 ">
+                        {leftNavData.map((item, index) => (
+                            <button
+                                key={index}
+                                onClick={() => router.push(item.route)}
+                                className=" w-full cursor-pointer text-left px-4 py-3 rounded-xl text-brand textfont-medium transition-all hover:bg-brand-50 dark:hover:bg-brand-100 hover:text-brand-600cursor-pointer"
+                            >
+                                {item.name}
+                            </button>
+                        ))}
+                    </div>
+                </aside>
+
+                {/* CONTENT */}
+                <main className="flex-1 p-1">
+                    <div className="px-2 py-4 border-b border-nav-border">
+                        <h2 className="text-2xl font-bold text-brand-text">
+                            Hoş geldin, 👋
+                        </h2>
+
+                        <p className="mt-2 text-lg font-medium text-brand-600">
+                            {name} {surname}
+                        </p>
+                    </div>
+                </main>
+            </div>
+        </div>
+    )
+}
+
+export default Dashboard

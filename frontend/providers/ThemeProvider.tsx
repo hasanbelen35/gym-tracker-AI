@@ -1,4 +1,3 @@
-// app/providers/theme-provider.tsx
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
@@ -16,10 +15,11 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
 
-  // İlk yüklemede localStorage veya sistem temasını oku
   useEffect(() => {
     const stored = localStorage.getItem("theme") as Theme | null;
-    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
     const initialTheme = stored ?? (systemPrefersDark ? "dark" : "light");
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -35,14 +35,14 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
-  // Hydration mismatch önlemek için ilk render'da içerik gösterme
-  if (!mounted) {
-    return <div style={{ visibility: "hidden" }}>{children}</div>;
-  }
-
+  // ÖNEMLİ: mounted olmasa bile children her zaman Provider içinde olmalı.
+  // Aksi halde SSR sırasında (ve ilk client render'da) useTheme() çağıran
+  // her bileşen context'i undefined bulur ve throw eder.
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
+      <div style={!mounted ? { visibility: "hidden" } : undefined}>
+        {children}
+      </div>
     </ThemeContext.Provider>
   );
 };

@@ -1,6 +1,7 @@
 // src/app/dashboard/page.tsx
 "use client";
 
+import Dashboard from "@/components/Dashboard";
 import { Navbar } from "@/components/Navbar";
 
 
@@ -15,12 +16,7 @@ export default function DashboardPage() {
   return (
     <div>
       <Navbar />
-      <h1>Merhaba, {user.name} {user.surname} 👋</h1>
-      <p>Rolünüz: {user.role}</p>
-      
-      {user.role === "gym" && (
-        <button>Salon İstatistiklerini Görüntüle</button>
-      )}
+      <Dashboard />
     </div>
   );
 }

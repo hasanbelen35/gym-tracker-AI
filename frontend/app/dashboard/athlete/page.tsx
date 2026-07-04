@@ -1,28 +1,12 @@
-// src/app/dashboard/page.tsx
-"use client";
 
 import { Navbar } from "@/components/Navbar";
-
-
-import { useAuth } from "@/hooks/useAuth";
+import Dashboard from "@/components/Dashboard";
 
 export default function DashboardPage() {
-  const { user, loading } = useAuth();
-
-  if (loading) return <p>Yükleniyor...</p>;
-  if (!user) return <p>Lütfen giriş yapın.</p>;
-
   return (
-    <div>
+    <div className="min-h-screen bg-brand-bg transition-colors">
       <Navbar />
-      <div className="bg-black text-white  ">
-        <h1>Merhaba, {user.name} {user.surname} 👋</h1>
-        <p>Rolünüz: {user.role}</p>
-
-        {user.role === "gym" && (
-          <button>Salon İstatistiklerini Görüntüle</button>
-        )}
-      </div>
+      <Dashboard />
 
     </div>
   );
