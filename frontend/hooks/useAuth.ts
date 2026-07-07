@@ -11,6 +11,8 @@ interface TokenPayload {
   role: "gym" | "member";
   name: string;
   surname?: string;
+  gymName?: string;
+  gymId?: number; 
 }
 
 export const useAuth = () => {
@@ -28,7 +30,7 @@ export const useAuth = () => {
         setUser(null);
       }
     }
-    
+
     setLoading(false);
   }, []);
 

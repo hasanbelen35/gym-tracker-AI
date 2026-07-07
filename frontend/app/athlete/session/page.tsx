@@ -3,10 +3,12 @@
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { checkIn, checkOut, getSessionsByUser } from "@/store/slices/sessionSlice";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function SessionPage() {
   const dispatch = useAppDispatch();
   const { isActive, loading, history } = useAppSelector((state) => state.session);
+  const { user } = useAuth(); // gymId burada, JWT'den decode edilmiş
 
   const [seconds, setSeconds] = useState(0);
   const [sessionSummary, setSessionSummary] = useState<string | null>(null);
@@ -26,9 +28,13 @@ export default function SessionPage() {
   }, [isActive]);
 
   const handleStart = () => {
+    if (!user?.gymId) {
+      console.error("Kullanıcının bağlı olduğu gym bulunamadı.", user);
+      return;
+    }
     setSeconds(0);
     setSessionSummary(null);
-    dispatch(checkIn(1));
+    dispatch(checkIn(user.gymId));
   };
 
   const handleEnd = () => {

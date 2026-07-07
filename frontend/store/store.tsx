@@ -2,10 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
 import authReducer from '@/store/slices/authSlice'
 import sessionReducer from '@/store/slices/sessionSlice'
+import gymSessionReducer from '@/store/slices/gymSessionSlice'
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    session: sessionReducer
+    session: sessionReducer,
+    gymSession: gymSessionReducer,
+
   },
 
 });

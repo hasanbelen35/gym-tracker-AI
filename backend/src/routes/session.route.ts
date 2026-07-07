@@ -13,10 +13,12 @@ router.post("/checkout", authenticate, authorizeMember, (req, res, next) => sess
 
 // Member views their own session history
 router.get("/my", authenticate, authorizeMember, (req, res, next) => session.getMemberSessions(req, res, next)); 
+//----------------------------------------------------------------------------------------------------------------------------------------
+/// GYM ///
 // Gym owner views all sessions in their gym
 router.get("/gym", authenticate, authorizeGym, (req, res, next) => session.getGymSessions(req, res, next));
 
-// Gym owner views members currently working out
+// Gym owner views members currently working out (NOT CHECKED OUT MEMBERS)
 router.get("/gym/active", authenticate, authorizeGym, (req, res, next) => session.getActiveGymSessions(req, res, next));
 
 export default router;

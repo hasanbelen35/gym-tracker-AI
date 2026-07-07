@@ -9,7 +9,8 @@ const Dashboard = () => {
     if (loading) return <p>Yükleniyor...</p>;
     if (!user) return <p>Lütfen giriş yapın.</p>;
 
-    const { name, surname, role } = user;
+    const {  name, surname, role, gymName } = user;
+    console.log(gymName)
     {/* PICK AS A ROLE  */ }
     const leftNavData = role === "gym" ? LeftNavDataGym : LeftNavDataAthlete;
     return (
@@ -40,6 +41,7 @@ const Dashboard = () => {
                         <p className="mt-2 text-lg font-medium text-brand-600">
                             {name} {surname}
                         </p>
+                        <p> {gymName} </p>
                     </div>
                 </main>
             </div>

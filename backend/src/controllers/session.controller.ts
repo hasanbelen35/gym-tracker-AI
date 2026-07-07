@@ -49,6 +49,7 @@ export class SessionController {
       const sessions = await sessionService.getGymSessions(gymId);
       res.json(sessions);
     } catch (err) {
+      //console.log(err)
       next(err);
     }
   }
@@ -60,6 +61,7 @@ export class SessionController {
       const sessions = await sessionService.getActiveGymSessions(gymId);
       res.json(sessions);
     } catch (err) {
+    //  console.log(err)
       next(err);
     }
   }

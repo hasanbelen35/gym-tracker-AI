@@ -5,6 +5,7 @@ import prisma from "../lib/db";
 export class AuthService {
   // --- GYM METHODS ---
 
+  // REGISTER GYM
   async registerGym(data: {
     name: string;
     email: string;
@@ -23,7 +24,7 @@ export class AuthService {
 
     return { gym: { id: gym.id, name: gym.name, email: gym.email } };
   }
-
+  // LOGIN GYM
   async loginGym(data: { email: string; password: string }) {
     const gym = await prisma.gym.findUnique({ where: { email: data.email } });
     if (!gym) throw new Error("Gym not found");
@@ -35,6 +36,7 @@ export class AuthService {
 
     return { token, gym: { id: gym.id, name: gym.name, email: gym.email } };
   }
+
 
   // --- MEMBER METHODS ---
 
@@ -61,16 +63,65 @@ export class AuthService {
     return { member: { id: member.id, name: member.name, email: member.email } };
   }
 
-  async loginMember(data: { email: string; password: string }) {
-    const member = await prisma.member.findUnique({ where: { email: data.email } });
-    if (!member) throw new Error("Member not found");
+  // LOGIN MEMBER
+  // LOGIN MEMBER
+async loginMember(data: { email: string; password: string }) {
 
-    const valid = await bcrypt.compare(data.password, member.password);
-    if (!valid) throw new Error("Invalid password");
+  const member = await prisma.member.findUnique({
+    where: {
+      email: data.email
+    },
+    select: {
+      id: true,
+      name: true,
+      surname: true,
+      password: true,
+      email: true,
+      gymId: true,        
+      gym: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
 
-    const token = jwt.sign({ id: member.id, role: "member", name: member.name , surname: member.surname}, process.env.JWT_SECRET!, { expiresIn: "7d" });
-
-    return { token, member: { id: member.id, name: member.name, email: member.email } };
+  if (!member) {
+    throw new Error("Member not found");
   }
-  
+
+  // PASSWORD CHECK
+  const valid = await bcrypt.compare(data.password, member.password);
+
+  if (!valid) {
+    throw new Error("Invalid password");
+  }
+
+  const token = jwt.sign(
+    {
+      id: member.id,
+      gymId: member.gymId,        
+      gymName: member.gym?.name,
+      role: "member",
+      name: member.name,
+      surname: member.surname,
+    },
+    process.env.JWT_SECRET!,
+    {
+      expiresIn: "7d",
+    }
+  );
+
+  return {
+    token,
+    member: {
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      gymId: member.gymId,        
+      gymName: member.gym?.name
+    }
+  };
+}
+
 }
