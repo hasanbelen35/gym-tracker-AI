@@ -121,8 +121,10 @@ const authSlice = createSlice({
             .addMatcher((action) => action.type.endsWith('/rejected'), (state, action: AnyAction) => {
                 state.loading = false;
                 state.error = action.payload as string || 'Beklenmedik bir hata oluştu.';
+            })
+            .addMatcher((action) => action.type.endsWith('/fulfilled'), (state) => {
+                state.loading = false;
             });
-
     },
 });
 

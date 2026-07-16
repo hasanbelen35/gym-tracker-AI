@@ -1,13 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { registerMember, clearError } from "@/store/slices/authSlice";
+import { fetchGymProfile } from "@/store/slices/gymSlice";
+
+interface Gym {
+  id: string | number;
+  name: string;
+}
 
 export default function AthleteRegister() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth);
+  const { profile: gyms, loading: gymsLoading } = useAppSelector((state) => state.gym);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -21,7 +28,13 @@ export default function AthleteRegister() {
     weight: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    dispatch(fetchGymProfile());
+  }, [dispatch]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -63,40 +76,55 @@ export default function AthleteRegister() {
         <div className="flex gap-3 mb-4">
           <div className="flex-1">
             <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Ad <span className="text-[#2E9E62]">*</span></label>
-            <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" required />
+            <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full h-11 text-black rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" required />
           </div>
           <div className="flex-1">
             <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Soyad <span className="text-[#2E9E62]">*</span></label>
-            <input name="surname" type="text" value={formData.surname} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" required />
+            <input name="surname" type="text" value={formData.surname} onChange={handleChange} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" required />
           </div>
         </div>
 
         <div className="mb-4">
           <label className="block text-xs font-medium text-[#3A7055] mb-1.5">E-posta <span className="text-[#2E9E62]">*</span></label>
-          <input name="email" type="email" value={formData.email} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3.5 text-sm outline-none focus:border-[#2E9E62] transition" required />
+          <input name="email" type="email" value={formData.email} onChange={handleChange} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3.5 text-sm outline-none focus:border-[#2E9E62] transition" required />
         </div>
 
         <div className="mb-4">
           <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Şifre <span className="text-[#2E9E62]">*</span></label>
-          <input name="password" type="password" value={formData.password} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3.5 text-sm outline-none focus:border-[#2E9E62] transition" required />
+          <input name="password" type="password" value={formData.password} onChange={handleChange} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3.5 text-sm outline-none focus:border-[#2E9E62] transition" required />
         </div>
 
         <div className="mb-4">
-          <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Salon ID <span className="text-[#2E9E62]">*</span></label>
-          <input name="gymId" type="number" value={formData.gymId} onChange={handleChange} onWheel={(e) => e.currentTarget.blur()} className="w-full h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3.5 text-sm outline-none focus:border-[#2E9E62] transition" required />
+          <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Spor Salonu <span className="text-[#2E9E62]">*</span></label>
+          <select
+            name="gymId"
+            value={formData.gymId}
+            onChange={handleChange}
+            className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3.5 text-sm outline-none focus:border-[#2E9E62] transition"
+            required
+          >
+            <option value="" disabled>
+              {gymsLoading ? "Yükleniyor..." : "Salon seçin"}
+            </option>
+            {Array.isArray(gyms) &&
+              gyms.map((gym: Gym) => (
+                <option key={gym.id} value={gym.id}>
+                  {gym.name}
+                </option>
+              ))}
+          </select>
         </div>
 
         <div className="flex gap-3 mb-4">
           <div className="flex-1">
             <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Yaş</label>
-            <input name="age" type="number" value={formData.age} onChange={handleChange} onWheel={(e) => e.currentTarget.blur()} className="w-full h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" />
+            <input name="age" type="number" value={formData.age} onChange={handleChange} onWheel={(e) => e.currentTarget.blur()} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" />
           </div>
           <div className="flex-1">
             <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Telefon</label>
-            <input name="phone" type="tel" value={formData.phone} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" />
+            <input name="phone" type="tel" value={formData.phone} onChange={handleChange} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" />
           </div>
         </div>
-
 
         <button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-gradient-to-r from-[#3CB574] to-[#2E9E62] text-white font-bold text-sm tracking-wide mt-5 hover:opacity-90 transition disabled:opacity-50">
           {loading ? "Kaydediliyor..." : "Kayıt Ol"}
