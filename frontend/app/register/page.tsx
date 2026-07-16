@@ -10,7 +10,7 @@ export default function RegisterSelect() {
       {/* SOL - Salon Kaydı */}
       <div
         onClick={() => router.push("/register/gym")}
-        className="flex-1 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden border-r border-[#D8DCEE] bg-[#EEF2FF] hover:flex-[1.3] transition-all duration-500 group"
+        className="flex-1 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden border-r border-[#D8DCEE] bg-[#EEF2FF] hover:flex-[1.15] transition-all duration-500 group"
       >
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#7B8FE8] to-[#5B6FD4]" />
         <div className="absolute bottom-[-100px] left-[-100px] w-[280px] h-[280px] rounded-full bg-[rgba(91,111,212,0.06)] pointer-events-none" />
@@ -44,18 +44,47 @@ export default function RegisterSelect() {
         </span>
       </div>
 
-      {/* ORTA AYRAÇ */}
-      <div className="relative z-10 pointer-events-none w-0">
-        <div className="absolute left-0 top-[22%] -translate-x-1/2 w-px h-[55%] bg-gradient-to-b from-transparent via-[#CCC] to-transparent" />
-        <div className="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white border border-[#DDD] flex items-center justify-center text-[11px] text-[#999]">
-          ya
+      {/* ORTA - Antrenör Kaydı */}
+      <div
+        onClick={() => router.push("/register/trainer")}
+        className="flex-1 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden border-r border-[#EAD9C4] bg-[#FFF6EC] hover:flex-[1.15] transition-all duration-500 group"
+      >
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#F0A24E] to-[#E8823C]" />
+        <div className="absolute top-[-100px] left-1/2 -translate-x-1/2 w-[280px] h-[280px] rounded-full bg-[rgba(232,130,60,0.06)] pointer-events-none" />
+
+        <span className="text-5xl mb-5 transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-1">
+          🥇
+        </span>
+        <p
+          className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#E8823C] mb-2"
+          style={{ fontFamily: "'Syne', sans-serif" }}
+        >
+          Antrenör Kaydı
+        </p>
+        <h2
+          className="text-2xl font-extrabold text-[#3A2415] mb-3 text-center px-6"
+          style={{ fontFamily: "'Syne', sans-serif" }}
+        >
+          Antrenör Kayıt
+        </h2>
+        <p className="text-sm text-[#8A6B4F] text-center max-w-[200px] leading-relaxed">
+          Sporcularını yönet, programlarını oluştur ve takip et.
+        </p>
+        <div className="mt-8 w-11 h-11 rounded-full flex items-center justify-center bg-[rgba(232,130,60,0.12)] border border-[rgba(232,130,60,0.25)] text-[#E8823C] transition-transform duration-300 group-hover:translate-x-1 text-lg">
+          →
         </div>
+        <span
+          className="absolute bottom-6 text-[10px] tracking-widest uppercase text-[#D9B48C]"
+          style={{ fontFamily: "'Syne', sans-serif" }}
+        >
+          Trainer Portal
+        </span>
       </div>
 
       {/* SAĞ - Sporcu Kaydı */}
       <div
         onClick={() => router.push("/register/athlete")}
-        className="flex-1 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden bg-[#EEFAF3] hover:flex-[1.3] transition-all duration-500 group"
+        className="flex-1 flex flex-col items-center justify-center cursor-pointer relative overflow-hidden bg-[#EEFAF3] hover:flex-[1.15] transition-all duration-500 group"
       >
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#2E9E62] to-[#5CC98A]" />
         <div className="absolute top-[-100px] right-[-100px] w-[280px] h-[280px] rounded-full bg-[rgba(46,158,98,0.06)] pointer-events-none" />
