@@ -29,8 +29,10 @@ export default function AthleteRegister() {
   });
 
   useEffect(() => {
-    dispatch(fetchGymProfile());
-  }, [dispatch]);
+    if (!gyms || gyms.length === 0) {
+      dispatch(fetchGymProfile());
+    }
+  }, [dispatch, gyms]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>

@@ -14,6 +14,8 @@ const cookieOptions = {
 };
 
 export class AuthController {
+  // ----------------------------------------------------- GYM METHODS -----------------------------------------------------
+
   // REGISTER GYM
   async registerGym(req: Request, res: Response, next: NextFunction) {
     try {
@@ -36,6 +38,8 @@ export class AuthController {
       next(err);
     }
   }
+  // ----------------------------------------------------- MEMBER METHODS -----------------------------------------------------
+
   // REGISTER MEMBER
   async registerMember(req: Request, res: Response, next: NextFunction) {
     try {
@@ -58,6 +62,32 @@ export class AuthController {
       next(err);
     }
   }
+  // ----------------------------------------------------- TRAINER METHODS -----------------------------------------------------
+
+  // REGISTER TRAINER
+  async registerTrainer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = req.body;
+      const result = await authService.registerTrainer(data);
+      res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // LOGIN TRAINER
+  async loginTrainer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const data = req.body;
+      const { token, trainer } = await authService.loginTrainer(data);
+
+      res.cookie("auth_token", token, cookieOptions);
+      res.json({ success: true, trainer });
+    } catch (err) {
+      next(err);
+    }
+  }
+  // ------------------------------------------------------------------------------------------------------------------------------
   // LOGOUT 
   async logout(req: Request, res: Response, next: NextFunction) {
     try {

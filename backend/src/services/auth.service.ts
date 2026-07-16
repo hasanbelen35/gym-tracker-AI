@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import prisma from "../lib/db";
 
 export class AuthService {
-  // --- GYM METHODS ---
+  // ----------------------------------------------------- GYM METHODS -----------------------------------------------------
 
   // REGISTER GYM
   async registerGym(data: {
@@ -38,7 +38,7 @@ export class AuthService {
   }
 
 
-  // --- MEMBER METHODS ---
+  // ----------------------------------------------------- MEMBER METHODS -----------------------------------------------------
 
   async registerMember(data: {
     name: string;
@@ -59,7 +59,6 @@ export class AuthService {
     return { member: { id: member.id, name: member.name, email: member.email } };
   }
 
-  // LOGIN MEMBER
   // LOGIN MEMBER
   async loginMember(data: { email: string; password: string }) {
 
@@ -117,6 +116,87 @@ export class AuthService {
         gymId: member.gymId,
         gymName: member.gym?.name
       }
+    };
+  }
+
+  // ----------------------------------------------------- TRAINER METHODS -----------------------------------------------------
+
+
+  // REGISTER TRAINER
+  async registerTrainer(data: {
+    name: string;
+    surname: string;
+    email: string;
+    password: string;
+    gymId: number;
+  }) {
+    const existing = await prisma.trainer.findUnique({ where: { email: data.email } });
+    if (existing) throw new Error("Email already exists");
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const trainer = await prisma.trainer.create({
+      data: { ...data, password: hashedPassword },
+    });
+
+    return { trainer: { id: trainer.id, name: trainer.name, email: trainer.email } };
+  }
+
+  // LOGIN TRAINER
+  async loginTrainer(data: { email: string; password: string }) {
+    const trainer = await prisma.trainer.findUnique({
+      where: {
+        email: data.email,
+      },
+      select: {
+        id: true,
+        name: true,
+        surname: true,
+        password: true,
+        email: true,
+        gymId: true,
+        gym: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!trainer) {
+      throw new Error("Trainer not found");
+    }
+
+    const valid = await bcrypt.compare(data.password, trainer.password);
+
+    if (!valid) {
+      throw new Error("Invalid password");
+    }
+
+    const token = jwt.sign(
+      {
+        id: trainer.id,
+        gymId: trainer.gymId,
+        gymName: trainer.gym?.name,
+        role: "trainer",
+        name: trainer.name,
+        surname: trainer.surname,
+      },
+      process.env.JWT_SECRET!,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    return {
+      token,
+      trainer: {
+        id: trainer.id,
+        name: trainer.name,
+        email: trainer.email,
+        gymId: trainer.gymId,
+        gymName: trainer.gym?.name,
+      },
     };
   }
 

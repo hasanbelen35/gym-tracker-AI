@@ -6,7 +6,7 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
-
+// Gym
 model Gym {
   id        Int      @id @default(autoincrement())
   name      String
@@ -20,7 +20,7 @@ model Gym {
   sessions  Session[]
   trainers  Trainer[]
 }
-
+// Trainer
 model Trainer {
   id        Int      @id @default(autoincrement())
   gymId     Int
@@ -30,8 +30,11 @@ model Trainer {
   password  String
   createdAt DateTime @default(now())
   gym       Gym      @relation(fields: [gymId], references: [id])
+  myMembers Member[] 
+  programs  Program[]   
+ 
 }
-
+// Member
 model Member {
   id        Int       @id @default(autoincrement())
   gymId     Int
@@ -43,11 +46,15 @@ model Member {
   height    Float?
   weight    Float?
   phone     String?
+  trainerId Int?     
   createdAt DateTime  @default(now())
   gym       Gym       @relation(fields: [gymId], references: [id])
+  trainer   Trainer?  @relation(fields: [trainerId], references: [id])
   sessions  Session[]
-}
+  programs  Program[]   
 
+}
+// Session
 model Session {
   id        Int       @id @default(autoincrement())
   memberId  Int
@@ -57,4 +64,21 @@ model Session {
   duration  Int?
   member    Member    @relation(fields: [memberId], references: [id])
   gym       Gym       @relation(fields: [gymId], references: [id])
+}
+
+// Program
+
+enum ProgramType {
+  WORKOUT
+  DIET
+}
+model Program {
+  id        Int         @id @default(autoincrement())
+  memberId  Int
+  trainerId Int
+  type      ProgramType
+  content   String
+  createdAt DateTime    @default(now())
+  member    Member      @relation(fields: [memberId], references: [id])
+  trainer   Trainer     @relation(fields: [trainerId], references: [id])
 }
