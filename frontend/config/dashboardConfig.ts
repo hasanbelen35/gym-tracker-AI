@@ -12,11 +12,10 @@ export const LeftNavDataAthlete: LeftNavDataType[] = [
 {/* LEFT SIDE-MENU GYM CONFIG*/ }
 export const LeftNavDataGym: LeftNavDataType[] = [
     { name: "Ana Sayfa", route: "/dashboard/gym" },
-    { name: "Üyeler", route: "/dashboard/workouts" },
-    { name: "Antrenörler", route: "/dashboard/nutrition" },
+    { name: "Üyeler", route: "/gym/members" },
+    { name: "Antrenörler", route: "/gym/trainers" },
     { name: "Salon Kayıtları", route: "/gym/sessions" },
-    { name: "Ayarlar", route: "/dashboard/profile" },
-    { name: "Ayarlar", route: "/dashboard/settings" },
+    { name: "Ayarlar", route: "/gym/settings" },
 ];
 
 
