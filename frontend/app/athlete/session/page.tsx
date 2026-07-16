@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function SessionPage() {
   const dispatch = useAppDispatch();
   const { isActive, loading, history } = useAppSelector((state) => state.session);
-  const { user } = useAuth(); // gymId burada, JWT'den decode edilmiş
+  const { user } = useAuth(); 
 
   const [seconds, setSeconds] = useState(0);
   const [sessionSummary, setSessionSummary] = useState<string | null>(null);

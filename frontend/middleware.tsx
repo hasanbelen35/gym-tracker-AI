@@ -38,6 +38,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard/gym", request.url));
   }
 
+  // TRAINER ROUTES
+  if (role === "trainer" && !pathname.startsWith("/trainer")) {
+    return NextResponse.redirect(new URL("/dashboard/trainer", request.url));
+  }
+
   return NextResponse.next();
 }
 
@@ -45,6 +50,7 @@ export const config = {
   matcher: [
     "/athlete/:path*",
     "/gym/:path*",
+    "/trainer/:path*",
     "/login",
     "/register",
   ],

@@ -2,17 +2,39 @@
 import React from 'react'
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { LeftNavDataAthlete, LeftNavDataGym } from '@/config/dashboardConfig'
+import { LeftNavDataAthlete, LeftNavDataGym, LeftNavDataTrainer } from '@/config/dashboardConfig'
+
+interface NavItem {
+    name: string;
+    route: string;
+}
+
 const Dashboard = () => {
     const { user, loading } = useAuth();
     const router = useRouter();
     if (loading) return <p>Yükleniyor...</p>;
     if (!user) return <p>Lütfen giriş yapın.</p>;
 
-    const {  name, surname, role, gymName } = user;
-    console.log(gymName)
-    {/* PICK AS A ROLE  */ }
-    const leftNavData = role === "gym" ? LeftNavDataGym : LeftNavDataAthlete;
+    const { name, surname, role, gymName } = user;
+
+
+    // cereate left data as role
+    let leftNavData: NavItem[];
+    switch (role) {
+        case "gym":
+            leftNavData = LeftNavDataGym;
+            break;
+        case "trainer":
+            leftNavData = LeftNavDataTrainer;
+            break;
+        case "member":
+            leftNavData = LeftNavDataAthlete;
+            break;
+        default:
+            leftNavData = [];
+            break;
+    }
+
     return (
         <div>
             <div className="flex">

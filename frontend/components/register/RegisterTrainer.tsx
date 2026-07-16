@@ -1,5 +1,7 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { fetchGymProfile } from "@/store/slices/gymSlice";
+import { registerTrainer } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { useEffect, useState } from "react";
 
@@ -9,6 +11,7 @@ interface Gym {
 }
 
 export default function RegisterTrainer() {
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const { loading, error } = useAppSelector((state) => state.auth);
   const { profile: gyms, loading: gymsLoading } = useAppSelector((state) => state.gym);
@@ -31,6 +34,21 @@ export default function RegisterTrainer() {
     }));
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = {
+      ...formData,
+      gymId: Number(formData.gymId),
+    };
+
+    const result = await dispatch(registerTrainer(payload));
+
+    if (registerTrainer.fulfilled.match(result)) {
+      router.push("/login/trainer");
+    }
+  };
+
   useEffect(() => {
     if (!gyms || gyms.length === 0) {
       dispatch(fetchGymProfile());
@@ -40,7 +58,7 @@ export default function RegisterTrainer() {
   return (
     <main className="flex min-h-screen items-center justify-center relative overflow-hidden bg-[#FFF6EC] py-10" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-[#F0A24E] to-[#E8823C]" />
-      <form className="bg-white rounded-2xl p-10 w-full max-w-sm shadow-[0_4px_40px_rgba(232,130,60,0.08)] relative z-10">
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-10 w-full max-w-sm shadow-[0_4px_40px_rgba(232,130,60,0.08)] relative z-10">
         <span className="text-4xl mb-4 block">🥇</span>
         <h1 className="text-2xl font-extrabold text-[#3A2415] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>Antrenör Kaydı</h1>
         <p className="text-sm text-[#B0977E] mb-7">Bilgilerinizi girerek kayıt olun.</p>
@@ -88,8 +106,8 @@ export default function RegisterTrainer() {
           </select>
         </div>
 
-        <button type="submit" className="w-full h-11 rounded-xl bg-linear-to-r from-[#F0A24E] to-[#E8823C] text-white font-bold text-sm tracking-wide hover:opacity-90 transition">
-          Kayıt Ol
+        <button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-linear-to-r from-[#F0A24E] to-[#E8823C] text-white font-bold text-sm tracking-wide hover:opacity-90 transition disabled:opacity-50">
+          {loading ? "Kayıt yapılıyor..." : "Kayıt Ol"}
         </button>
       </form>
     </main>

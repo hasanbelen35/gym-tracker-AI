@@ -8,11 +8,11 @@ import { jwtDecode } from "jwt-decode";
 
 interface TokenPayload {
   id: number;
-  role: "gym" | "member";
+  role: "gym" | "member" | "trainer";
   name: string;
   surname?: string;
   gymName?: string;
-  gymId?: number; 
+  gymId?: number;
 }
 
 export const useAuth = () => {

@@ -10,7 +10,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
 
   if (req.cookies?.auth_token) {
     token = req.cookies.auth_token;
-  } 
+  }
   else if (req.headers.authorization?.startsWith("Bearer ")) {
     token = req.headers.authorization.split(" ")[1];
   }
@@ -41,6 +41,15 @@ export const authorizeGym = (req: AuthRequest, res: Response, next: NextFunction
 // Only allow members to access the route
 export const authorizeMember = (req: AuthRequest, res: Response, next: NextFunction) => {
   if (req.user?.role !== "member") {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+  next();
+};
+
+// Only allow trainer to access the route
+export const authorizeTrainer = (req: AuthRequest, res: Response, next: NextFunction) => {
+  if (req.user?.role !== "trainer") {
     res.status(403).json({ error: "Access denied" });
     return;
   }

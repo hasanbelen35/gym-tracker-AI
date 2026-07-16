@@ -32,6 +32,7 @@ const API = axios.create({
     baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
     withCredentials: true,
 });
+// ------------------------------------------------------------------------REGISTER ------------------------------------------------------------------------
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registerGym = createAsyncThunk('auth/registerGym', async (data: Record<string, any>, { rejectWithValue }) => {
@@ -54,6 +55,7 @@ export const loginGym = createAsyncThunk('auth/loginGym', async (data: Record<st
         return rejectWithValue(error.response?.data?.message || "Giriş yapılamadı.");
     }
 });
+// ------------------------------------------------------------------------MEMBER ------------------------------------------------------------------------
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const registerMember = createAsyncThunk('auth/registerMember', async (data: Record<string, any>, { rejectWithValue }) => {
@@ -76,6 +78,32 @@ export const loginMember = createAsyncThunk('auth/loginMember', async (data: Rec
         return rejectWithValue(error.response?.data?.message || "Üye girişi yapılamadı.");
     }
 });
+
+// ------------------------------------------------------------------------TRAINER ------------------------------------------------------------------------
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const registerTrainer = createAsyncThunk('auth/registerTrainer', async (data: Record<string, any>, { rejectWithValue }) => {
+    try {
+        const response = await API.post('/auth/trainer/register', data);
+        return response.data;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.message || "Üye girişi yapılamadı.");
+    }
+});
+
+
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const loginTrainer = createAsyncThunk('auth/loginTrainer', async (data: Record<string, any>, { rejectWithValue }) => {
+    try {
+        const response = await API.post('/auth/trainer/login', data);
+        return response.data;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+        return rejectWithValue(error.response?.data?.message || "Üye girişi yapılamadı.");
+    }
+});
+
 
 // LOGOUT USER 
 export const logoutUser = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
