@@ -1,16 +1,18 @@
 "use client";
 import React, { useEffect, useState } from 'react'
+import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchAllMembers, removeMemberFromGym } from "@/store/slices/gymSlice";
 import ConfirmModal from "@/components/ConfirmModel";
 
 const Members = () => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const { members, membersLoading, membersError } = useAppSelector((state) => state.gym);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [memberToDelete, setMemberToDelete] = useState<any | null>(null);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!members || members.length === 0) {
@@ -21,15 +23,19 @@ const Members = () => {
   const handleConfirmDelete = async () => {
     if (!memberToDelete) return;
 
-    setDeletingId(memberToDelete.id);
+    setDeletingId(memberToDelete.publicId);
     try {
-      await dispatch(removeMemberFromGym(memberToDelete.id)).unwrap();
+      await dispatch(removeMemberFromGym(memberToDelete.publicId)).unwrap();
     } catch (err) {
       console.error("Üye silinemedi:", err);
     } finally {
       setDeletingId(null);
       setMemberToDelete(null);
     }
+  };
+
+  const handleRowClick = (memberPublicId: string) => {
+    router.push(`/gym/members/${memberPublicId}`);
   };
 
   if (membersLoading) return <p>Yükleniyor...</p>;
@@ -55,17 +61,24 @@ const Members = () => {
             <tbody>
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {members.map((member: any) => (
-                <tr key={member.id} className="border-t border-gray-100 hover:bg-brand-100">
+                <tr
+                  key={member.publicId}
+                  onClick={() => handleRowClick(member.publicId)}
+                  className="border-t border-gray-100 hover:bg-brand-100 cursor-pointer"
+                >
                   <td className="px-4 py-3">{member.name}</td>
                   <td className="px-4 py-3">{member.surname}</td>
                   <td className="px-4 py-3">{member.email}</td>
                   <td className="px-4 py-3">
                     <button
-                      onClick={() => setMemberToDelete(member)}
-                      disabled={deletingId === member.id}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMemberToDelete(member);
+                      }}
+                      disabled={deletingId === member.publicId}
                       className="text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed text-xs font-medium"
                     >
-                      {deletingId === member.id ? "Siliniyor..." : "Sil"}
+                      {deletingId === member.publicId ? "Siliniyor..." : "Sil"}
                     </button>
                   </td>
                 </tr>

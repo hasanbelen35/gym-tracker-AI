@@ -8,11 +8,11 @@ export class GymService {
         return gyms;
     }
     // ----------------------------------------MEMBER-----------------------------------------
-    // get all members from db
     async getAllMembers() {
         const members = await prisma.member.findMany({
             select: {
                 id: true,
+                publicId: true,
                 name: true,
                 surname: true,
                 email: true,
@@ -21,30 +21,30 @@ export class GymService {
         });
         return members;
     }
-    // use transaction for safe delete
-    async removeMemberFromGym(gymId: number, memberId: number) {
+
+    async removeMemberFromGym(gymId: number, memberPublicId: string) {
         return prisma.$transaction(async (tx) => {
             const member = await tx.member.findFirst({
-                where: { id: memberId, gymId }
+                where: { publicId: memberPublicId, gymId }
             });
 
             if (!member) {
                 throw new Error("Member not found in this gym");
             }
 
-            await tx.session.deleteMany({ where: { memberId } });
-            await tx.program.deleteMany({ where: { memberId } });
+            await tx.session.deleteMany({ where: { memberId: member.id } });
+            await tx.program.deleteMany({ where: { memberId: member.id } });
 
-            return tx.member.delete({ where: { id: memberId } });
+            return tx.member.delete({ where: { id: member.id } });
         });
     }
 
-    // get full detail of a member 
-    async getMemberDetail(gymId: number, memberId: number) {
+    async getMemberDetail(gymId: number, memberPublicId: string) {
         const member = await prisma.member.findFirst({
-            where: { id: memberId, gymId },
+            where: { publicId: memberPublicId, gymId },
             select: {
                 id: true,
+                publicId: true,
                 name: true,
                 surname: true,
                 email: true,
@@ -54,11 +54,11 @@ export class GymService {
                 phone: true,
                 createdAt: true,
                 trainer: {
-                    select: { id: true, name: true, surname: true }
+                    select: { id: true, publicId: true, name: true, surname: true }
                 },
                 sessions: {
                     orderBy: { checkIn: "desc" },
-                    take: 20, // last 20 sessions //TODO: will change later
+                    take: 20,
                     select: {
                         id: true,
                         checkIn: true,
@@ -78,18 +78,20 @@ export class GymService {
             }
         });
 
+        if (!member) {
+            throw new Error("Member not found in this gym");
+        }
+
         return member;
     }
 
-
-
     //----------------------------------------TRAINER----------------------------------------
 
-    // get all trainers from db
     async getAllTrainers() {
         const trainers = await prisma.trainer.findMany({
             select: {
                 id: true,
+                publicId: true,
                 name: true,
                 surname: true,
                 email: true,
@@ -98,41 +100,40 @@ export class GymService {
         });
         return trainers;
     }
-    // use transaction for safe delete
-    async removeTrainerFromGym(gymId: number, trainerId: number) {
+
+    async removeTrainerFromGym(gymId: number, trainerPublicId: string) {
         return prisma.$transaction(async (tx) => {
             const trainer = await tx.trainer.findFirst({
-                where: { id: trainerId, gymId }
+                where: { publicId: trainerPublicId, gymId }
             });
 
             if (!trainer) {
                 throw new Error("Trainer not found in this gym");
             }
 
-            // leave members assigned from trainer don't delete
             await tx.member.updateMany({
-                where: { trainerId },
+                where: { trainerId: trainer.id },
                 data: { trainerId: null }
             });
 
-            await tx.program.deleteMany({ where: { trainerId } });
+            await tx.program.deleteMany({ where: { trainerId: trainer.id } });
 
-            return tx.trainer.delete({ where: { id: trainerId } });
+            return tx.trainer.delete({ where: { id: trainer.id } });
         });
     }
 
-    // get full detail of a trainer 
-    async getTrainerDetail(gymId: number, trainerId: number) {
+    async getTrainerDetail(gymId: number, trainerPublicId: string) {
         const trainer = await prisma.trainer.findFirst({
-            where: { id: trainerId, gymId },
+            where: { publicId: trainerPublicId, gymId },
             select: {
                 id: true,
+                publicId: true,
                 name: true,
                 surname: true,
                 email: true,
                 createdAt: true,
                 myMembers: {
-                    select: { id: true, name: true, surname: true, email: true }
+                    select: { id: true, publicId: true, name: true, surname: true, email: true }
                 },
                 programs: {
                     orderBy: { createdAt: "desc" },
@@ -143,14 +144,17 @@ export class GymService {
                         content: true,
                         createdAt: true,
                         member: {
-                            select: { id: true, name: true, surname: true }
+                            select: { id: true, publicId: true, name: true, surname: true }
                         }
                     }
                 }
             }
         });
 
+        if (!trainer) {
+            throw new Error("Trainer not found in this gym");
+        }
+
         return trainer;
     }
 }
-

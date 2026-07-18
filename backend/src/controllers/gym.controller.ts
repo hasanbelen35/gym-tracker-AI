@@ -5,6 +5,8 @@ import { AuthRequest } from "../middleware/auth.middleware";
 const gymService = new GymService();
 
 export class GymController {
+        // ----------------------------------------GYM-----------------------------------------
+
     async getAllGymController(req: Request, res: Response, next: NextFunction) {
         try {
             const data = await gymService.getAllGymData();
@@ -30,18 +32,17 @@ export class GymController {
         }
     }
 
-    // remove member from gym
     async removeMemberFromGymController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const gymId = req.user!.id; // token gym'e ait olmalı
-            const memberId = Number(req.params.memberId);
+            const gymId = req.user!.id;
+            const memberPublicId: string = String(req.params.memberId);
 
-            if (!memberId || isNaN(memberId)) {
+            if (!memberPublicId || memberPublicId === "undefined") {
                 res.status(400).json({ message: "Invalid member id" });
                 return;
             }
 
-            const deletedMember = await gymService.removeMemberFromGym(gymId, memberId);
+            const deletedMember = await gymService.removeMemberFromGym(gymId, memberPublicId);
 
             res.status(200).json({
                 message: "Member removed successfully",
@@ -52,18 +53,17 @@ export class GymController {
         }
     }
 
-    // Get full detail of a member 
     async getMemberDetailController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const gymId = req.user!.id;
-            const memberId = Number(req.params.memberId);
+            const memberPublicId: string = String(req.params.memberId);
 
-            if (!memberId || isNaN(memberId)) {
+            if (!memberPublicId || memberPublicId === "undefined") {
                 res.status(400).json({ message: "Invalid member id" });
                 return;
             }
 
-            const data = await gymService.getMemberDetail(gymId, memberId);
+            const data = await gymService.getMemberDetail(gymId, memberPublicId);
 
             res.status(200).json({
                 message: "success",
@@ -86,18 +86,18 @@ export class GymController {
             next(error);
         }
     }
-    // remove trainer from gym
+
     async removeTrainerFromGymController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const gymId = req.user!.id; // token gym'e ait olmalı
-            const trainerId = Number(req.params.trainerId);
+            const gymId = req.user!.id;
+            const trainerPublicId: string = String(req.params.trainerId);
 
-            if (!trainerId || isNaN(trainerId)) {
+            if (!trainerPublicId || trainerPublicId === "undefined") {
                 res.status(400).json({ message: "Invalid trainer id" });
                 return;
             }
 
-            const deletedTrainer = await gymService.removeTrainerFromGym(gymId, trainerId);
+            const deletedTrainer = await gymService.removeTrainerFromGym(gymId, trainerPublicId);
 
             res.status(200).json({
                 message: "Trainer removed successfully",
@@ -108,19 +108,17 @@ export class GymController {
         }
     }
 
-
-    // Get full detail of a trainer (gym owner only)
     async getTrainerDetailController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const gymId = req.user!.id;
-            const trainerId = Number(req.params.trainerId);
+            const trainerPublicId: string = String(req.params.trainerId);
 
-            if (!trainerId || isNaN(trainerId)) {
+            if (!trainerPublicId || trainerPublicId === "undefined") {
                 res.status(400).json({ message: "Invalid trainer id" });
                 return;
             }
 
-            const data = await gymService.getTrainerDetail(gymId, trainerId);
+            const data = await gymService.getTrainerDetail(gymId, trainerPublicId);
 
             res.status(200).json({
                 message: "success",
@@ -131,6 +129,3 @@ export class GymController {
         }
     }
 }
-
-// removeTrainerFromGym
-// removeMemberFromGym

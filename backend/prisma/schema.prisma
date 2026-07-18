@@ -9,6 +9,7 @@ datasource db {
 // Gym
 model Gym {
   id        Int      @id @default(autoincrement())
+  publicId  String    @unique @default(uuid())  
   name      String
   address   String?
   phone     String?
@@ -23,6 +24,7 @@ model Gym {
 // Trainer
 model Trainer {
   id        Int      @id @default(autoincrement())
+  publicId  String    @unique @default(uuid())
   gymId     Int
   name      String
   surname   String
@@ -37,6 +39,7 @@ model Trainer {
 // Member
 model Member {
   id        Int       @id @default(autoincrement())
+  publicId  String    @unique @default(uuid())
   gymId     Int
   name      String
   surname   String
@@ -57,6 +60,7 @@ model Member {
 // Session
 model Session {
   id        Int       @id @default(autoincrement())
+  publicId  String    @unique @default(uuid()) 
   memberId  Int
   gymId     Int
   checkIn   DateTime  @default(now())
@@ -74,6 +78,7 @@ enum ProgramType {
 }
 model Program {
   id        Int         @id @default(autoincrement())
+  publicId  String    @unique @default(uuid())
   memberId  Int
   trainerId Int
   type      ProgramType
