@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/store';
 import { fetchGymSessions, fetchActiveSessions } from '@/store/slices/gymSessionSlice';
+import Loading from '@/components/Loading'
 
 export default function GymSessionsPanel() {
     const dispatch = useAppDispatch();
@@ -16,7 +17,7 @@ export default function GymSessionsPanel() {
     }, [dispatch]);
 
     if (loading) {
-        return <div className="p-6 text-center text-gray-500">Yükleniyor...</div>;
+        return <Loading />;
     }
 
     if (error) {

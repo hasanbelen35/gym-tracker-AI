@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import Loading from "@/components/Loading";
+import { Navbar } from "@/components/Navbar";
 
 const ROLE_TO_ROUTE: Record<string, string> = {
   gym: "gym",
@@ -25,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [loading, user, pathname, router]);
 
-  if (loading) return <p>Yükleniyor...</p>;
+  if (loading) return <Loading />;
   if (!user) return <p>Lütfen giriş yapın.</p>;
 
   const expectedSegment = ROLE_TO_ROUTE[user.role];
@@ -35,5 +37,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return null;
   }
 
-  return <>{children}</>;
+  return <>
+    <Navbar />
+    {children}
+  </>;
 }

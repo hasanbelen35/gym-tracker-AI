@@ -3,6 +3,7 @@ import React from 'react'
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { LeftNavDataAthlete, LeftNavDataGym, LeftNavDataTrainer } from '@/config/dashboardConfig'
+import Loading from '@/components/Loading'
 
 interface NavItem {
     name: string;
@@ -12,7 +13,7 @@ interface NavItem {
 const Dashboard = () => {
     const { user, loading } = useAuth();
     const router = useRouter();
-    if (loading) return <p>Yükleniyor...</p>;
+    if (loading) return <Loading />;
     if (!user) return <p>Lütfen giriş yapın.</p>;
 
     const { name, surname, role, gymName } = user;

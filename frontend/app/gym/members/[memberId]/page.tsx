@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchMemberDetail, clearMemberDetail } from "@/store/slices/gymSlice";
+import Loading from '@/components/Loading'
 
 export default function MemberDetail() {
   const params = useParams();
@@ -25,7 +26,7 @@ export default function MemberDetail() {
   }, [dispatch, memberPublicId]);
 
   if (memberDetailLoading) {
-    return <div className="p-6 text-gray-500">Yükleniyor...</div>;
+    return <Loading />;
   }
 
   if (memberDetailError) {

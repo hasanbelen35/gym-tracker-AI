@@ -7,6 +7,7 @@ export class GymService {
         });
         return gyms;
     }
+    
     // ----------------------------------------MEMBER-----------------------------------------
     async getAllMembers() {
         const members = await prisma.member.findMany({
@@ -156,5 +157,34 @@ export class GymService {
         }
 
         return trainer;
+    }
+
+    // TO APPROVE TRAINER'S MEMBER ASSINGMINET
+    async approveMemberAssignment(memberPublicId: string, gymId: number) {
+        return await prisma.member.updateMany({
+            where: {
+                publicId: memberPublicId,
+                gymId: gymId,
+                assignmentStatus: 'PENDING',
+            },
+            data: {
+                assignmentStatus: 'ASSIGNED',
+            }
+        });
+    }
+    
+    // TO REJECT TRAINER'S MEMBER ASSINGMINET
+    async rejectMemberAssignment(memberPublicId: string, gymId: number) {
+        return await prisma.member.updateMany({
+            where: {
+                publicId: memberPublicId,
+                gymId: gymId,
+                assignmentStatus: 'PENDING',
+            },
+            data: {
+                trainerId: null,
+                assignmentStatus: 'UNASSIGNED',
+            }
+        });
     }
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchAllTrainers, removeTrainerFromGym } from "@/store/slices/gymSlice";
 import ConfirmModal from "@/components/ConfirmModel";
+import Loading from '@/components/Loading'
 
 const Trainers = () => {
   const dispatch = useAppDispatch();
@@ -34,7 +35,7 @@ const Trainers = () => {
     }
   };
 
-  if (trainersLoading) return <p>Yükleniyor...</p>;
+  if (trainersLoading) return <Loading />;
   if (trainersError) return <p className="text-red-500">{trainersError}</p>;
 
   return (

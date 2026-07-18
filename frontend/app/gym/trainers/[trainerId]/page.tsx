@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchTrainerDetail, clearTrainerDetail } from "@/store/slices/gymSlice";
+import Loading from '@/components/Loading'
 
 export default function TrainerDetail() {
   const params = useParams();
@@ -19,7 +20,7 @@ export default function TrainerDetail() {
     return () => { dispatch(clearTrainerDetail()); };
   }, [dispatch, trainerPublicId]);
 
-  if (trainerDetailLoading) return <p className="p-6">Yükleniyor...</p>;
+  if (trainerDetailLoading) return <Loading />;
   if (!trainerDetail) return null;
 
   return (

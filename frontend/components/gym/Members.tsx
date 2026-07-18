@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchAllMembers, removeMemberFromGym } from "@/store/slices/gymSlice";
 import ConfirmModal from "@/components/ConfirmModel";
-
+import Loading from '@/components/Loading'
 const Members = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
@@ -38,7 +38,7 @@ const Members = () => {
     router.push(`/gym/members/${memberPublicId}`);
   };
 
-  if (membersLoading) return <p>Yükleniyor...</p>;
+  if (membersLoading) return <Loading />;
   if (membersError) return <p className="text-red-500">{membersError}</p>;
 
   return (
@@ -48,9 +48,9 @@ const Members = () => {
       {(!members || members.length === 0) ? (
         <p className="text-gray-500">Kayıtlı üye bulunamadı.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-gray-200">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+        <div className="overflow-x-auto rounded-xl border  border-gray-200">
+          <table className="w-full  text-sm text-left">
+            <thead className="bg-gray-50 dark:bg-brand-50 dark:text-brand uppercase text-xs">
               <tr>
                 <th className="px-4 py-3">Ad</th>
                 <th className="px-4 py-3">Soyad</th>

@@ -2,21 +2,20 @@
 "use client";
 
 import Dashboard from "@/components/Dashboard";
-import { Navbar } from "@/components/Navbar";
-
+import Loading from '@/components/Loading'
 
 import { useAuth } from "@/hooks/useAuth";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
 
-  if (loading) return <p>Yükleniyor...</p>;
+  if (loading) return <Loading />;
   if (!user) return <p>Lütfen giriş yapın.</p>;
 
   return (
     <div>
-      <Navbar />
       <Dashboard />
     </div>
   );
 }
+
