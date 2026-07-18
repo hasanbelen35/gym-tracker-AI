@@ -38,14 +38,14 @@ const initialState: GymState = {
     trainersError: null,
 };
 
-// GYM PROFİL BİLGİLERİNİ GETİR
+// GET GYM PROFILE DATAS
 export const fetchGymProfile = createAsyncThunk(
     'gym/fetchProfile',
     async (_, { rejectWithValue }) => {
         try {
             const response = await API.get('/gym/getAllGym');
             return response.data.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || "Gym bilgileri alınamadı.");
         }
@@ -59,7 +59,7 @@ export const fetchAllMembers = createAsyncThunk(
         try {
             const response = await API.get('/gym/getAllMembers');
             return response.data.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || "Üyeler alınamadı.");
         }
@@ -73,9 +73,37 @@ export const fetchAllTrainers = createAsyncThunk(
         try {
             const response = await API.get('/gym/getAllTrainers');
             return response.data.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || "Antrenörler alınamadı.");
+        }
+    }
+);
+
+// REMOVE MEMBER FROM GYM
+export const removeMemberFromGym = createAsyncThunk(
+    'gym/removeMemberFromGym',
+    async (memberId: number, { rejectWithValue }) => {
+        try {
+            const response = await API.delete(`/gym/deleteMemberFromGym/${memberId}`);
+            return response.data.data; 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Üye silinemedi.");
+        }
+    }
+);
+
+// REMOVE TRAINER FROM GYM
+export const removeTrainerFromGym = createAsyncThunk(
+    'gym/removeTrainerFromGym',
+    async (trainerId: number, { rejectWithValue }) => {
+        try {
+            const response = await API.delete(`/gym/deleteTrainerFromGym/${trainerId}`);
+            return response.data.data; 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Antrenör silinemedi.");
         }
     }
 );
@@ -114,6 +142,39 @@ const gymSlice = createSlice({
                 state.trainers = action.payload;
             })
             .addCase(fetchAllTrainers.rejected, (state, action) => {
+                state.trainersLoading = false;
+                state.trainersError = action.payload as string;
+            })
+         
+
+            // REMOVE MEMBER
+            .addCase(removeMemberFromGym.pending, (state) => {
+                state.membersLoading = true;
+                state.membersError = null;
+            })
+            .addCase(removeMemberFromGym.fulfilled, (state, action) => {
+                state.membersLoading = false;
+                state.members = state.members.filter(
+                    (member) => member.id !== action.payload.id
+                );
+            })
+            .addCase(removeMemberFromGym.rejected, (state, action) => {
+                state.membersLoading = false;
+                state.membersError = action.payload as string;
+            })
+
+            // REMOVE TRAINER
+            .addCase(removeTrainerFromGym.pending, (state) => {
+                state.trainersLoading = true;
+                state.trainersError = null;
+            })
+            .addCase(removeTrainerFromGym.fulfilled, (state, action) => {
+                state.trainersLoading = false;
+                state.trainers = state.trainers.filter(
+                    (trainer) => trainer.id !== action.payload.id
+                );
+            })
+            .addCase(removeTrainerFromGym.rejected, (state, action) => {
                 state.trainersLoading = false;
                 state.trainersError = action.payload as string;
             });

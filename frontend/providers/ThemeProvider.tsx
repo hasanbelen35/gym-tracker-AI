@@ -35,9 +35,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
 
-  // ÖNEMLİ: mounted olmasa bile children her zaman Provider içinde olmalı.
-  // Aksi halde SSR sırasında (ve ilk client render'da) useTheme() çağıran
-  // her bileşen context'i undefined bulur ve throw eder.
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       <div style={!mounted ? { visibility: "hidden" } : undefined}>

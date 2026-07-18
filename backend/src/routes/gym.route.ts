@@ -9,7 +9,7 @@ router.get("/getAllGym", (req, res, next) => gym.getAllGymController(req, res, n
 router.get("/getAllMembers", authenticate, authorizeGym, (req, res, next) => gym.getAllMembersController(req, res, next));
 router.get("/getAllTrainers", authenticate, authorizeGym, (req, res, next) => gym.getAllTrainersController(req, res, next));
 
-router.delete("/deleteMemberFromGym", authenticate, authorizeGym, (req, res, next) => gym.removeMemberFromGymController(req, res, next));
-router.delete("/deleteTrainerFromGym", authenticate, authorizeGym, (req, res, next) => gym.removeTrainerFromGymController(req, res, next));
+router.delete("/deleteMemberFromGym/:memberId", authenticate, authorizeGym, (req, res, next) => gym.removeMemberFromGymController(req, res, next));
+router.delete("/deleteTrainerFromGym/:trainerId", authenticate, authorizeGym, (req, res, next) => gym.removeTrainerFromGymController(req, res, next));
 
 export default router;
