@@ -39,6 +39,48 @@ export class GymService {
         });
     }
 
+    // get full detail of a member 
+    async getMemberDetail(gymId: number, memberId: number) {
+        const member = await prisma.member.findFirst({
+            where: { id: memberId, gymId },
+            select: {
+                id: true,
+                name: true,
+                surname: true,
+                email: true,
+                age: true,
+                height: true,
+                weight: true,
+                phone: true,
+                createdAt: true,
+                trainer: {
+                    select: { id: true, name: true, surname: true }
+                },
+                sessions: {
+                    orderBy: { checkIn: "desc" },
+                    take: 20, // last 20 sessions //TODO: will change later
+                    select: {
+                        id: true,
+                        checkIn: true,
+                        checkOut: true,
+                        duration: true
+                    }
+                },
+                programs: {
+                    orderBy: { createdAt: "desc" },
+                    select: {
+                        id: true,
+                        type: true,
+                        content: true,
+                        createdAt: true
+                    }
+                }
+            }
+        });
+
+        return member;
+    }
+
 
 
     //----------------------------------------TRAINER----------------------------------------
@@ -77,6 +119,38 @@ export class GymService {
 
             return tx.trainer.delete({ where: { id: trainerId } });
         });
+    }
+
+    // get full detail of a trainer 
+    async getTrainerDetail(gymId: number, trainerId: number) {
+        const trainer = await prisma.trainer.findFirst({
+            where: { id: trainerId, gymId },
+            select: {
+                id: true,
+                name: true,
+                surname: true,
+                email: true,
+                createdAt: true,
+                myMembers: {
+                    select: { id: true, name: true, surname: true, email: true }
+                },
+                programs: {
+                    orderBy: { createdAt: "desc" },
+                    take: 20,
+                    select: {
+                        id: true,
+                        type: true,
+                        content: true,
+                        createdAt: true,
+                        member: {
+                            select: { id: true, name: true, surname: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        return trainer;
     }
 }
 

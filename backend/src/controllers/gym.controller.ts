@@ -31,7 +31,6 @@ export class GymController {
     }
 
     // remove member from gym
-
     async removeMemberFromGymController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const gymId = req.user!.id; // token gym'e ait olmalı
@@ -47,6 +46,28 @@ export class GymController {
             res.status(200).json({
                 message: "Member removed successfully",
                 data: deletedMember
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // Get full detail of a member 
+    async getMemberDetailController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const gymId = req.user!.id;
+            const memberId = Number(req.params.memberId);
+
+            if (!memberId || isNaN(memberId)) {
+                res.status(400).json({ message: "Invalid member id" });
+                return;
+            }
+
+            const data = await gymService.getMemberDetail(gymId, memberId);
+
+            res.status(200).json({
+                message: "success",
+                data: data
             });
         } catch (error) {
             next(error);
@@ -81,6 +102,29 @@ export class GymController {
             res.status(200).json({
                 message: "Trainer removed successfully",
                 data: deletedTrainer
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
+    // Get full detail of a trainer (gym owner only)
+    async getTrainerDetailController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const gymId = req.user!.id;
+            const trainerId = Number(req.params.trainerId);
+
+            if (!trainerId || isNaN(trainerId)) {
+                res.status(400).json({ message: "Invalid trainer id" });
+                return;
+            }
+
+            const data = await gymService.getTrainerDetail(gymId, trainerId);
+
+            res.status(200).json({
+                message: "success",
+                data: data
             });
         } catch (error) {
             next(error);
