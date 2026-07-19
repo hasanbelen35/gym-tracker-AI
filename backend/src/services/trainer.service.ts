@@ -2,13 +2,12 @@ import prisma from "../lib/db";
 
 export class TrainerService {
 
-    // ASSIGN MEMBER REQUEST
-    async requestMemberAssignment(memberPublicId: string, trainerId: number, gymId: number) {
+    async requestMemberAssignment(memberPublicId: string, trainerId: number, gymPublicId: string) {
         return await prisma.member.updateMany({
             where: {
                 publicId: memberPublicId,
-                gymId: gymId,
-                assignmentStatus: 'UNASSIGNED', // JUST NON ASSIGNED MEMBERS
+                gym: { publicId: gymPublicId },
+                assignmentStatus: 'UNASSIGNED',
             },
             data: {
                 trainerId: trainerId,
@@ -17,13 +16,12 @@ export class TrainerService {
         });
     }
 
-    // DRAW BACK TO ASSİGN REQUEST
-    async cancelMyAssignmentRequest(memberPublicId: string, trainerId: number, gymId: number) {
+    async cancelMyAssignmentRequest(memberPublicId: string, trainerId: number, gymPublicId: string) {
         return await prisma.member.updateMany({
             where: {
                 publicId: memberPublicId,
                 trainerId: trainerId,
-                gymId: gymId,
+                gym: { publicId: gymPublicId },
                 assignmentStatus: 'PENDING',
             },
             data: {
@@ -32,13 +30,16 @@ export class TrainerService {
             }
         });
     }
-
-    // FETCH MEMBERS AS ASSIGNMENT STATUS
-    async getMembersByStatus(trainerId: number, gymId: number, status: 'PENDING' | 'ASSIGNED') {
+    // get all members ın exıst gym
+    async getMembersByStatus(
+        trainerId: number,
+        gymPublicId: string,
+        status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED'
+    ) {
         return await prisma.member.findMany({
             where: {
-                trainerId,
-                gymId,
+                trainerId: status === 'UNASSIGNED' ? null : trainerId,
+                gym: { publicId: gymPublicId },
                 assignmentStatus: status
             },
             select: {

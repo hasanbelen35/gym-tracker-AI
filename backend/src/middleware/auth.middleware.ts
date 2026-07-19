@@ -31,6 +31,11 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
 
 // Only allow gym owners to access the route
 export const authorizeGym = (req: AuthRequest, res: Response, next: NextFunction) => {
+
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   if (req.user?.role !== "gym") {
     res.status(403).json({ error: "Access denied" });
     return;
@@ -40,6 +45,11 @@ export const authorizeGym = (req: AuthRequest, res: Response, next: NextFunction
 
 // Only allow members to access the route
 export const authorizeMember = (req: AuthRequest, res: Response, next: NextFunction) => {
+
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
   if (req.user?.role !== "member") {
     res.status(403).json({ error: "Access denied" });
     return;
@@ -49,6 +59,12 @@ export const authorizeMember = (req: AuthRequest, res: Response, next: NextFunct
 
 // Only allow trainer to access the route
 export const authorizeTrainer = (req: AuthRequest, res: Response, next: NextFunction) => {
+
+  if (!req.user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+
   if (req.user?.role !== "trainer") {
     res.status(403).json({ error: "Access denied" });
     return;

@@ -67,22 +67,22 @@ export default function RegisterTrainer() {
 
         <div className="mb-4">
           <label className="block text-xs font-medium text-[#8A6B4F] mb-1.5">Ad</label>
-          <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
+          <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full h-11 text-black  rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
         </div>
 
         <div className="mb-4">
           <label className="block text-xs font-medium text-[#8A6B4F] mb-1.5">Soyad</label>
-          <input name="surname" type="text" value={formData.surname} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
+          <input name="surname" type="text" value={formData.surname} onChange={handleChange} className="w-full h-11 text-black  rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
         </div>
 
         <div className="mb-4">
           <label className="block text-xs font-medium text-[#8A6B4F] mb-1.5">E-posta</label>
-          <input name="email" type="email" value={formData.email} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
+          <input name="email" type="email" value={formData.email} onChange={handleChange} className="w-full h-11 text-black  rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
         </div>
 
         <div className="mb-4">
           <label className="block text-xs font-medium text-[#8A6B4F] mb-1.5">Şifre</label>
-          <input name="password" type="password" value={formData.password} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
+          <input name="password" type="password" value={formData.password} onChange={handleChange} className="w-full h-11 text-black     rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
         </div>
 
         <div className="mb-6">

@@ -44,11 +44,11 @@ const LoginTrainer = () => {
           {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
 
           <div className="mb-4">
-            <label className="block text-xs font-medium text-[#8A6B4F] mb-1.5">E-posta</label>
+            <label className="block text-xs font-medium text-black mb-1.5">E-posta</label>
             <input name="email" type="email" value={formData.email} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
           </div>
           <div className="mb-6">
-            <label className="block text-xs font-medium text-[#8A6B4F] mb-1.5">Şifre</label>
+            <label className="block text-xs font-medium text-black mb-1.5">Şifre</label>
             <input name="password" type="password" value={formData.password} onChange={handleChange} className="w-full h-11 rounded-xl border-[1.5px] border-[#F0DFC9] bg-[#FFFAF3] px-3.5 text-sm" required />
           </div>
 

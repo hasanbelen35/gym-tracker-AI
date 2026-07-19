@@ -7,7 +7,7 @@ import { errorHandler } from "./middleware/errorHandler";
 import sessionRouter from "./routes/session.route";
 import cookieParser from "cookie-parser";
 import gymRouter from "./routes/gym.route";
-
+import trainerRouter from './routes/trainer.routes';
 dotenv.config();
 
 const app = express();
@@ -28,6 +28,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/session", sessionRouter);
 app.use("/api/gym", gymRouter);
+app.use("/api/trainer", trainerRouter);
 
 app.get("/", (req, res) => {
   res.json({ message: "GymTrack API is running 🚀" });

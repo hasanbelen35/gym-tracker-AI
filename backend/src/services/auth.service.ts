@@ -145,9 +145,7 @@ export class AuthService {
   // LOGIN TRAINER
   async loginTrainer(data: { email: string; password: string }) {
     const trainer = await prisma.trainer.findUnique({
-      where: {
-        email: data.email,
-      },
+      where: { email: data.email },
       select: {
         id: true,
         name: true,
@@ -158,6 +156,7 @@ export class AuthService {
         gym: {
           select: {
             name: true,
+            publicId: true,
           },
         },
       },
@@ -177,15 +176,14 @@ export class AuthService {
       {
         id: trainer.id,
         gymId: trainer.gymId,
+        gymPublicId: trainer.gym?.publicId,  
         gymName: trainer.gym?.name,
         role: "trainer",
         name: trainer.name,
         surname: trainer.surname,
       },
       process.env.JWT_SECRET!,
-      {
-        expiresIn: "7d",
-      }
+      { expiresIn: "7d" }
     );
 
     return {

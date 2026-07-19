@@ -13,6 +13,7 @@ interface TokenPayload {
   surname?: string;
   gymName?: string;
   gymId?: number;
+  gymPublicId: string;
 }
 
 export const useAuth = () => {
