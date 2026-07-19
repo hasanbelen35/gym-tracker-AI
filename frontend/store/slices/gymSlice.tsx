@@ -59,6 +59,7 @@ export const fetchAllMembers = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await API.get('/gym/getAllMembers');
+          //  console.log(response.data.data)
             return response.data.data;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {

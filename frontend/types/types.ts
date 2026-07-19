@@ -138,7 +138,11 @@ export interface Member {
   name: string;
   surname: string;
   email: string;
-  assignmentStatus: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED';
+  assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
+  trainer?: {
+    name: string;
+    surname: string;
+  };
 }
 export
   interface TrainerState {

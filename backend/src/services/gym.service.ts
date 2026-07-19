@@ -18,9 +18,19 @@ export class GymService {
                 surname: true,
                 email: true,
                 gymId: true,
+                assignmentStatus: true,
+                // get trainer's data
+                trainer: {
+                    select: {
+                        name: true,
+                        surname: true,
+                    }
+                }
             }
+
         });
         return members;
+
     }
 
     async removeMemberFromGym(gymId: number, memberPublicId: string) {
@@ -112,10 +122,15 @@ export class GymService {
                 throw new Error("Trainer not found in this gym");
             }
 
-            await tx.member.updateMany({
-                where: { trainerId: trainer.id },
-                data: { trainerId: null }
-            });
+          await tx.member.updateMany({
+            where: {
+                trainer: { publicId: trainerPublicId }
+            },
+            data: {
+                assignmentStatus: 'UNASSIGNED',
+                trainerId: null 
+            }
+        });
 
             await tx.program.deleteMany({ where: { trainerId: trainer.id } });
 

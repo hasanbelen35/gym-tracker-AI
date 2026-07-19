@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchAllMembers, removeMemberFromGym } from "@/store/slices/gymSlice";
-import { Member } from "@/store/slices/trainerSlice";
+import { Member } from "@/types/types";
 import ConfirmModal from "@/components/ConfirmModel";
 import Loading from '@/components/Loading'
 
@@ -18,7 +18,6 @@ const Members = () => {
 
   useEffect(() => {
     dispatch(fetchAllMembers());
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   const handleConfirmDelete = async () => {
@@ -50,13 +49,15 @@ const Members = () => {
       {(!members || members.length === 0) ? (
         <p className="text-gray-500">Kayıtlı üye bulunamadı.</p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border  border-gray-200">
-          <table className="w-full  text-sm text-left">
+        <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 dark:bg-brand-50 dark:text-brand uppercase text-xs">
               <tr>
                 <th className="px-4 py-3">Ad</th>
                 <th className="px-4 py-3">Soyad</th>
                 <th className="px-4 py-3">E-posta</th>
+                <th className="px-4 py-3">Eğitmen</th>
+                <th className="px-4 py-3">Durum</th>
                 <th className="px-4 py-3">İşlem</th>
               </tr>
             </thead>
@@ -70,6 +71,12 @@ const Members = () => {
                   <td className="px-4 py-3">{member.name}</td>
                   <td className="px-4 py-3">{member.surname}</td>
                   <td className="px-4 py-3">{member.email}</td>
+                  <td className="px-4 py-3">
+                    {(member.assignmentStatus === 'ASSIGNED' || member.assignmentStatus === 'PENDING') && member.trainer
+                      ? `${member.trainer.name} ${member.trainer.surname}`
+                      : "-"}
+                  </td>
+                  <td className="px-4 py-3">{member.assignmentStatus}</td>
                   <td className="px-4 py-3">
                     <button
                       onClick={(e) => {
@@ -108,4 +115,4 @@ const Members = () => {
   )
 }
 
-export default Members
+export default Members;
