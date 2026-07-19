@@ -32,6 +32,18 @@ interface GymState {
     trainerDetail: any | null;
     trainerDetailLoading: boolean;
     trainerDetailError: string | null;
+
+    assignmentLoading: boolean;
+    assignmentError: string | null;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    pendingMembers: any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    assignedMembers: any[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    unassignedMembers: any[];
+    statusMembersLoading: boolean;
+    statusMembersError: string | null;
 }
 
 const initialState: GymState = {
@@ -54,6 +66,15 @@ const initialState: GymState = {
     trainerDetail: null,
     trainerDetailLoading: false,
     trainerDetailError: null,
+
+    assignmentLoading: false,
+    assignmentError: null,
+
+    pendingMembers: [],
+    assignedMembers: [],
+    unassignedMembers: [],
+    statusMembersLoading: false,
+    statusMembersError: null,
 };
 
 // GET GYM PROFILE DATAS
@@ -150,6 +171,48 @@ export const fetchTrainerDetail = createAsyncThunk(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || "Antrenör detayı alınamadı.");
+        }
+    }
+);
+
+// APPROVE MEMBER ASSIGNMENT
+export const approveMemberAssignment = createAsyncThunk(
+    'gym/approveMemberAssignment',
+    async (memberPublicId: string, { rejectWithValue }) => {
+        try {
+            const response = await API.post('/gym/approveAssignment', { memberPublicId });
+            return { memberPublicId, data: response.data.data };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Talep onaylanamadı.");
+        }
+    }
+);
+
+// REJECT MEMBER ASSIGNMENT
+export const rejectMemberAssignment = createAsyncThunk(
+    'gym/rejectMemberAssignment',
+    async (memberPublicId: string, { rejectWithValue }) => {
+        try {
+            const response = await API.post('/gym/rejectAssignment', { memberPublicId });
+            return { memberPublicId, data: response.data.data };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Talep reddedilemedi.");
+        }
+    }
+);
+
+// GET MEMBERS BY ASSIGNMENT STATUS
+export const fetchMembersByStatus = createAsyncThunk(
+    'gym/fetchMembersByStatus',
+    async (status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED', { rejectWithValue }) => {
+        try {
+            const response = await API.get(`/gym/getMembers?status=${status}`);
+            return { data: response.data.data, status };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || "Üyeler alınamadı.");
         }
     }
 );
@@ -252,6 +315,68 @@ const gymSlice = createSlice({
             .addCase(fetchTrainerDetail.rejected, (state, action) => {
                 state.trainerDetailLoading = false;
                 state.trainerDetailError = action.payload as string;
+            })
+
+            // APPROVE ASSIGNMENT
+            .addCase(approveMemberAssignment.pending, (state) => {
+                state.assignmentLoading = true;
+                state.assignmentError = null;
+            })
+            .addCase(approveMemberAssignment.fulfilled, (state, action) => {
+                state.assignmentLoading = false;
+                state.pendingMembers = state.pendingMembers.filter(
+                    (m) => m.publicId !== action.payload.memberPublicId
+                );
+                state.members = state.members.map((member) =>
+                    member.publicId === action.payload.memberPublicId
+                        ? { ...member, assignmentStatus: 'ASSIGNED' }
+                        : member
+                );
+            })
+            .addCase(approveMemberAssignment.rejected, (state, action) => {
+                state.assignmentLoading = false;
+                state.assignmentError = action.payload as string;
+            })
+
+            // REJECT ASSIGNMENT
+            .addCase(rejectMemberAssignment.pending, (state) => {
+                state.assignmentLoading = true;
+                state.assignmentError = null;
+            })
+            .addCase(rejectMemberAssignment.fulfilled, (state, action) => {
+                state.assignmentLoading = false;
+                state.pendingMembers = state.pendingMembers.filter(
+                    (m) => m.publicId !== action.payload.memberPublicId
+                );
+                state.members = state.members.map((member) =>
+                    member.publicId === action.payload.memberPublicId
+                        ? { ...member, assignmentStatus: 'UNASSIGNED', trainerId: null }
+                        : member
+                );
+            })
+            .addCase(rejectMemberAssignment.rejected, (state, action) => {
+                state.assignmentLoading = false;
+                state.assignmentError = action.payload as string;
+            })
+
+            // FETCH MEMBERS BY STATUS
+            .addCase(fetchMembersByStatus.pending, (state) => {
+                state.statusMembersLoading = true;
+                state.statusMembersError = null;
+            })
+            .addCase(fetchMembersByStatus.fulfilled, (state, action) => {
+                state.statusMembersLoading = false;
+                if (action.payload.status === 'PENDING') {
+                    state.pendingMembers = action.payload.data;
+                } else if (action.payload.status === 'ASSIGNED') {
+                    state.assignedMembers = action.payload.data;
+                } else {
+                    state.unassignedMembers = action.payload.data;
+                }
+            })
+            .addCase(fetchMembersByStatus.rejected, (state, action) => {
+                state.statusMembersLoading = false;
+                state.statusMembersError = action.payload as string;
             });
     },
 });

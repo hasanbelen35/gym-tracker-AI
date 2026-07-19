@@ -7,7 +7,7 @@ export class GymService {
         });
         return gyms;
     }
-    
+
     // ----------------------------------------MEMBER-----------------------------------------
     async getAllMembers() {
         const members = await prisma.member.findMany({
@@ -172,7 +172,7 @@ export class GymService {
             }
         });
     }
-    
+
     // TO REJECT TRAINER'S MEMBER ASSINGMINET
     async rejectMemberAssignment(memberPublicId: string, gymId: number) {
         return await prisma.member.updateMany({
@@ -184,6 +184,29 @@ export class GymService {
             data: {
                 trainerId: null,
                 assignmentStatus: 'UNASSIGNED',
+            }
+        });
+    }
+    // get member by status
+    // GET MEMBERS BY ASSIGNMENT STATUS (gym'in tüm üyeleri arasından filtreli)
+    async getMembersByStatus(gymId: number, status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED') {
+        return await prisma.member.findMany({
+            where: {
+                gymId: gymId,
+                assignmentStatus: status,
+            },
+            select: {
+                publicId: true,
+                name: true,
+                surname: true,
+                email: true,
+                assignmentStatus: true,
+                trainer: {
+                    select: {
+                        name: true,
+                        surname: true,
+                    }
+                }
             }
         });
     }

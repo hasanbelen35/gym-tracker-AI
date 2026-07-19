@@ -5,7 +5,7 @@ import { AuthRequest } from "../middleware/auth.middleware";
 const gymService = new GymService();
 
 export class GymController {
-        // ----------------------------------------GYM-----------------------------------------
+    // ----------------------------------------GYM-----------------------------------------
 
     async getAllGymController(req: Request, res: Response, next: NextFunction) {
         try {
@@ -126,6 +126,56 @@ export class GymController {
             });
         } catch (error) {
             next(error);
+        }
+    }
+
+    // APPROVE TRAINER'S MEMBER ASSIGNMENT
+    async approveMemberAssignment(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const gymId = req.user!.id;
+            const { memberPublicId } = req.body;
+
+            const result = await gymService.approveMemberAssignment(memberPublicId, gymId);
+
+            if (result.count === 0) {
+                return res.status(404).json({ message: "Üye bulunamadı veya uygun durumda değil." });
+            }
+
+            res.status(200).json({ message: "Assignment approved", data: result });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    // REJECT TRAINER'S MEMBER ASSIGNMENT
+    async rejectMemberAssignment(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const gymId = req.user!.id;
+            const { memberPublicId } = req.body;
+
+            const result = await gymService.rejectMemberAssignment(memberPublicId, gymId);
+
+            if (result.count === 0) {
+                return res.status(404).json({ message: "Üye bulunamadı veya uygun durumda değil." });
+            }
+
+            res.status(200).json({ message: "Assignment rejected", data: result });
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    // GET MEMBERS BY STATUS
+    async getMembersByStatus(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const gymId = req.user!.id;
+            const { status } = req.query as { status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED' };
+
+            const members = await gymService.getMembersByStatus(gymId, status);
+
+            res.status(200).json({ message: "Members fetched", data: members });
+        } catch (err) {
+            next(err);
         }
     }
 }

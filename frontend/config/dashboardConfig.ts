@@ -14,6 +14,7 @@ export const LeftNavDataGym: LeftNavDataType[] = [
     { name: "Ana Sayfa", route: "/dashboard/gym" },
     { name: "Üyeler", route: "/gym/members" },
     { name: "Antrenörler", route: "/gym/trainers" },
+    { name: "Antrenör Atamaları", route: "/gym/assignments" },
     { name: "Salon Kayıtları", route: "/gym/sessions" },
     { name: "Ayarlar", route: "/gym/settings" },
 ];

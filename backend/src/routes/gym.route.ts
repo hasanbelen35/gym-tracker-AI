@@ -14,5 +14,9 @@ router.delete("/deleteTrainerFromGym/:trainerId", authenticate, authorizeGym, (r
 // detailed pages routes
 router.get("/getMemberDetail/:memberId", authenticate, authorizeGym, (req, res, next) => gym.getMemberDetailController(req, res, next));
 router.get("/getTrainerDetail/:trainerId", authenticate, authorizeGym, (req, res, next) => gym.getTrainerDetailController(req, res, next));
+// trainer processes
+router.post("/approveAssignment", authenticate, authorizeGym, (req, res, next) => gym.approveMemberAssignment(req, res, next));
+router.post("/rejectAssignment", authenticate, authorizeGym, (req, res, next) => gym.rejectMemberAssignment(req, res, next));
+router.get("/getMembers", authenticate, authorizeGym, (req, res, next) => gym.getMembersByStatus(req, res, next));
 
 export default router;
