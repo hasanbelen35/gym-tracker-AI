@@ -4,11 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { LeftNavDataAthlete, LeftNavDataGym, LeftNavDataTrainer } from '@/config/dashboardConfig'
 import Loading from '@/components/Loading'
-
-interface NavItem {
-    name: string;
-    route: string;
-}
+import { NavItem } from '@/types/types';
 
 const Dashboard = () => {
     const { user, loading } = useAuth();

@@ -4,11 +4,9 @@ import { fetchGymProfile } from "@/store/slices/gymSlice";
 import { registerTrainer } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { useEffect, useState } from "react";
+import { Gym } from '@/types/types';
 
-interface Gym {
-  id: number;
-  name: string;
-}
+
 
 export default function RegisterTrainer() {
   const router = useRouter();

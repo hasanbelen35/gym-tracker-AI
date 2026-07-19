@@ -4,11 +4,16 @@ import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { registerMember, clearError } from "@/store/slices/authSlice";
 import { fetchGymProfile } from "@/store/slices/gymSlice";
+import {Gym} from '@/types/types';
 
-interface Gym {
-  id: string | number;
-  name: string;
-}
+const CONFIG = {
+  icon: "🏋️",
+  eyebrow: "Üye Kaydı",
+  title: "Sporcu Kayıt",
+  backPath: "/login",
+  gymSelectPlaceholderLoading: "Yükleniyor...",
+  gymSelectPlaceholder: "Salon seçin",
+};
 
 export default function AthleteRegister() {
   const router = useRouter();
@@ -64,14 +69,14 @@ export default function AthleteRegister() {
       <div className="absolute top-[-100px] right-[-100px] w-[320px] h-[320px] rounded-full bg-[rgba(46,158,98,0.06)] pointer-events-none" />
       <div className="absolute bottom-[-80px] left-[-80px] w-[240px] h-[240px] rounded-full bg-[rgba(46,158,98,0.04)] pointer-events-none" />
 
-      <button onClick={() => router.push("/login")} className="absolute top-5 left-5 bg-white/80 border border-[#C5E8D5] rounded-lg px-3 py-1.5 text-xs font-medium text-[#2E9E62] hover:bg-white transition flex items-center gap-1.5">
+      <button onClick={() => router.push(CONFIG.backPath)} className="absolute top-5 left-5 bg-white/80 border border-[#C5E8D5] rounded-lg px-3 py-1.5 text-xs font-medium text-[#2E9E62] hover:bg-white transition flex items-center gap-1.5">
         ← Geri
       </button>
 
       <form onSubmit={handleRegister} className="bg-white rounded-2xl p-10 w-full max-w-sm shadow-[0_4px_40px_rgba(46,158,98,0.08)] relative z-10">
-        <span className="text-4xl mb-4 block">🏋️</span>
-        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#2E9E62] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>Üye Kaydı</p>
-        <h1 className="text-2xl font-extrabold text-[#0F2D1A] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>Sporcu Kayıt</h1>
+        <span className="text-4xl mb-4 block">{CONFIG.icon}</span>
+        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#2E9E62] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>{CONFIG.eyebrow}</p>
+        <h1 className="text-2xl font-extrabold text-[#0F2D1A] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>{CONFIG.title}</h1>
 
         {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
 
@@ -106,7 +111,7 @@ export default function AthleteRegister() {
             required
           >
             <option value="" disabled>
-              {gymsLoading ? "Yükleniyor..." : "Salon seçin"}
+              {gymsLoading ? CONFIG.gymSelectPlaceholderLoading : CONFIG.gymSelectPlaceholder}
             </option>
             {Array.isArray(gyms) &&
               gyms.map((gym: Gym) => (

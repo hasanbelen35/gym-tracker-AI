@@ -1,25 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction, AnyAction } from '@reduxjs/toolkit';
 import axios from 'axios';
-
-interface Gym {
-    id: number;
-    name: string;
-    email: string;
-}
-
-interface Member {
-    id: number;
-    name: string;
-    surname: string;
-    email: string;
-}
-
-interface AuthState {
-    user: Gym | Member | null;
-    role: 'gym' | 'member' | null;
-    loading: boolean;
-    error: string | null;
-}
+import { Gym, Member, AuthState } from '@/types/types';
 
 const initialState: AuthState = {
     user: null,

@@ -3,34 +3,36 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchAllMembers, removeMemberFromGym } from "@/store/slices/gymSlice";
+import { Member } from "@/store/slices/trainerSlice";
 import ConfirmModal from "@/components/ConfirmModel";
 import Loading from '@/components/Loading'
+
 const Members = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { members, membersLoading, membersError } = useAppSelector((state) => state.gym);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [memberToDelete, setMemberToDelete] = useState<any | null>(null);
+  const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!members || members.length === 0) {
-      dispatch(fetchAllMembers());
-    }
-  }, [dispatch, members]);
+    dispatch(fetchAllMembers());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   const handleConfirmDelete = async () => {
     if (!memberToDelete) return;
 
     setDeletingId(memberToDelete.publicId);
+    setDeleteError(null);
     try {
       await dispatch(removeMemberFromGym(memberToDelete.publicId)).unwrap();
+      setMemberToDelete(null);
     } catch (err) {
-      console.error("Üye silinemedi:", err);
+      setDeleteError(typeof err === "string" ? err : "Üye silinemedi, tekrar deneyin.");
     } finally {
       setDeletingId(null);
-      setMemberToDelete(null);
     }
   };
 
@@ -59,8 +61,7 @@ const Members = () => {
               </tr>
             </thead>
             <tbody>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {members.map((member: any) => (
+              {members.map((member: Member) => (
                 <tr
                   key={member.publicId}
                   onClick={() => handleRowClick(member.publicId)}
@@ -87,19 +88,21 @@ const Members = () => {
           </table>
         </div>
       )}
-      
-      {/* CONFIRM MODEL */}
+
       <ConfirmModal
         isOpen={!!memberToDelete}
         title="Emin misiniz?"
         message={
           memberToDelete
-            ? `${memberToDelete.name} ${memberToDelete.surname} adlı üyeyi salondan silmek üzeresiniz. Bu işlem geri alınamaz.`
+            ? `${memberToDelete.name} ${memberToDelete.surname} adlı üyeyi salondan silmek üzeresiniz. Bu işlem geri alınamaz.${deleteError ? `\n\n${deleteError}` : ""}`
             : ""
         }
         loading={deletingId !== null}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setMemberToDelete(null)}
+        onCancel={() => {
+          setMemberToDelete(null);
+          setDeleteError(null);
+        }}
       />
     </div>
   )

@@ -4,6 +4,12 @@ import { loginTrainer } from "@/store/slices/authSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { useState } from "react";
 
+const CONFIG = {
+  icon: "🥇",
+  title: "Antrenör Girişi",
+  subtitle: "Hoş geldiniz, giriş yapın.",
+};
+
 const LoginTrainer = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -37,9 +43,9 @@ const LoginTrainer = () => {
       <main className="flex min-h-screen items-center justify-center relative overflow-hidden bg-[#FFF6EC] py-10" style={{ fontFamily: "'DM Sans', sans-serif" }}>
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#F0A24E] to-[#E8823C]" />
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-10 w-full max-w-sm shadow-[0_4px_40px_rgba(232,130,60,0.08)] relative z-10">
-          <span className="text-4xl mb-4 block">🥇</span>
-          <h1 className="text-2xl font-extrabold text-[#3A2415] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>Antrenör Girişi</h1>
-          <p className="text-sm text-[#B0977E] mb-7">Hoş geldiniz, giriş yapın.</p>
+          <span className="text-4xl mb-4 block">{CONFIG.icon}</span>
+          <h1 className="text-2xl font-extrabold text-[#3A2415] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>{CONFIG.title}</h1>
+          <p className="text-sm text-[#B0977E] mb-7">{CONFIG.subtitle}</p>
 
           {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
 

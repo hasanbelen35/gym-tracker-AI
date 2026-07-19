@@ -6,7 +6,6 @@ const trainerService = new TrainerService();
 
 export class TrainerController {
     // send request to gym for assıgn member to trainer controller
-    // controllers/trainer.controller.ts
     async requestMemberAssignment(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const trainerId = req.user!.id;

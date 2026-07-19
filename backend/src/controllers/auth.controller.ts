@@ -1,17 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthService } from "../services/auth.service";
-
+import { COOKIE_MAX_AGE, cookieOptions } from '../lib/cookie'
 const authService = new AuthService();
 
-const COOKIE_MAX_AGE = Number(process.env.COOKIE_MAX_AGE) || 7 * 24 * 60 * 60 * 1000;
-
-const cookieOptions = {
-  httpOnly: false,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
-  maxAge: COOKIE_MAX_AGE,
-  path: "/",
-};
 
 export class AuthController {
   // ----------------------------------------------------- GYM METHODS -----------------------------------------------------

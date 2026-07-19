@@ -21,7 +21,6 @@ export default function TrainerAthletesPage() {
         dispatch(fetchMembersByStatus({ gymId, status: 'ASSIGNED' }));
     }, [dispatch, gymId]);
 
-    // Havuzdan sporcu için talep gönder
     const handleRequest = (memberPublicId: string) => {
         if (!gymId) return;
         dispatch(requestAssignment({ memberPublicId, gymId }))
@@ -32,7 +31,6 @@ export default function TrainerAthletesPage() {
             });
     };
 
-    // Bekleyen talebi geri çek
     const handleCancel = (memberPublicId: string) => {
         if (!gymId) return;
         dispatch(cancelAssignment({ memberPublicId, gymId }))
@@ -54,6 +52,24 @@ export default function TrainerAthletesPage() {
         );
     }
 
+    const columns = [
+        {
+            title: "Havuz (Boştaki Sporcular)",
+            emptyText: "Havuzda uygun sporcu bulunamadı.",
+            members: availableMembers,
+        },
+        {
+            title: "Bekleyen Talepler",
+            emptyText: "Bekleyen talep bulunmuyor.",
+            members: pendingMembers,
+        },
+        {
+            title: "Onaylı Sporcularım",
+            emptyText: "Henüz onaylı sporcunuz yok.",
+            members: approvedMembers,
+        },
+    ];
+
     return (
         <div className="p-6">
             {loading && <p className="text-sm text-gray-400 mb-2">Yükleniyor...</p>}
@@ -62,12 +78,12 @@ export default function TrainerAthletesPage() {
             <div className="flex gap-4">
                 {/* 1. Sütun: Havuz */}
                 <div className="w-1/3 border p-4 rounded-xl shadow-sm bg-white dark:bg-brand-50">
-                    <h3 className="font-bold text-lg mb-4 text-gray-700 border-b pb-2">Havuz (Boştaki Sporcular)</h3>
+                    <h3 className="font-bold text-lg mb-4 text-gray-700 border-b pb-2">{columns[0].title}</h3>
                     <div className="flex flex-col gap-2">
-                        {availableMembers.length === 0 ? (
-                            <p className="text-gray-400 text-sm italic">Havuzda uygun sporcu bulunamadı.</p>
+                        {columns[0].members.length === 0 ? (
+                            <p className="text-gray-400 text-sm italic">{columns[0].emptyText}</p>
                         ) : (
-                            availableMembers.map((m: Member) => (
+                            columns[0].members.map((m: Member) => (
                                 <button
                                     onClick={() => handleRequest(m.publicId)}
                                     key={m.publicId}
@@ -82,12 +98,12 @@ export default function TrainerAthletesPage() {
 
                 {/* 2. Sütun: Pending */}
                 <div className="w-1/3 border p-4 rounded-xl shadow-sm bg-yellow-50/40">
-                    <h3 className="font-bold text-lg mb-4 text-yellow-800 border-b border-yellow-200 pb-2">Bekleyen Talepler</h3>
+                    <h3 className="font-bold text-lg mb-4 text-yellow-800 border-b border-yellow-200 pb-2">{columns[1].title}</h3>
                     <div className="flex flex-col gap-2">
-                        {pendingMembers.length === 0 ? (
-                            <p className="text-yellow-600/60 text-sm italic">Bekleyen talep bulunmuyor.</p>
+                        {columns[1].members.length === 0 ? (
+                            <p className="text-yellow-600/60 text-sm italic">{columns[1].emptyText}</p>
                         ) : (
-                            pendingMembers.map((m: Member) => (
+                            columns[1].members.map((m: Member) => (
                                 <div
                                     key={m.publicId}
                                     className="flex items-center justify-between px-4 py-3 border border-yellow-200 bg-white rounded-xl text-gray-700 font-medium shadow-sm"
@@ -107,12 +123,12 @@ export default function TrainerAthletesPage() {
 
                 {/* 3. Sütun: Onaylı */}
                 <div className="w-1/3 border p-4 rounded-xl shadow-sm bg-green-50/40">
-                    <h3 className="font-bold text-lg mb-4 text-green-800 border-b border-green-200 pb-2">Onaylı Sporcularım</h3>
+                    <h3 className="font-bold text-lg mb-4 text-green-800 border-b border-green-200 pb-2">{columns[2].title}</h3>
                     <div className="flex flex-col gap-2">
-                        {approvedMembers.length === 0 ? (
-                            <p className="text-green-600/60 text-sm italic">Henüz onaylı sporcunuz yok.</p>
+                        {columns[2].members.length === 0 ? (
+                            <p className="text-green-600/60 text-sm italic">{columns[2].emptyText}</p>
                         ) : (
-                            approvedMembers.map((m: Member) => (
+                            columns[2].members.map((m: Member) => (
                                 <div key={m.publicId} className="px-4 py-3 border border-green-200 bg-white rounded-xl text-gray-700 font-medium shadow-sm">
                                     {m.name} {m.surname}
                                 </div>

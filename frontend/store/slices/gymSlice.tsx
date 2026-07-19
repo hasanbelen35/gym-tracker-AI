@@ -1,50 +1,12 @@
 // src/store/slices/gymSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { GymState } from '@/types/types';
 
 const API = axios.create({
     baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
     withCredentials: true,
 });
-
-interface GymState {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    profile: any | null;
-    loading: boolean;
-    error: string | null;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    members: any[];
-    membersLoading: boolean;
-    membersError: string | null;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    trainers: any[];
-    trainersLoading: boolean;
-    trainersError: string | null;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    memberDetail: any | null;
-    memberDetailLoading: boolean;
-    memberDetailError: string | null;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    trainerDetail: any | null;
-    trainerDetailLoading: boolean;
-    trainerDetailError: string | null;
-
-    assignmentLoading: boolean;
-    assignmentError: string | null;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    pendingMembers: any[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    assignedMembers: any[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    unassignedMembers: any[];
-    statusMembersLoading: boolean;
-    statusMembersError: string | null;
-}
 
 const initialState: GymState = {
     profile: null,

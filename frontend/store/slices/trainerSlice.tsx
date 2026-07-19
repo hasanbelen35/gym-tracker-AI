@@ -1,14 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-
-export interface Member {
-  publicId: string;
-  name: string;
-  surname: string;
-  email: string;
-  assignmentStatus: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED';
-}
-
+import { Member } from '@/types/types';
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
   withCredentials: true,

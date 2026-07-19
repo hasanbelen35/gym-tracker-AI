@@ -1,26 +1,13 @@
 // src/store/slices/gymSessionSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { Session , GymSessionState } from '@/types/types';
 
 const API = axios.create({
     baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
     withCredentials: true,
 });
 
-interface Session {
-    id: number;
-    memberId: number;
-    memberName: string;
-    checkIn: string;
-    checkOut: string | null;
-}
-
-interface GymSessionState {
-    allSessions: Session[];
-    activeSessions: Session[];
-    loading: boolean;
-    error: string | null;
-}
 
 const initialState: GymSessionState = {
     allSessions: [],

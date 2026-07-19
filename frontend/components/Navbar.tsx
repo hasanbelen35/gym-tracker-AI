@@ -7,6 +7,17 @@ import { useAppDispatch } from "@/store/store";
 import { logoutUser } from "@/store/slices/authSlice";
 import { useAuth } from "@/hooks/useAuth";
 
+const CONFIG = {
+  logoLetter: "G",
+  brandName: "GymTracker",
+  brandSuffix: "AI",
+  searchPlaceholder: "Egzersiz, program veya kullanıcı ara...",
+  themeToggleLabel: "Tema değiştir",
+  profileMenuLabel: "Profil menüsü",
+  logoutLabel: "Çıkış Yap",
+  logoutErrorMessage: "Çıkış işlemi başarısız:",
+};
+
 export const Navbar = () => {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
@@ -34,21 +45,21 @@ export const Navbar = () => {
       router.push("/login");
       router.refresh();
     } catch (error) {
-      console.error("Çıkış işlemi başarısız:", error);
+      console.error(CONFIG.logoutErrorMessage, error);
     }
   };
 
   return (
     <nav className="flex items-center justify-between px-8 py-3 bg-nav-bg border-b border-nav-border shadow-nav transition-colors">
-      
+
       {/* Logo + Rol Badge */}
       <div className="flex items-center gap-3 ">
         <div className="flex items-center gap-2 cursor-pointer">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-sm">
-            <span className="text-white text-sm font-bold">G</span>
+            <span className="text-white text-sm font-bold">{CONFIG.logoLetter}</span>
           </div>
           <span className="text-xl font-bold tracking-tight text-brand-600 ">
-            GymTracker<span className="text-brand-dark">AI</span>
+            {CONFIG.brandName}<span className="text-brand-dark">{CONFIG.brandSuffix}</span>
           </span>
         </div>
 
@@ -67,7 +78,7 @@ export const Navbar = () => {
       <div className="relative w-1/3">
         <input
           type="text"
-          placeholder="Egzersiz, program veya kullanıcı ara..."
+          placeholder={CONFIG.searchPlaceholder}
           className="w-full bg-white dark:bg-nav-bg border border-nav-border rounded-xl py-2 pl-4 pr-10
                      placeholder:text-slate-400 text-sm text-brand-text
                      focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500
@@ -83,7 +94,7 @@ export const Navbar = () => {
         <button
           onClick={toggleTheme}
           className="p-2 rounded-lg text-brand-600 hover:bg-brand-50 transition-colors"
-          aria-label="Tema değiştir"
+          aria-label={CONFIG.themeToggleLabel}
         >
           {isDark ? (
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -102,7 +113,7 @@ export const Navbar = () => {
           <button
             onClick={() => setIsMenuOpen((prev) => !prev)}
             className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white shadow-sm hover:from-brand-600 hover:to-brand-dark transition-all cursor-pointer"
-            aria-label="Profil menüsü"
+            aria-label={CONFIG.profileMenuLabel}
             aria-expanded={isMenuOpen}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -123,7 +134,7 @@ export const Navbar = () => {
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                Çıkış Yap
+                {CONFIG.logoutLabel}
               </button>
             </div>
           )}
