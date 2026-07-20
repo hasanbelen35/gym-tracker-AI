@@ -16,13 +16,14 @@ export class TrainerService {
         });
     }
 
+    // draw back pendıng or assıgned status
     async cancelMyAssignmentRequest(memberPublicId: string, trainerId: number, gymPublicId: string) {
         return await prisma.member.updateMany({
             where: {
                 publicId: memberPublicId,
                 trainerId: trainerId,
                 gym: { publicId: gymPublicId },
-                assignmentStatus: 'PENDING',
+                assignmentStatus: { in: ['PENDING', 'ASSIGNED'] },
             },
             data: {
                 trainerId: null,
@@ -30,6 +31,7 @@ export class TrainerService {
             }
         });
     }
+    
     // get all members ın exıst gym
     async getMembersByStatus(
         trainerId: number,

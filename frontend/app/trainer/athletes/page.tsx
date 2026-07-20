@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/store';
 import { fetchMembersByStatus, requestAssignment, cancelAssignment, Member } from '@/store/slices/trainerSlice';
 import { useAuth } from '@/hooks/useAuth';
 import Loading from '@/components/Loading';
+import ConfirmModal from '@/components/ConfirmModel';
 
 export default function TrainerAthletesPage() {
     const dispatch = useAppDispatch();
     const { user, loading: authLoading } = useAuth();
     const { availableMembers, pendingMembers, approvedMembers, loading, error } = useAppSelector(state => state.trainer);
+
+    const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const gymId = user?.gymPublicId;
 
@@ -31,13 +35,22 @@ export default function TrainerAthletesPage() {
             });
     };
 
-    const handleCancel = (memberPublicId: string) => {
-        if (!gymId) return;
-        dispatch(cancelAssignment({ memberPublicId, gymId }))
+    const openCancelModal = (memberPublicId: string) => {
+        setSelectedMemberId(memberPublicId);
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmCancel = () => {
+        if (!gymId || !selectedMemberId) return;
+        
+        dispatch(cancelAssignment({ memberPublicId: selectedMemberId, gymId }))
             .unwrap()
             .then(() => {
                 dispatch(fetchMembersByStatus({ gymId, status: 'UNASSIGNED' }));
                 dispatch(fetchMembersByStatus({ gymId, status: 'PENDING' }));
+                dispatch(fetchMembersByStatus({ gymId, status: 'ASSIGNED' }));
+                setIsModalOpen(false);
+                setSelectedMemberId(null);
             });
     };
 
@@ -110,7 +123,7 @@ export default function TrainerAthletesPage() {
                                 >
                                     <span>{m.name} {m.surname}</span>
                                     <button
-                                        onClick={() => handleCancel(m.publicId)}
+                                        onClick={() => openCancelModal(m.publicId)}
                                         className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 font-semibold transition-all"
                                     >
                                         Geri Çek
@@ -129,14 +142,37 @@ export default function TrainerAthletesPage() {
                             <p className="text-green-600/60 text-sm italic">{columns[2].emptyText}</p>
                         ) : (
                             columns[2].members.map((m: Member) => (
-                                <div key={m.publicId} className="px-4 py-3 border border-green-200 bg-white rounded-xl text-gray-700 font-medium shadow-sm">
-                                    {m.name} {m.surname}
+                                <div
+                                    key={m.publicId}
+                                    className="flex items-center justify-between px-4 py-3 border border-green-200 bg-white rounded-xl text-gray-700 font-medium shadow-sm"
+                                >
+                                    <span>{m.name} {m.surname}</span>
+                                    <button
+                                        onClick={() => openCancelModal(m.publicId)}
+                                        className="text-xs px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 font-semibold transition-all"
+                                    >
+                                        Geri Çek
+                                    </button>
                                 </div>
                             ))
                         )}
                     </div>
                 </div>
             </div>
+
+            <ConfirmModal
+                isOpen={isModalOpen}
+                title="Sporcuyu Geri Çek"
+                message="Bu sporcuyu geri çekmek istediğinizden emin misiniz? İşlem sonrasında sporcu boştaki havuzuna dönecektir."
+                confirmText="Evet, Geri Çek"
+                cancelText="Vazgeç"
+                loading={loading}
+                onConfirm={handleConfirmCancel}
+                onCancel={() => {
+                    setIsModalOpen(false);
+                    setSelectedMemberId(null);
+                }}
+            />
         </div>
     );
 }

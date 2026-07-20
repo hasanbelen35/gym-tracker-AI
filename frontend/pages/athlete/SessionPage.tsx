@@ -10,18 +10,25 @@ export default function SessionPage() {
   const { isActive, loading, history } = useAppSelector((state) => state.session);
   const { user } = useAuth(); 
 
-  const [seconds, setSeconds] = useState(0);
+  // eslint-disable-next-line react-hooks/purity
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
   const [sessionSummary, setSessionSummary] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(getSessionsByUser());
   }, [dispatch]);
 
+  const activeSession = history.find((s) => !s.checkOut);
+  const startTime = activeSession ? new Date(activeSession.checkIn).getTime() : null;
+
+  const totalSeconds = isActive && startTime ? Math.floor((currentTime - startTime) / 1000) : 0;
+  const seconds = totalSeconds > 0 ? totalSeconds : 0;
+
   useEffect(() => {
     if (!isActive) return;
 
     const interval = setInterval(() => {
-      setSeconds((prev) => prev + 1);
+      setCurrentTime(Date.now());
     }, 1000);
 
     return () => clearInterval(interval);
@@ -32,9 +39,10 @@ export default function SessionPage() {
       console.error("Kullanıcının bağlı olduğu gym bulunamadı.", user);
       return;
     }
-    setSeconds(0);
     setSessionSummary(null);
-    dispatch(checkIn(user.gymId));
+    dispatch(checkIn(user.gymId)).then(() => {
+      dispatch(getSessionsByUser());
+    });
   };
 
   const handleEnd = () => {
@@ -46,7 +54,6 @@ export default function SessionPage() {
         const minutes = Math.floor(finalSeconds / 60);
         const remainingSeconds = finalSeconds % 60;
         setSessionSummary(`${minutes} dakika ${remainingSeconds} saniye spor yaptın!`);
-        setSeconds(0);
         dispatch(getSessionsByUser());
       })
       .catch((err) => console.error(err));

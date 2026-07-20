@@ -8,6 +8,8 @@ import sessionRouter from "./routes/session.route";
 import cookieParser from "cookie-parser";
 import gymRouter from "./routes/gym.route";
 import trainerRouter from './routes/trainer.routes';
+import memberRouter from './routes/member.routes';
+
 dotenv.config();
 
 const app = express();
@@ -25,10 +27,12 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
+// routes
 app.use("/api/auth", authRouter);
 app.use("/api/session", sessionRouter);
 app.use("/api/gym", gymRouter);
 app.use("/api/trainer", trainerRouter);
+app.use("/api/member", memberRouter);
 
 app.get("/", (req, res) => {
   res.json({ message: "GymTrack API is running 🚀" });

@@ -152,3 +152,20 @@ export
   loading: boolean;
   error: string | null;
 }
+
+
+// member slice
+
+export interface TrainerInfo {
+  publicId: string;
+  name: string;
+  surname: string;
+  email: string;
+}
+
+export interface MemberState {
+  trainer: TrainerInfo | null;
+  assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
+  loading: boolean;
+  error: string | null;
+}

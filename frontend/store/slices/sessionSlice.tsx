@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-const API = axios.create({
-    baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
-    withCredentials: true,
-});
+import axios, { AxiosError } from 'axios';
+
+interface ApiErrorResponse {
+    message?: string;
+}
 
 interface SessionHistoryItem {
     id: number;
@@ -24,6 +24,11 @@ interface SessionState {
     history: SessionHistoryItem[];
 }
 
+const API = axios.create({
+    baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
+    withCredentials: true,
+});
+
 const initialState: SessionState = {
     isActive: false,
     loading: false,
@@ -36,9 +41,9 @@ export const checkIn = createAsyncThunk('session/checkIn', async (gymId: number,
     try {
         const response = await API.post('/session/checkin', { gymId });
         return response.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Antrenman başlatılamadı.");
+    } catch (error) {
+        const err = error as AxiosError<ApiErrorResponse>;
+        return rejectWithValue(err.response?.data?.message || "Antrenman başlatılamadı.");
     }
 });
 
@@ -47,9 +52,9 @@ export const checkOut = createAsyncThunk('session/checkOut', async (_, { rejectW
     try {
         const response = await API.post('/session/checkout');
         return response.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Oturum kapatılamadı.");
+    } catch (error) {
+        const err = error as AxiosError<ApiErrorResponse>;
+        return rejectWithValue(err.response?.data?.message || "Oturum kapatılamadı.");
     }
 });
 
@@ -63,9 +68,9 @@ export const getSessionsByUser = createAsyncThunk(
                 },
             });
             return response.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Oturumlar alınamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Oturumlar alınamadı.");
         }
     }
 );

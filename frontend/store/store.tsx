@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
-import authReducer from '@/store/slices/authSlice'
-import sessionReducer from '@/store/slices/sessionSlice'
-import gymSessionReducer from '@/store/slices/gymSessionSlice'
+import authReducer from '@/store/slices/authSlice';
+import sessionReducer from '@/store/slices/sessionSlice';
+import gymSessionReducer from '@/store/slices/gymSessionSlice';
 import gymReducer from './slices/gymSlice';
-import trainerReducer from './slices/trainerSlice'
+import trainerReducer from './slices/trainerSlice';
+import memberReducer from './slices/memberSlice';
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -12,6 +13,7 @@ export const store = configureStore({
     gymSession: gymSessionReducer,
     gym: gymReducer,
     trainer: trainerReducer,
+    member: memberReducer
   },
 
 });

@@ -1,13 +1,16 @@
 // src/store/slices/gymSessionSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { Session , GymSessionState } from '@/types/types';
+import axios, { AxiosError } from 'axios';
+import { GymSessionState } from '@/types/types';
+
+interface ApiErrorResponse {
+    message?: string;
+}
 
 const API = axios.create({
     baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
     withCredentials: true,
 });
-
 
 const initialState: GymSessionState = {
     allSessions: [],
@@ -23,10 +26,9 @@ export const fetchGymSessions = createAsyncThunk(
         try {
             const response = await API.get('/session/gym');
             return response.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            console.log(error)
-            return rejectWithValue(error.response?.data?.message || "Oturumlar alınamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Oturumlar alınamadı.");
         }
     }
 );
@@ -38,11 +40,9 @@ export const fetchActiveSessions = createAsyncThunk(
         try {
             const response = await API.get('/session/gym/active');
             return response.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            console.log(error)
-
-            return rejectWithValue(error.response?.data?.message || "Aktif oturumlar alınamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Aktif oturumlar alınamadı.");
         }
     }
 );

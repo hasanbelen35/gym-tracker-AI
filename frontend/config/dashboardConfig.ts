@@ -3,8 +3,11 @@ import { LeftNavDataType } from "@/types/types";
 {/* LEFT SIDE-MENU ATHLETE CONFIG*/ }
 export const LeftNavDataAthlete: LeftNavDataType[] = [
     { name: "Ana Sayfa", route: "/dashboard/athlete" },
-    { name: "Antrenmanlar", route: "/athlete/session" },
-    { name: "Beslenme", route: "/dashboard/nutrition" },
+    { name: "Geçmiş Antrenmanlarım", route: "/athlete/session" },
+    { name: "Salonum", route: "/athlete/myGym" },
+    { name: "Antrenörlerim", route: "/athlete/myTrainer" },
+    { name: "Beslenme Programlarım", route: "/athlete/nutritions" },
+    { name: "Antrenman Programlarım", route: "/athlete/workouts" },
     { name: "İstatistikler", route: "/dashboard/statistics" },
     { name: "Profil", route: "/dashboard/profile" },
 ];

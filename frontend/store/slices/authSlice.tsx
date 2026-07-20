@@ -1,6 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction, AnyAction } from '@reduxjs/toolkit';
-import axios from 'axios';
 import { Gym, Member, AuthState } from '@/types/types';
+import axios, { AxiosError } from "axios";
+
+interface ApiErrorResponse {
+    message?: string;
+}
 
 const initialState: AuthState = {
     user: null,
@@ -13,86 +17,80 @@ const API = axios.create({
     baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
     withCredentials: true,
 });
+
 // ------------------------------------------------------------------------REGISTER ------------------------------------------------------------------------
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const registerGym = createAsyncThunk('auth/registerGym', async (data: Record<string, any>, { rejectWithValue }) => {
+export const registerGym = createAsyncThunk('auth/registerGym', async (data: Record<string, unknown>, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/gym/register', data);
         return response.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Kayıt sırasında bir hata oluştu.");
+    } catch (error) {
+        const err = error as AxiosError<ApiErrorResponse>;
+        return rejectWithValue(err.response?.data?.message || "Eğitmen bilgisi alınamadı.");
     }
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const loginGym = createAsyncThunk('auth/loginGym', async (data: Record<string, any>, { rejectWithValue }) => {
+export const loginGym = createAsyncThunk('auth/loginGym', async (data: Record<string, unknown>, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/gym/login', data);
         return response.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Giriş yapılamadı.");
+    } catch (error) {
+        const err = error as AxiosError<ApiErrorResponse>;
+        return rejectWithValue(err.response?.data?.message || "Giriş yapılamadı.");
     }
 });
+
 // ------------------------------------------------------------------------MEMBER ------------------------------------------------------------------------
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const registerMember = createAsyncThunk('auth/registerMember', async (data: Record<string, any>, { rejectWithValue }) => {
+export const registerMember = createAsyncThunk('auth/registerMember', async (data: Record<string, unknown>, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/member/register', data);
         return response.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Üye kaydı sırasında hata oluştu.");
+    } catch (error) {
+        const err = error as AxiosError<ApiErrorResponse>;
+        return rejectWithValue(err.response?.data?.message || "Üye kaydı sırasında hata oluştu.");
     }
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const loginMember = createAsyncThunk('auth/loginMember', async (data: Record<string, any>, { rejectWithValue }) => {
+export const loginMember = createAsyncThunk('auth/loginMember', async (data: Record<string, unknown>, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/member/login', data);
         return response.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Üye girişi yapılamadı.");
+    } catch (error) {
+        const err = error as AxiosError<ApiErrorResponse>;
+        return rejectWithValue(err.response?.data?.message || "Üye girişi yapılamadı.");
     }
 });
 
 // ------------------------------------------------------------------------TRAINER ------------------------------------------------------------------------
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const registerTrainer = createAsyncThunk('auth/registerTrainer', async (data: Record<string, any>, { rejectWithValue }) => {
+
+export const registerTrainer = createAsyncThunk('auth/registerTrainer', async (data: Record<string, unknown>, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/trainer/register', data);
         return response.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Üye girişi yapılamadı.");
+    } catch (error) {
+        const err = error as AxiosError<ApiErrorResponse>;
+        return rejectWithValue(err.response?.data?.message || "Eğitmen kaydı yapılamadı.");
     }
 });
 
-
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const loginTrainer = createAsyncThunk('auth/loginTrainer', async (data: Record<string, any>, { rejectWithValue }) => {
+export const loginTrainer = createAsyncThunk('auth/loginTrainer', async (data: Record<string, unknown>, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/trainer/login', data);
         return response.data;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Üye girişi yapılamadı.");
+    } catch (error) {
+        const err = error as AxiosError<ApiErrorResponse>;
+        return rejectWithValue(err.response?.data?.message || "Eğitmen girişi yapılamadı.");
     }
 });
-
 
 // LOGOUT USER 
 export const logoutUser = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
     try {
         await API.post('/auth/logout');
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-        return rejectWithValue(error.response?.data?.message || "Üye girişi yapılamadı.");
+    } catch (error) {
+        const err = error as AxiosError<ApiErrorResponse>;
+        return rejectWithValue(err.response?.data?.message || "Çıkış yapılamadı.");
     }
 });
 

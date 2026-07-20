@@ -1,7 +1,11 @@
 // src/store/slices/gymSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { GymState } from '@/types/types';
+
+interface ApiErrorResponse {
+    message?: string;
+}
 
 const API = axios.create({
     baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
@@ -46,9 +50,9 @@ export const fetchGymProfile = createAsyncThunk(
         try {
             const response = await API.get('/gym/getAllGym');
             return response.data.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Gym bilgileri alınamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Gym bilgileri alınamadı.");
         }
     }
 );
@@ -59,11 +63,10 @@ export const fetchAllMembers = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await API.get('/gym/getAllMembers');
-          //  console.log(response.data.data)
             return response.data.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Üyeler alınamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Üyeler alınamadı.");
         }
     }
 );
@@ -75,9 +78,9 @@ export const fetchAllTrainers = createAsyncThunk(
         try {
             const response = await API.get('/gym/getAllTrainers');
             return response.data.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Antrenörler alınamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Antrenörler alınamadı.");
         }
     }
 );
@@ -89,9 +92,9 @@ export const removeMemberFromGym = createAsyncThunk(
         try {
             const response = await API.delete(`/gym/deleteMemberFromGym/${memberPublicId}`);
             return response.data.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Üye silinemedi.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Üye silinemedi.");
         }
     }
 );
@@ -103,9 +106,9 @@ export const removeTrainerFromGym = createAsyncThunk(
         try {
             const response = await API.delete(`/gym/deleteTrainerFromGym/${trainerPublicId}`);
             return response.data.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Antrenör silinemedi.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Antrenör silinemedi.");
         }
     }
 );
@@ -117,9 +120,9 @@ export const fetchMemberDetail = createAsyncThunk(
         try {
             const response = await API.get(`/gym/getMemberDetail/${memberPublicId}`);
             return response.data.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Üye detayı alınamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Üye detayı alınamadı.");
         }
     }
 );
@@ -131,9 +134,9 @@ export const fetchTrainerDetail = createAsyncThunk(
         try {
             const response = await API.get(`/gym/getTrainerDetail/${trainerPublicId}`);
             return response.data.data;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Antrenör detayı alınamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Antrenör detayı alınamadı.");
         }
     }
 );
@@ -145,9 +148,9 @@ export const approveMemberAssignment = createAsyncThunk(
         try {
             const response = await API.post('/gym/approveAssignment', { memberPublicId });
             return { memberPublicId, data: response.data.data };
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Talep onaylanamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Talep onaylanamadı.");
         }
     }
 );
@@ -159,9 +162,9 @@ export const rejectMemberAssignment = createAsyncThunk(
         try {
             const response = await API.post('/gym/rejectAssignment', { memberPublicId });
             return { memberPublicId, data: response.data.data };
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Talep reddedilemedi.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Talep reddedilemedi.");
         }
     }
 );
@@ -173,9 +176,9 @@ export const fetchMembersByStatus = createAsyncThunk(
         try {
             const response = await API.get(`/gym/getMembers?status=${status}`);
             return { data: response.data.data, status };
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || "Üyeler alınamadı.");
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || "Üyeler alınamadı.");
         }
     }
 );
