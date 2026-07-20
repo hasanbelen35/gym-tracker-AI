@@ -27,3 +27,6 @@ Thumbs.db
 
 # Prisma
 prisma/migrations/**/migration_lock.toml
+
+#EXERCISE JSON FILE 
+prisma/exercises.json

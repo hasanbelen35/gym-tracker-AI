@@ -97,3 +97,18 @@ model Program {
   member    Member      @relation(fields: [memberId], references: [id])
   trainer   Trainer     @relation(fields: [trainerId], references: [id])
 }
+
+// EXERCISE
+model Exercise {
+  id               Int      @id @default(autoincrement())
+  publicId         String   @unique @default(uuid())
+  name             String
+  category         String?
+  bodyPart         String?
+  equipment        String?
+  targetMuscle     String?
+  instructions     String?  @db.Text // Türkçe açıklama metni
+  instruction_steps Json?   
+  gifUrl           String?  
+  createdAt        DateTime @default(now())
+}
