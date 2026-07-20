@@ -21,16 +21,14 @@ async function main() {
 
   let count = 0;
   for (const ex of exercises) {
-    // Sadece Türkçe verileri çekiyoruz (Eğer Türkçe çevirisi yoksa atlayabiliriz)
+    // just turkısh datas
     const turkishInstruction = ex.instructions?.tr || null;
     const turkishSteps = ex.instruction_steps?.tr || null;
 
-    if (!turkishInstruction) continue; // Türkçe açıklaması olmayanları pas geç
-
-    // GitHub raw tam URL oluşturma (örn: https://raw.githubusercontent.com/.../videos/0001-2gPfomN.gif)
+    if (!turkishInstruction) continue; 
+// raw gif url creating
     const fullGifUrl = ex.gif_url ? `${GITHUB_RAW_BASE}${ex.gif_url}` : null;
 
-    // Mükerrer (duplicate) kontrolü
     const existing = await prisma.exercise.findFirst({
       where: { name: ex.name }
     });
@@ -44,7 +42,7 @@ async function main() {
           equipment: ex.equipment || null,
           targetMuscle: ex.target || null,
           instructions: turkishInstruction,
-          instruction_steps: turkishSteps, // Prisma JSON alanına direkt dizi kaydedebilir
+          instruction_steps: turkishSteps, 
           gifUrl: fullGifUrl,
         },
       });
