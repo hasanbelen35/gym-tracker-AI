@@ -6,6 +6,7 @@ import gymSessionReducer from '@/store/slices/gymSessionSlice';
 import gymReducer from './slices/gymSlice';
 import trainerReducer from './slices/trainerSlice';
 import memberReducer from './slices/memberSlice';
+import exerciseReducer from "./slices/exerciseSlice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -13,7 +14,8 @@ export const store = configureStore({
     gymSession: gymSessionReducer,
     gym: gymReducer,
     trainer: trainerReducer,
-    member: memberReducer
+    member: memberReducer,
+    exercises: exerciseReducer, 
   },
 
 });

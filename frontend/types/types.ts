@@ -169,3 +169,29 @@ export interface MemberState {
   loading: boolean;
   error: string | null;
 }
+
+
+// exercise 
+export interface Exercise {
+  id: number;
+  publicId: string;
+  name: string;
+  category?: string;
+  bodyPart?: string;
+  equipment?: string;
+  targetMuscle?: string;
+  instructions?: string;
+  gifUrl?: string;
+}
+
+export interface ExerciseState {
+  exercises: Exercise[];
+  loading: boolean;
+  error: string | null;
+  filters: {
+    search: string;
+    category: string;
+    equipment: string;
+    targetMuscle: string;
+  };
+}
