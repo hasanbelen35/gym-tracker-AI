@@ -3,21 +3,18 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const prisma = new PrismaClient();
-const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/";
+const GITHUB_RAW_BASE = process.env.GITHUB_EXERCISE_DATA;
 
 async function main() {
   const filePath = path.join(__dirname, 'exercises.json');
-  
+
   if (!fs.existsSync(filePath)) {
-    console.error("exercises.json dosyası prisma klasöründe bulunamadı!");
     return;
   }
 
-  console.log("JSON dosyası okunuyor, lütfen bekleyin...");
   const fileData = fs.readFileSync(filePath, 'utf-8');
   const exercises = JSON.parse(fileData);
 
-  console.log(`Toplam egzersiz kaydı: ${exercises.length}. Veritabanına aktarılıyor...`);
 
   let count = 0;
   for (const ex of exercises) {
@@ -25,8 +22,8 @@ async function main() {
     const turkishInstruction = ex.instructions?.tr || null;
     const turkishSteps = ex.instruction_steps?.tr || null;
 
-    if (!turkishInstruction) continue; 
-// raw gif url creating
+    if (!turkishInstruction) continue;
+    // raw gif url creating
     const fullGifUrl = ex.gif_url ? `${GITHUB_RAW_BASE}${ex.gif_url}` : null;
 
     const existing = await prisma.exercise.findFirst({
@@ -42,7 +39,7 @@ async function main() {
           equipment: ex.equipment || null,
           targetMuscle: ex.target || null,
           instructions: turkishInstruction,
-          instruction_steps: turkishSteps, 
+          instruction_steps: turkishSteps,
           gifUrl: fullGifUrl,
         },
       });
@@ -50,12 +47,10 @@ async function main() {
     }
   }
 
-  console.log(`Başarıyla ${count} adet Türkçe egzersiz veritabanına aktarıldı!`);
 }
 
 main()
   .catch((e) => {
-    console.error("Aktarım hatası:", e);
     process.exit(1);
   })
   .finally(async () => {

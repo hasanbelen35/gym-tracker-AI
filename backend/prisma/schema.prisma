@@ -80,24 +80,6 @@ model Session {
   gym       Gym       @relation(fields: [gymId], references: [id])
 }
 
-// Program
-
-enum ProgramType {
-  WORKOUT
-  DIET
-}
-model Program {
-  id        Int         @id @default(autoincrement())
-  publicId  String    @unique @default(uuid())
-  memberId  Int
-  trainerId Int
-  type      ProgramType
-  content   String
-  createdAt DateTime    @default(now())
-  member    Member      @relation(fields: [memberId], references: [id])
-  trainer   Trainer     @relation(fields: [trainerId], references: [id])
-}
-
 // EXERCISE
 model Exercise {
   id               Int      @id @default(autoincrement())
@@ -110,5 +92,77 @@ model Exercise {
   instructions     String?  @db.Text // Türkçe açıklama metni
   instruction_steps Json?   
   gifUrl           String?  
+  workoutExercises WorkoutExercise[]
   createdAt        DateTime @default(now())
+}
+
+
+// Program Type
+enum ProgramType {
+  WORKOUT
+  DIET
+}
+
+// Split Types
+enum SplitCategory {
+  PPL
+  UPPER_LOWER
+  FULL_BODY
+  BRO_SPLIT
+  CUSTOM
+}
+
+// PROGRAM
+
+model Program {
+  id           Int           @id @default(autoincrement())
+  publicId     String        @unique @default(uuid())
+  memberId     Int
+  trainerId    Int
+  title        String        
+  type         ProgramType   @default(WORKOUT)
+  splitType    SplitCategory @default(PPL) 
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  
+  member       Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  trainer      Trainer       @relation(fields: [trainerId], references: [id])
+  
+  days         WorkoutDay[]
+}
+
+model WorkoutDay {
+  id          Int               @id @default(autoincrement())
+  publicId    String            @unique @default(uuid())
+  programId   Int
+  dayName     String            
+  dayOrder    Int               
+  
+  program     Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
+  exercises   WorkoutExercise[]
+}
+
+model WorkoutExercise {
+  id           Int            @id @default(autoincrement())
+  publicId     String         @unique @default(uuid())
+  dayId        Int
+  exerciseId   Int            
+  orderIndex   Int            
+  notes        String?        @db.Text 
+  
+  day          WorkoutDay     @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  exercise     Exercise       @relation(fields: [exerciseId], references: [id])
+  sets         WorkoutSet[]
+}
+
+model WorkoutSet {
+  id                Int             @id @default(autoincrement())
+  publicId          String          @unique @default(uuid())
+  workoutExerciseId Int
+  setNumber         Int             
+  targetReps        String?        
+  targetWeight      Float?          
+  rir               Int?            
+  
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
 }
