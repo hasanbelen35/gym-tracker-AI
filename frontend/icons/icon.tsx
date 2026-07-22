@@ -48,3 +48,4 @@ export const IconUserX = ({ className = "" }: { className?: string }) => (
     <path d="M17 8l4 4m0-4l-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
   </svg>
 );
+

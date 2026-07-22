@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchMembersByStatus } from "@/store/slices/trainerSlice";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import Loading from "../Loading";
 
 export const Athletes: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -30,6 +31,17 @@ export const Athletes: React.FC = () => {
   return (
     <div className="min-h-screen w-full bg-[var(--background)] text-[var(--foreground)] p-6 sm:p-10 transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
+
+        {/* BACK BUTTON */}
+        <div className="mb-6">
+          <button
+            onClick={() => router.back()}
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--nav-bg)] border border-[var(--nav-border)] text-sm font-medium hover:border-[var(--brand-500)] hover:text-[var(--brand-500)] transition-all shadow-sm"
+          >
+            <span className="transition-transform group-hover:-translate-x-1">&larr;</span> Geri Dön
+          </button>
+        </div>
+
         <header className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Antrenör Paneli</h1>
           <p className="text-sm opacity-70 mt-1">Bekleyen taleplerinizi ve onaylı sporcularınızı yönetin.</p>
@@ -55,7 +67,7 @@ export const Athletes: React.FC = () => {
 
             <div className="flex-1 overflow-y-auto space-y-3 pr-1">
               {loading && pendingMembers.length === 0 ? (
-                <p className="text-center text-sm opacity-60 py-10">Yükleniyor...</p>
+                <Loading />
               ) : pendingMembers.length === 0 ? (
                 <p className="text-center text-sm opacity-60 py-10">Bekleyen sporcu talebi bulunmuyor.</p>
               ) : (

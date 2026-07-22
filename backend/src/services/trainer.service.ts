@@ -62,15 +62,24 @@ export class TrainerService {
                 trainerId: trainerId,
                 assignmentStatus: 'ASSIGNED'
             },
-            include: {
+            select: {
+                id: true,
+                publicId: true,
+                name: true,
+                surname: true,
+                email: true,
+                phone: true,
+                createdAt: true,
+                assignmentStatus: true,
+                weight: true,
+                height: true,
+
                 gym: {
-                    select: { name: true, publicId: true }
-                },
-                trainer: {
-                    select: { name: true, surname: true, email: true }
+                    select: { name: true }
                 },
                 programs: {
                     orderBy: { createdAt: 'desc' },
+                    take: 5,
                 },
                 sessions: {
                     orderBy: { checkIn: 'desc' },

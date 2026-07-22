@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/store/store';
 import { fetchMembersByStatus, requestAssignment, cancelAssignment } from '@/store/slices/trainerSlice';
 import type { Member } from '@/types/types';
@@ -18,6 +19,7 @@ const Avatar = ({ name, surname }: { name: string; surname: string }) => (
 
 export default function TrainerAthletesPage() {
     const dispatch = useAppDispatch();
+    const router = useRouter();
     const { user, loading: authLoading } = useAuth();
     const { availableMembers, pendingMembers, approvedMembers, loading, error } = useAppSelector(state => state.trainer);
 
@@ -120,6 +122,16 @@ export default function TrainerAthletesPage() {
     return (
         <div className="min-h-screen bg-[var(--background)] py-10 font-sans text-[var(--foreground)]">
             <div className="mx-auto max-w-6xl px-4 sm:px-6">
+
+                {/* BACK BUTTON */}
+                <div className="mb-6">
+                    <button
+                        onClick={() => router.back()}
+                        className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-nav-bg border border-nav-border text-sm font-medium hover:border-brand-500 hover:text-brand-500 transition-all shadow-sm"
+                    >
+                        <span className="transition-transform group-hover:-translate-x-1">&larr;</span> Geri Dön
+                    </button>
+                </div>
 
                 {/* HEADER */}
                 <div className="mb-8 border-b border-nav-border pb-6">

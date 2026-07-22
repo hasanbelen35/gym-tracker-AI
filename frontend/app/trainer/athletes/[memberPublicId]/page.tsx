@@ -4,13 +4,13 @@ import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchMemberDetail } from "@/store/slices/trainerSlice";
 import { useParams, useRouter } from "next/navigation";
 import { Program, Session } from "@/types/types";
+import { IconClock, IconArrowRight } from '@/icons/icon';
 
 export const MemberDetail: React.FC = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const params = useParams();
     const memberPublicId = params?.memberPublicId as string;
-    console.log("URL'den gelen memberPublicId:", memberPublicId);
     const { selectedMemberDetail, loading, error } = useAppSelector((state) => state.trainer);
 
     useEffect(() => {
@@ -79,18 +79,28 @@ export const MemberDetail: React.FC = () => {
 
                 {/* Profil Kartı */}
                 <div className="bg-[var(--nav-bg)] border border-[var(--nav-border)] rounded-2xl p-6 sm:p-8 shadow-[var(--shadow-nav)] backdrop-blur-md">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                         <div>
                             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
                                 {selectedMemberDetail.name} {selectedMemberDetail.surname}
                             </h1>
                             <p className="text-sm opacity-70 mt-1">{selectedMemberDetail.email}</p>
                         </div>
-                        {selectedMemberDetail.createdAt && (
-                            <div className="text-xs opacity-60 self-start sm:self-auto bg-[var(--background)] px-3 py-1.5 rounded-lg border border-[var(--nav-border)]">
-                                Kayıt: {new Date(selectedMemberDetail.createdAt).toLocaleDateString('tr-TR')}
-                            </div>
-                        )}
+
+                        {/* Sağ Üst Kısım: Gym Adı ve Kayıt Tarihi */}
+                        <div className="flex flex-col items-start sm:items-end gap-2 self-start sm:self-auto">
+                            {selectedMemberDetail.gym?.name && (
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold tracking-wide shadow-sm">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    {selectedMemberDetail.gym.name}
+                                </div>
+                            )}
+                            {selectedMemberDetail.createdAt && (
+                                <div className="text-xs opacity-60 bg-[var(--background)] px-3 py-1.5 rounded-lg border border-[var(--nav-border)]">
+                                    Kayıt: {new Date(selectedMemberDetail.createdAt).toLocaleDateString('tr-TR')}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Ölçüm İstatistikleri */}
@@ -127,7 +137,10 @@ export const MemberDetail: React.FC = () => {
                     <div className="bg-[var(--nav-bg)] border border-[var(--nav-border)] rounded-2xl p-6 shadow-[var(--shadow-nav)] flex flex-col h-[42vh]">
                         <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--nav-border)]">
                             <h2 className="text-base font-semibold flex items-center gap-2">
-                                <span>📋 Antrenman Programları</span>
+                                <span className="p-1.5 rounded-lg bg-[var(--brand-100)] text-[var(--brand-dark)]">
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                                </span>
+                                <span>Antrenman Programları</span>
                             </h2>
                             <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[var(--brand-100)] text-[var(--brand-dark)]">
                                 {selectedMemberDetail.programs?.length || 0}
@@ -144,7 +157,7 @@ export const MemberDetail: React.FC = () => {
                                         <span className="font-medium text-sm group-hover:text-[var(--brand-500)] transition-colors">
                                             {program.title || `Antrenman Programı #${index + 1}`}
                                         </span>
-                                        <span className="text-xs opacity-50">&rarr;</span>
+                                        <IconArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                                     </div>
                                 ))
                             ) : (
@@ -159,7 +172,8 @@ export const MemberDetail: React.FC = () => {
                     <div className="bg-[var(--nav-bg)] border border-[var(--nav-border)] rounded-2xl p-6 shadow-[var(--shadow-nav)] flex flex-col h-[42vh]">
                         <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--nav-border)]">
                             <h2 className="text-base font-semibold flex items-center gap-2">
-                                <span>⏱️ Son Seanslar & Check-in</span>
+                                <IconClock className="w-4 h-4 text-[var(--brand-500)]" />
+                                <span>Son Seanslar & Check-in</span>
                             </h2>
                             <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[var(--brand-100)] text-[var(--brand-dark)]">
                                 {selectedMemberDetail.sessions?.length || 0}
@@ -188,13 +202,12 @@ export const MemberDetail: React.FC = () => {
                                                     })}
                                                 </span>
                                             </div>
-                                            <span className={`text-xs px-2.5 py-1 rounded-lg font-medium ${
-                                                isCompleted 
-                                                    ? 'bg-[var(--brand-50)] text-[var(--brand-text)] border border-[var(--brand-100)]' 
+                                            <span className={`text-xs px-2.5 py-1 rounded-lg font-medium ${isCompleted
+                                                    ? 'bg-[var(--brand-50)] text-[var(--brand-text)] border border-[var(--brand-100)]'
                                                     : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 animate-pulse'
-                                            }`}>
-                                                {isCompleted 
-                                                    ? (session.duration !== null && session.duration !== undefined ? `${session.duration} dk` : "Tamamlandı") 
+                                                }`}>
+                                                {isCompleted
+                                                    ? (session.duration !== null && session.duration !== undefined ? `${session.duration} dk` : "Tamamlandı")
                                                     : "Devam Ediyor"}
                                             </span>
                                         </div>
