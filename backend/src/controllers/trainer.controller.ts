@@ -52,4 +52,29 @@ export class TrainerController {
             next(err);
         }
     }
+
+    // get member's detailed data controller
+    getAssignedMemberDetailController = async (req: any, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user?.id;
+            const { memberPublicId } = req.params;
+
+            if (!trainerId) {
+                return res.status(401).json({ success: false, message: "Yetkilendirme hatası." });
+            }
+
+            const member = await trainerService.getMemberDetail(trainerId, memberPublicId);
+
+            if (!member) {
+                return res.status(404).json({ success: false, message: "Sporcu bulunamadı veya bu sporcuya erişim yetkiniz yok." });
+            }
+
+            return res.status(200).json({
+                success: true,
+                data: member
+            });
+        } catch (error) {
+           next(error)
+        }
+    };
 }

@@ -31,7 +31,7 @@ export class TrainerService {
             }
         });
     }
-    
+
     // get all members ın exıst gym
     async getMembersByStatus(
         trainerId: number,
@@ -50,6 +50,32 @@ export class TrainerService {
                 surname: true,
                 email: true,
                 assignmentStatus: true
+            }
+        });
+    }
+
+    // get member's detailed data
+    async getMemberDetail(trainerId: number, memberPublicId: string) {
+        return await prisma.member.findFirst({
+            where: {
+                publicId: memberPublicId,
+                trainerId: trainerId,
+                assignmentStatus: 'ASSIGNED'
+            },
+            include: {
+                gym: {
+                    select: { name: true, publicId: true }
+                },
+                trainer: {
+                    select: { name: true, surname: true, email: true }
+                },
+                programs: {
+                    orderBy: { createdAt: 'desc' },
+                },
+                sessions: {
+                    orderBy: { checkIn: 'desc' },
+                    take: 10
+                }
             }
         });
     }

@@ -23,9 +23,10 @@ export const LeftNavDataGym: LeftNavDataType[] = [
 ];
 
 
-{/* LEFT SIDE-MENU GYM CONFIG*/ }
+{/* LEFT SIDE-MENU TRAINER CONFIG*/ }
 export const LeftNavDataTrainer: LeftNavDataType[] = [
     { name: "Ana Sayfa", route: "/dashboard/gym" },
+    { name: "Sporcu Atamaları", route: "/trainer/assignment-athlete" },
     { name: "Sporcularım", route: "/trainer/athletes" },
     { name: "Programlarım", route: "/trainer/exercises" },
     { name: "Sporcu Kayıtlarım", route: "/trainer/athleteRecords" },

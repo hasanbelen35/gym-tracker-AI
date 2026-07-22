@@ -1,9 +1,9 @@
 import React from 'react'
-import Athletes from '@/components/trainer/Athletes';
+import AthleteAssignment from '@/components/trainer/AthleteAssignment'
 const page = () => {
   return (
     <div>
-      <Athletes />
+      <AthleteAssignment />
     </div>
   )
 }

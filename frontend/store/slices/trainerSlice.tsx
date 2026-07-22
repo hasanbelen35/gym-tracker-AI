@@ -15,6 +15,7 @@ interface TrainerState {
     pendingMembers: Member[];
     approvedMembers: Member[];
     availableMembers: Member[];
+    selectedMemberDetail: Member | null;
     loading: boolean;
     error: string | null;
 }
@@ -23,14 +24,19 @@ const initialState: TrainerState = {
     pendingMembers: [],
     approvedMembers: [],
     availableMembers: [],
+    selectedMemberDetail: null,
     loading: false,
     error: null,
 };
 
-// FETCH MEMBERS BY STATUS 
+interface FetchMembersArgs {
+    gymId: string;
+    status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED';
+}
+
 export const fetchMembersByStatus = createAsyncThunk(
     'trainer/fetchMembers',
-    async ({ gymId, status }: { gymId: string; status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED' }, { rejectWithValue }) => {
+    async ({ gymId, status }: FetchMembersArgs, { rejectWithValue }) => {
         try {
             const response = await api.get(`/api/trainer/getMembers/${gymId}?status=${status}`);
             return { data: response.data, status };
@@ -41,12 +47,11 @@ export const fetchMembersByStatus = createAsyncThunk(
     }
 );
 
-// SEND REQUEST ASSIGNMENT
 export const requestAssignment = createAsyncThunk(
     'trainer/requestAssignment',
-    async ({ memberPublicId, gymId }: { memberPublicId: string; gymId: string }, { rejectWithValue }) => {
+    async (memberPublicId: string, { rejectWithValue }) => {
         try {
-            await api.post('/api/trainer/requestAssignment', { memberPublicId, gymId });
+            await api.post('/api/trainer/requestAssignment', { memberPublicId });
             return memberPublicId;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
@@ -55,16 +60,28 @@ export const requestAssignment = createAsyncThunk(
     }
 );
 
-// DRAW BACK REQUEST ASSIGNMENT
 export const cancelAssignment = createAsyncThunk(
     'trainer/cancelAssignment',
-    async ({ memberPublicId, gymId }: { memberPublicId: string; gymId: string }, { rejectWithValue }) => {
+    async (memberPublicId: string, { rejectWithValue }) => {
         try {
-            await api.delete('/api/trainer/cancelAssignment', { data: { memberPublicId, gymId } });
+            await api.delete('/api/trainer/cancelAssignment', { data: { memberPublicId } });
             return memberPublicId;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
             return rejectWithValue(err.response?.data?.message || 'Talep iptal edilemedi');
+        }
+    }
+);
+
+export const fetchMemberDetail = createAsyncThunk(
+    'trainer/fetchMemberDetail',
+    async (memberPublicId: string, { rejectWithValue }) => {
+        try {
+            const response = await api.get(`/api/trainer/my-members/${memberPublicId}`);
+            return response.data.data;
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || 'Üye detayı alınamadı');
         }
     }
 );
@@ -75,7 +92,6 @@ const trainerSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            // FETCH MEMBERS
             .addCase(fetchMembersByStatus.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -96,8 +112,6 @@ const trainerSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-
-            // REQUEST ASSIGNMENT
             .addCase(requestAssignment.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -109,8 +123,6 @@ const trainerSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-
-            // CANCEL ASSIGNMENT
             .addCase(cancelAssignment.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -119,6 +131,18 @@ const trainerSlice = createSlice({
                 state.loading = false;
             })
             .addCase(cancelAssignment.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+            .addCase(fetchMemberDetail.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchMemberDetail.fulfilled, (state, action) => {
+                state.loading = false;
+                state.selectedMemberDetail = action.payload;
+            })
+            .addCase(fetchMemberDetail.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             });

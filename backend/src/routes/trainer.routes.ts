@@ -6,18 +6,22 @@ const router = Router();
 const trainer = new TrainerController();
 
 // crete assıgnment
-router.post("/requestAssignment", authenticate, authorizeTrainer, (req, res, next) => 
+router.post("/requestAssignment", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.requestMemberAssignment(req, res, next)
 );
 
 // draw back assıngment
-router.delete("/cancelAssignment", authenticate, authorizeTrainer, (req, res, next) => 
+router.delete("/cancelAssignment", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.cancelMyAssignmentRequest(req, res, next)
 );
 
 // list members as assıngment status 
-router.get("/getMembers/:gymId", authenticate, authorizeTrainer, (req, res, next) => 
+router.get("/getMembers/:gymId", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.getMembersByStatus(req, res, next)
+);
+// get member's detailed data
+router.get("/my-members/:memberPublicId", authenticate, authorizeTrainer, (req, res, next) =>
+    trainer.getAssignedMemberDetailController(req, res, next)
 );
 
 export default router;
