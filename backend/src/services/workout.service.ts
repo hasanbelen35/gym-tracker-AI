@@ -9,15 +9,10 @@ export class ExerciseService {
         equipment?: string;
         targetMuscle?: string;
     }) {
-        const { search, category, equipment, targetMuscle } = query;
+        const { category, equipment, targetMuscle } = query;
 
         const whereClause: any = {};
 
-        if (search && typeof search === "string") {
-            whereClause.name = {
-                contains: search,
-            };
-        }
 
         if (category && typeof category === "string") {
             whereClause.category = category;
@@ -41,4 +36,5 @@ export class ExerciseService {
 
         return exercises;
     }
+
 }

@@ -14,7 +14,7 @@
   --color-brand-dark: var(--brand-dark);
   --color-brand-text: var(--brand-text);
 
-  --shadow-nav: 0 1px 2px 0 rgba(46, 111, 242, 0.06);
+  --shadow-nav: 0 1px 2px 0 rgba(20, 20, 20, 0.08);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -22,36 +22,36 @@
 
 /* ---- LIGHT MODE (default) ---- */
 :root {
-  --background: #dfe4eb;
-  --foreground: #1E293B;
+  --background: #E7E4DD;      /* raw concrete floor, not pure white */
+  --foreground: #1C1D20;      /* graphite ink, near-black */
 
-  --nav-bg: #F7F9FC;
-  --nav-border: #E1E8F5;
+  --nav-bg: #F6F4EF;          /* chalk surface, sits above the floor tone */
+  --nav-border: #D9D5CB;      /* dry concrete edge */
 
-  --brand-50: #EFF6FF;
-  --brand-100: #DBEAFE;
-  --brand-400: #4F94F5;
-  --brand-500: #2E6FF2;
-  --brand-600: #1E56D6;
-  --brand-dark: #16357A;
-  --brand-text: #334155;
+  --brand-50: #FFF0E8;        /* faint plate-orange wash, hover bg */
+  --brand-100: #FFDAC4;       /* light tint, badges/tags */
+  --brand-400: #FF8656;       /* mid accent, secondary emphasis */
+  --brand-500: #FF6A3D;       /* core accent — safety-orange (plates/equipment) */
+  --brand-600: #E44F1E;       /* pressed/hover state, deeper saturation */
+  --brand-dark: #9A3413;      /* rust, darkest accent for high-contrast text on light */
+  --brand-text: #8A3818;      /* accent color legible on light bg (links, labels) */
 }
 
 /* ---- DARK MODE ---- */
 .dark {
-  --background: #0F1B3D;      /* siyah değil, derin lacivert */
-  --foreground: #E4EAF6;      /* soft mavimsi beyaz metin */
+  --background: #151619;      /* not black — poured concrete / gym floor at night */
+  --foreground: #EDEDE9;      /* chalk white text */
 
-  --nav-bg: #14224C;          /* navbar zemini — arka plandan biraz açık */
-  --nav-border: #22336B;      /* çizgi — mavi ailesinde kalır */
+  --nav-bg: #1B1D21;          /* panel surface, one step up from floor */
+  --nav-border: #2C2F34;      /* steel-gray seam */
 
-  --brand-50: #1B2A5C;        /* hover zemini (dark'ta koyu-mavi) */
-  --brand-100: #22336B;
-  --brand-  : #6FA3F7;       /* dark zeminde daha parlak görünsün diye açıldı */
-  --brand-500: #4F86F0;
-  --brand-600: #3B6EE0;
-  --brand-dark: #A9C4FA;      /* dark'ta "koyu vurgu" artık en açık ton — kontrast için ters çevrildi */
-  --brand-text: #C7D2E8;
+  --brand-50: #2A1A14;        /* dark orange wash, hover bg on dark surfaces */
+  --brand-100: #3A2419;       /* slightly lifted tint, subtle badges */
+  --brand-400: #FF8656;       /* brighter accent, pops more against dark bg */
+  --brand-500: #FF6A3D;       /* core accent — kept identical across themes */
+  --brand-600: #FF7A4D;       /* dark mode hover reads lighter, not darker, for contrast */
+  --brand-dark: #FFB08C;      /* inverted: lightest tone here, used for high-emphasis text */
+  --brand-text: #FF9A70;      /* accent color legible on dark bg (links, labels) */
 }
 
 body {

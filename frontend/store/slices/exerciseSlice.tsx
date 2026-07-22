@@ -19,7 +19,6 @@ export interface ExerciseState {
     loading: boolean;
     error: string | null;
     filters: {
-        search: string;
         category: string;
         equipment: string;
         targetMuscle: string;
@@ -31,7 +30,6 @@ const initialState: ExerciseState = {
     loading: false,
     error: null,
     filters: {
-        search: "",
         category: "",
         equipment: "",
         targetMuscle: "",
@@ -48,16 +46,15 @@ const API = axios.create({
     withCredentials: true,
 });
 
-
-// fetch exercies 
+// fetch exercises 
 export const fetchExercises = createAsyncThunk(
     "exercises/fetchExercises",
-    async (filters: { search?: string; category?: string; equipment?: string; targetMuscle?: string }, { rejectWithValue }) => {
+    async (filters: { category?: string; equipment?: string; targetMuscle?: string }, { rejectWithValue }) => {
         try {
             const response = await API.get('/exercises/getExercisesByQuery', {
                 params: filters,
             });
-
+            console.log(response.data.data);
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
@@ -70,9 +67,6 @@ const exerciseSlice = createSlice({
     name: "exercises",
     initialState,
     reducers: {
-        setSearchFilter(state, action: PayloadAction<string>) {
-            state.filters.search = action.payload;
-        },
         setCategoryFilter(state, action: PayloadAction<string>) {
             state.filters.category = action.payload;
         },
@@ -104,7 +98,6 @@ const exerciseSlice = createSlice({
 });
 
 export const {
-    setSearchFilter,
     setCategoryFilter,
     setEquipmentFilter,
     setTargetMuscleFilter,
