@@ -1,8 +1,17 @@
+// ==========================================
+// 1. GENEL & NAVİGASYON TİPLERİ
+// ==========================================
+
 export interface LeftNavDataType {
-  name: string,
-  route: string
+  name: string;
+  route: string;
 }
-// login page
+
+export interface NavItem {
+  name: string;
+  route: string;
+}
+
 export interface PortalData {
   icon: string;
   eyebrow: string;
@@ -11,167 +20,70 @@ export interface PortalData {
   label: string;
   path: string;
 }
-// register page
-export interface PortalDataRegister {
-  icon: string;
-  eyebrow: string;
-  title: string;
-  description: string;
-  label: string;
-  path: string;
-}
 
-// gym
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface PortalDataRegister extends PortalData {}
+
+// ==========================================
+// 2. TEMEL MODEL TİPLERİ (MODELS)
+// ==========================================
 
 export interface Gym {
-  id: string | number;
+  id: number | string;
   name: string;
+  publicId?: string;
+  email?: string;
 }
-
-// nav ıtem
-
-export interface NavItem {
-  name: string;
-  route: string;
-}
-
-// auth slice
-export interface GymSlice {
-  id: number;
-  name: string;
-  email: string;
-}
-
-export interface Member {
-  id: number;
-  name: string;
-  surname: string;
-  email: string;
-}
-export interface AuthState {
-  user: Gym | Member | null;
-  role: 'gym' | 'member' | null;
-  loading: boolean;
-  error: string | null;
-}
-// gym session slice
-
-export interface Session {
-  id: number;
-  memberId: number;
-  memberName: string;
-  checkIn: string;
-  checkOut: string | null;
-}
-
-export interface GymSessionState {
-  allSessions: Session[];
-  activeSessions: Session[];
-  loading: boolean;
-  error: string | null;
-}
-
-// gym slice
-
-export interface GymState {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  profile: any | null;
-  loading: boolean;
-  error: string | null;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  members: any[];
-  membersLoading: boolean;
-  membersError: string | null;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trainers: any[];
-  trainersLoading: boolean;
-  trainersError: string | null;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  memberDetail: any | null;
-  memberDetailLoading: boolean;
-  memberDetailError: string | null;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  trainerDetail: any | null;
-  trainerDetailLoading: boolean;
-  trainerDetailError: string | null;
-
-  assignmentLoading: boolean;
-  assignmentError: string | null;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pendingMembers: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  assignedMembers: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  unassignedMembers: any[];
-  statusMembersLoading: boolean;
-  statusMembersError: string | null;
-}
-
-// session slice
-export interface SessionHistoryItem {
-  id: number;
-  memberId: number;
-  gymId: number;
-  checkIn: string;
-  checkOut: string | null;
-  duration: number;
-  gym: {
-    name: string;
-  };
-}
-
-export interface SessionState {
-  isActive: boolean;
-  loading: boolean;
-  error: string | null;
-  history: SessionHistoryItem[];
-}
-
-// trainer slice 
-export interface Member {
-  publicId: string;
-  name: string;
-  surname: string;
-  email: string;
-  assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
-  trainer?: {
-    name: string;
-    surname: string;
-  };
-}
-export
-  interface TrainerState {
-  pendingMembers: Member[];
-  approvedMembers: Member[];
-  availableMembers: Member[];
-  loading: boolean;
-  error: string | null;
-}
-
-
-// member slice
 
 export interface TrainerInfo {
+  publicId?: string;
+  name: string;
+  surname: string;
+  email?: string;
+}
+
+export interface Session {
+  id?: number;
+  memberId?: number;
+  memberName?: string;
+  gymId?: number;
+  checkIn: string;
+  checkOut?: string | null;
+  duration?: number;
+  gym?: {
+    name: string;
+  };
+}
+
+export interface Program {
+  id?: number;
+  publicId?: string;
+  title?: string;
+  description?: string;
+  exercises?: Exercise[];
+  [key: string]: unknown;
+}
+
+export interface Member {
+  id: number;
   publicId: string;
   name: string;
   surname: string;
   email: string;
+  phone?: string | null;
+  age?: number | null;
+  height?: number | null;
+  weight?: number | null;
+  assignmentStatus?: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
+  gymId?: number;
+  gym?: Gym;
+  trainerId?: number | null;
+  trainer?: TrainerInfo | null;
+  programs?: Program[];
+  sessions?: Session[];
+  createdAt?: string;
 }
 
-export interface MemberState {
-  trainer: TrainerInfo | null;
-  assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
-  loading: boolean;
-  error: string | null;
-}
-
-
-// exercise 
 export interface Exercise {
   id: number;
   publicId: string;
@@ -184,6 +96,85 @@ export interface Exercise {
   gifUrl?: string;
 }
 
+// ==========================================
+// 3. REDUX STATE TİPLERİ (SLICES)
+// ==========================================
+
+// Auth State
+export interface AuthState {
+  user: Gym | Member | null;
+  role: 'gym' | 'member' | 'trainer' | null;
+  loading: boolean;
+  error: string | null;
+}
+
+// Gym State
+export interface GymState {
+  profile: Gym | null;
+  loading: boolean;
+  error: string | null;
+
+  members: Member[];
+  membersLoading: boolean;
+  membersError: string | null;
+
+  trainers: TrainerInfo[];
+  trainersLoading: boolean;
+  trainersError: string | null;
+
+  memberDetail: Member | null;
+  memberDetailLoading: boolean;
+  memberDetailError: string | null;
+
+  trainerDetail: TrainerInfo | null;
+  trainerDetailLoading: boolean;
+  trainerDetailError: string | null;
+
+  assignmentLoading: boolean;
+  assignmentError: string | null;
+
+  pendingMembers: Member[];
+  assignedMembers: Member[];
+  unassignedMembers: Member[];
+  statusMembersLoading: boolean;
+  statusMembersError: string | null;
+}
+
+// Gym Session State
+export interface GymSessionState {
+  allSessions: Session[];
+  activeSessions: Session[];
+  loading: boolean;
+  error: string | null;
+}
+
+// Member Session State
+export interface SessionState {
+  isActive: boolean;
+  loading: boolean;
+  error: string | null;
+  history: Session[];
+}
+
+// Trainer State
+export interface TrainerState {
+  pendingMembers: Member[];
+  approvedMembers: Member[];
+  availableMembers: Member[];
+  selectedMemberDetail?: Member | null;
+  loading: boolean;
+  error: string | null;
+}
+
+// Member State
+export interface MemberState {
+  trainer: TrainerInfo | null;
+  assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
+  loading: boolean;
+  error: string | null;
+}
+
+// Exercise State
 export interface ExerciseState {
   exercises: Exercise[];
   loading: boolean;

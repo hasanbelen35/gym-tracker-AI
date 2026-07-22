@@ -24,7 +24,7 @@ export const Athletes: React.FC = () => {
   }, [dispatch, gymId]);
 
   const handleMemberClick = (publicId: string) => {
-    router.push(`/trainer/my-members/${publicId}`);
+    router.push(`/trainer/athletes/${publicId}`);
   };
 
   return (
@@ -36,7 +36,7 @@ export const Athletes: React.FC = () => {
         </header>
 
         {error && (
-          <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm">
+          <div className="mb-6 p-4 rounded-xl bg-brand-50 border border-brand-600/40 text-brand-text text-sm">
             {error}
           </div>
         )}

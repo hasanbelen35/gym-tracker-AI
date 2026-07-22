@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios, { AxiosError } from 'axios';
 import { Member } from '@/types/types';
 
+export type { Member };
+
 interface ApiErrorResponse {
     message?: string;
 }
@@ -78,9 +80,11 @@ export const fetchMemberDetail = createAsyncThunk(
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
             const response = await api.get(`/api/trainer/my-members/${memberPublicId}`);
+            console.log(response.data.data)
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
+            console.log(err.response?.data.message)
             return rejectWithValue(err.response?.data?.message || 'Üye detayı alınamadı');
         }
     }
@@ -89,7 +93,13 @@ export const fetchMemberDetail = createAsyncThunk(
 const trainerSlice = createSlice({
     name: 'trainer',
     initialState,
-    reducers: {},
+    reducers: {
+        // Prevents stale member data flashing when navigating between detail pages
+        clearSelectedMember: (state) => {
+            state.selectedMemberDetail = null;
+            state.error = null;
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchMembersByStatus.pending, (state) => {
@@ -149,4 +159,5 @@ const trainerSlice = createSlice({
     },
 });
 
+export const { clearSelectedMember } = trainerSlice.actions;
 export default trainerSlice.reducer;
