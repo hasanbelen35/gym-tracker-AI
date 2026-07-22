@@ -1,8 +1,10 @@
+// src/app/register/gym/page.tsx
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { registerGym, clearError } from "@/store/slices/authSlice";
+import { GymIcon } from "@/icons/icon";
 
 export default function GymRegister() {
   const router = useRouter();
@@ -31,40 +33,46 @@ export default function GymRegister() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center relative overflow-hidden bg-[#EEF2FF] py-10" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#7B8FE8] to-[#5B6FD4]" />
-      <div className="absolute bottom-[-100px] left-[-100px] w-[320px] h-[320px] rounded-full bg-[rgba(91,111,212,0.06)] pointer-events-none" />
-      <div className="absolute top-[-80px] right-[-80px] w-[240px] h-[240px] rounded-full bg-[rgba(91,111,212,0.04)] pointer-events-none" />
+    <main className="flex min-h-screen items-center justify-center relative overflow-hidden bg-[var(--background)] text-[var(--foreground)] py-10 transition-colors duration-300" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      {/* Top Brand Accent Line */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-brand-500" />
 
-      <button onClick={() => router.push("/login")} className="absolute top-5 left-5 bg-white/80 border border-[#D8DCEE] rounded-lg px-3 py-1.5 text-xs font-medium text-[#5B6FD4] hover:bg-white transition flex items-center gap-1.5">
+      <button onClick={() => router.push("/register")} className="absolute top-5 left-5 bg-nav-bg border border-nav-border rounded-xl px-3.5 py-2 text-xs font-medium text-[var(--foreground)] hover:border-brand-400 transition flex items-center gap-1.5 shadow-nav">
         ← Geri
       </button>
 
-      <form onSubmit={handleRegister} className="bg-white rounded-2xl p-10 w-full max-w-sm shadow-[0_4px_40px_rgba(91,111,212,0.08)] relative z-10">
-        <span className="text-4xl mb-4 block">🏛️</span>
-        <h1 className="text-2xl font-extrabold text-[#1A1A2E] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>Spor Salonu Kayıt</h1>
+      <form onSubmit={handleRegister} className="bg-nav-bg border border-nav-border rounded-2xl p-10 w-full max-w-sm shadow-nav relative z-10">
+        <div className="mb-4 inline-flex p-3 rounded-xl bg-[var(--background)] border border-nav-border text-brand-500">
+          <GymIcon className="w-8 h-8" />
+        </div>
+        
+        <h1 className="text-2xl font-extrabold mb-6" style={{ fontFamily: "'Syne', sans-serif" }}>Spor Salonu Kayıt</h1>
+        
         {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
         
         {["name", "email", "password", "address", "phone"].map((field) => (
           <div key={field} className="mb-4">
-            <label className="block text-xs font-medium text-[#6B6B8A] mb-1.5 capitalize">{field === "name" ? "Salon Adı" : field}</label>
+            <label className="block text-xs font-medium opacity-80 mb-1.5 capitalize">
+              {field === "name" ? "Salon Adı" : field === "email" ? "E-posta" : field === "password" ? "Şifre" : field === "address" ? "Adres" : "Telefon"}
+            </label>
             <input
               name={field}
               type={field === "password" ? "password" : field === "email" ? "email" : "text"}
+              placeholder={field === "email" ? "salon@example.com" : field === "password" ? "••••••••" : ""}
               value={formData[field as keyof typeof formData]}
               onChange={handleChange}
-              className="w-full h-11 rounded-xl border-[1.5px] border-[#E0E3F5] bg-[#F8F9FF] px-3.5 text-sm text-[#1A1A2E] outline-none focus:border-[#7B8FE8] focus:ring-2 focus:ring-[#5B6FD4]/10 transition"
+              className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3.5 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition"
               required={field === "name" || field === "email" || field === "password"}
             />
           </div>
         ))}
 
-        <button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-gradient-to-r from-[#7B8FE8] to-[#5B6FD4] text-white font-bold text-sm tracking-wide mt-4 hover:opacity-90 active:scale-[0.98] transition disabled:opacity-50">
+        <button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-brand-500 text-white font-bold text-sm tracking-wide mt-2 hover:bg-brand-600 active:scale-[0.98] transition disabled:opacity-50 shadow-nav">
           {loading ? "Kayıt Olunuyor..." : "Kayıt Ol"}
         </button>
 
-        <p className="text-center text-xs text-[#AAAFDB] mt-5">
-          Zaten hesabınız var mı? <span onClick={() => router.push("/login/gym")} className="text-[#5B6FD4] font-medium cursor-pointer hover:underline">Giriş Yap</span>
+        <p className="text-center text-xs opacity-50 mt-5">
+          Zaten hesabınız var mı? <span onClick={() => router.push("/login/gym")} className="text-brand-text font-medium cursor-pointer hover:underline">Giriş Yap</span>
         </p>
       </form>
     </main>

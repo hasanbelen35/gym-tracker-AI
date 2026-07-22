@@ -1,16 +1,17 @@
+// src/app/register/athlete/page.tsx
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { registerMember, clearError } from "@/store/slices/authSlice";
 import { fetchGymProfile } from "@/store/slices/gymSlice";
-import {Gym} from '@/types/types';
+import { Gym } from "@/types/types";
+import { AthleteIcon } from "@/icons/icon";
 
 const CONFIG = {
-  icon: "🏋️",
   eyebrow: "Üye Kaydı",
   title: "Sporcu Kayıt",
-  backPath: "/login",
+  backPath: "/register",
   gymSelectPlaceholderLoading: "Yükleniyor...",
   gymSelectPlaceholder: "Salon seçin",
 };
@@ -64,50 +65,52 @@ export default function AthleteRegister() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center relative overflow-hidden bg-[#EEFAF3] py-10" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#2E9E62] to-[#5CC98A]" />
-      <div className="absolute top-[-100px] right-[-100px] w-[320px] h-[320px] rounded-full bg-[rgba(46,158,98,0.06)] pointer-events-none" />
-      <div className="absolute bottom-[-80px] left-[-80px] w-[240px] h-[240px] rounded-full bg-[rgba(46,158,98,0.04)] pointer-events-none" />
+    <main className="flex min-h-screen items-center justify-center relative overflow-hidden bg-[var(--background)] text-[var(--foreground)] py-10 transition-colors duration-300" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+      {/* Top Brand Accent Line */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-brand-500" />
 
-      <button onClick={() => router.push(CONFIG.backPath)} className="absolute top-5 left-5 bg-white/80 border border-[#C5E8D5] rounded-lg px-3 py-1.5 text-xs font-medium text-[#2E9E62] hover:bg-white transition flex items-center gap-1.5">
+      <button onClick={() => router.push(CONFIG.backPath)} className="absolute top-5 left-5 bg-nav-bg border border-nav-border rounded-xl px-3.5 py-2 text-xs font-medium text-[var(--foreground)] hover:border-brand-400 transition flex items-center gap-1.5 shadow-nav">
         ← Geri
       </button>
 
-      <form onSubmit={handleRegister} className="bg-white rounded-2xl p-10 w-full max-w-sm shadow-[0_4px_40px_rgba(46,158,98,0.08)] relative z-10">
-        <span className="text-4xl mb-4 block">{CONFIG.icon}</span>
-        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#2E9E62] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>{CONFIG.eyebrow}</p>
-        <h1 className="text-2xl font-extrabold text-[#0F2D1A] mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>{CONFIG.title}</h1>
+      <form onSubmit={handleRegister} className="bg-nav-bg border border-nav-border rounded-2xl p-10 w-full max-w-sm shadow-nav relative z-10">
+        <div className="mb-4 inline-flex p-3 rounded-xl bg-[var(--background)] border border-nav-border text-brand-500">
+          <AthleteIcon className="w-8 h-8" />
+        </div>
+        
+        <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-brand-text mb-1" style={{ fontFamily: "'Syne', sans-serif" }}>{CONFIG.eyebrow}</p>
+        <h1 className="text-2xl font-extrabold mb-6" style={{ fontFamily: "'Syne', sans-serif" }}>{CONFIG.title}</h1>
 
         {error && <p className="text-red-500 text-xs mb-4">{error}</p>}
 
         <div className="flex gap-3 mb-4">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Ad <span className="text-[#2E9E62]">*</span></label>
-            <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full h-11 text-black rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" required />
+            <label className="block text-xs font-medium opacity-80 mb-1.5">Ad <span className="text-brand-text">*</span></label>
+            <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" required />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Soyad <span className="text-[#2E9E62]">*</span></label>
-            <input name="surname" type="text" value={formData.surname} onChange={handleChange} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" required />
+            <label className="block text-xs font-medium opacity-80 mb-1.5">Soyad <span className="text-brand-text">*</span></label>
+            <input name="surname" type="text" value={formData.surname} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" required />
           </div>
         </div>
 
         <div className="mb-4">
-          <label className="block text-xs font-medium text-[#3A7055] mb-1.5">E-posta <span className="text-[#2E9E62]">*</span></label>
-          <input name="email" type="email" value={formData.email} onChange={handleChange} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3.5 text-sm outline-none focus:border-[#2E9E62] transition" required />
+          <label className="block text-xs font-medium opacity-80 mb-1.5">E-posta <span className="text-brand-text">*</span></label>
+          <input name="email" type="email" placeholder="sporcu@example.com" value={formData.email} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3.5 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" required />
         </div>
 
         <div className="mb-4">
-          <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Şifre <span className="text-[#2E9E62]">*</span></label>
-          <input name="password" type="password" value={formData.password} onChange={handleChange} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3.5 text-sm outline-none focus:border-[#2E9E62] transition" required />
+          <label className="block text-xs font-medium opacity-80 mb-1.5">Şifre <span className="text-brand-text">*</span></label>
+          <input name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3.5 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" required />
         </div>
 
         <div className="mb-4">
-          <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Spor Salonu <span className="text-[#2E9E62]">*</span></label>
+          <label className="block text-xs font-medium opacity-80 mb-1.5">Spor Salonu <span className="text-brand-text">*</span></label>
           <select
             name="gymId"
             value={formData.gymId}
             onChange={handleChange}
-            className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3.5 text-sm outline-none focus:border-[#2E9E62] transition"
+            className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3.5 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition"
             required
           >
             <option value="" disabled>
@@ -115,27 +118,31 @@ export default function AthleteRegister() {
             </option>
             {Array.isArray(gyms) &&
               gyms.map((gym: Gym) => (
-                <option key={gym.id} value={gym.id}>
+                <option key={gym.id} value={gym.id} className="bg-[var(--background)] text-[var(--foreground)]">
                   {gym.name}
                 </option>
               ))}
           </select>
         </div>
 
-        <div className="flex gap-3 mb-4">
+        <div className="flex gap-3 mb-6">
           <div className="flex-1">
-            <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Yaş</label>
-            <input name="age" type="number" value={formData.age} onChange={handleChange} onWheel={(e) => e.currentTarget.blur()} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" />
+            <label className="block text-xs font-medium opacity-80 mb-1.5">Yaş</label>
+            <input name="age" type="number" value={formData.age} onChange={handleChange} onWheel={(e) => e.currentTarget.blur()} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" />
           </div>
           <div className="flex-1">
-            <label className="block text-xs font-medium text-[#3A7055] mb-1.5">Telefon</label>
-            <input name="phone" type="tel" value={formData.phone} onChange={handleChange} className="w-full text-black h-11 rounded-xl border-[1.5px] border-[#C5E8D5] bg-[#F5FDF8] px-3 text-sm outline-none focus:border-[#2E9E62] transition" />
+            <label className="block text-xs font-medium opacity-80 mb-1.5">Telefon</label>
+            <input name="phone" type="tel" placeholder="0500..." value={formData.phone} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" />
           </div>
         </div>
 
-        <button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-gradient-to-r from-[#3CB574] to-[#2E9E62] text-white font-bold text-sm tracking-wide mt-5 hover:opacity-90 transition disabled:opacity-50">
+        <button type="submit" disabled={loading} className="w-full h-11 rounded-xl bg-brand-500 text-white font-bold text-sm tracking-wide hover:bg-brand-600 active:scale-[0.98] transition disabled:opacity-50 shadow-nav">
           {loading ? "Kaydediliyor..." : "Kayıt Ol"}
         </button>
+
+        <p className="text-center text-xs opacity-50 mt-5">
+          Zaten hesabınız var mı? <span onClick={() => router.push("/login/athlete")} className="text-brand-text font-medium cursor-pointer hover:underline">Giriş Yap</span>
+        </p>
       </form>
     </main>
   );
