@@ -38,19 +38,50 @@ export class ExerciseService {
 
     // create workout program
     async createWorkoutProgram(programData: {
-        memberId: number;
         trainerId: number;
+        memberPublicId: string;
         title: string;
         type?: string;
         splitType?: string;
         days: any[];
     }) {
-        const { memberId, trainerId, title, type, splitType, days } = programData;
+        const { trainerId, memberPublicId, title, type, splitType, days } = programData;
 
+        const member = await prisma.member.findUnique({
+            where: { publicId: memberPublicId },
+        });
+
+        if (!member) {
+            throw new Error("Üye bulunamadı.");
+        }
+
+        if (member.trainerId !== trainerId) {
+            throw new Error("Bu üyeye program oluşturma yetkiniz yok.");
+        }
+
+        const exercisePublicIds = days
+            .flatMap((day: any) => day.exercises || [])
+            .map((ex: any) => ex.exercisePublicId);
+
+        const exercisesFromDb = await prisma.exercise.findMany({
+            where: { publicId: { in: exercisePublicIds } },
+            select: { id: true, publicId: true },
+        });
+
+        const exerciseIdMap = new Map(
+            exercisesFromDb.map((e) => [e.publicId, e.id])
+        );
+
+        for (const pid of exercisePublicIds) {
+            if (!exerciseIdMap.has(pid)) {
+                throw new Error(`Egzersiz bulunamadı: ${pid}`);
+            }
+        }
+        // create
         const newProgram = await prisma.program.create({
             data: {
-                memberId: Number(memberId),
-                trainerId: Number(trainerId),
+                memberId: member.id,
+                trainerId,
                 title,
                 type: type ? (type as any) : "WORKOUT",
                 splitType: splitType ? (splitType as any) : "PPL",
@@ -62,7 +93,7 @@ export class ExerciseService {
                         isRestDay: Boolean(day.isRestDay),
                         exercises: day.isRestDay ? undefined : {
                             create: (day.exercises || []).map((exercise: any, exIndex: number) => ({
-                                exerciseId: Number(exercise.exerciseId),
+                                exerciseId: exerciseIdMap.get(exercise.exercisePublicId)!,
                                 orderIndex: Number(exercise.orderIndex ?? exIndex),
                                 notes: exercise.notes || null,
                                 sets: {
@@ -82,16 +113,11 @@ export class ExerciseService {
                 days: {
                     include: {
                         exercises: {
-                            include: {
-                                exercise: true,
-                                sets: true
-                            }
+                            include: { exercise: true, sets: true }
                         }
                     }
                 },
-                trainer: {
-                    select: { name: true, surname: true }
-                }
+                trainer: { select: { name: true, surname: true } }
             }
         });
 

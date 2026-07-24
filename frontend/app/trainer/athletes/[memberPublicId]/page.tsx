@@ -142,9 +142,18 @@ export const MemberDetail: React.FC = () => {
                                 </span>
                                 <span>Antrenman Programları</span>
                             </h2>
-                            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[var(--brand-100)] text-[var(--brand-dark)]">
-                                {selectedMemberDetail.programs?.length || 0}
-                            </span>
+                            <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[var(--brand-100)] text-[var(--brand-dark)]">
+                                    {selectedMemberDetail.programs?.length || 0}
+                                </span>
+                                <button
+                                    onClick={() => router.push(`/trainer/create-new-program/${memberPublicId}`)}
+                                    className="px-2.5 py-1 rounded-lg bg-[var(--brand-500)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-sm flex items-center gap-1"
+                                    title="Yeni Program Ekle"
+                                >
+                                    <span>+ Yeni</span>
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto space-y-3 pr-1">
@@ -203,9 +212,9 @@ export const MemberDetail: React.FC = () => {
                                                 </span>
                                             </div>
                                             <span className={`text-xs px-2.5 py-1 rounded-lg font-medium ${isCompleted
-                                                    ? 'bg-[var(--brand-50)] text-[var(--brand-text)] border border-[var(--brand-100)]'
-                                                    : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 animate-pulse'
-                                                }`}>
+                                                ? 'bg-[var(--brand-50)] text-[var(--brand-text)] border border-[var(--brand-100)]'
+                                                : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 animate-pulse'
+                                            }`}>
                                                 {isCompleted
                                                     ? (session.duration !== null && session.duration !== undefined ? `${session.duration} dk` : "Tamamlandı")
                                                     : "Devam Ediyor"}

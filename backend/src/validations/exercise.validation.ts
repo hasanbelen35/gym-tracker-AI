@@ -30,16 +30,31 @@ const daySchema = z.object({
   dayName: z.string().min(1),
   isRestDay: z.boolean().default(false),
   exercises: z.array(exerciseSchema).default([]),
-});
+}).refine(
+  (day) => day.isRestDay || day.exercises.length > 0,
+  {
+    message: "Dinlenme günü olmayan günlerde en az bir egzersiz olmalı",
+    path: ["exercises"],
+  }
+);
 
 export const createProgramSchema = z.object({
   body: z.object({
     memberPublicId: z.string().uuid(),
     title: z.string().min(1),
-    type: z.enum(["WORKOUT", "DIET"]).default("WORKOUT"),
-    splitType: z.enum(["PPL", "UPPER_LOWER", "FULL_BODY", "BRO_SPLIT", "CUSTOM"]),
+    type: z.nativeEnum(ProgramType).default(ProgramType.WORKOUT),
+    splitType: z.nativeEnum(SplitCategory),
     days: z.array(daySchema).min(1, "En az bir gün eklenmeli"),
-  }),
+  }).refine(
+    (data) => {
+      const orders = data.days.map((d) => d.dayOrder);
+      return new Set(orders).size === orders.length;
+    },
+    {
+      message: "Her gün için farklı bir dayOrder kullanılmalı",
+      path: ["days"],
+    }
+  ),
 });
 
 export type CreateProgramInput = z.infer<typeof createProgramSchema>["body"];
