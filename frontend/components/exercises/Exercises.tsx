@@ -1,4 +1,5 @@
-'use client'
+'use client';
+
 import React, { useEffect, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
@@ -7,7 +8,8 @@ import {
     setEquipmentFilter,
     setCategoryFilter,
     setTargetMuscleFilter,
-    clearFilters
+    clearFilters,
+    Exercise
 } from "@/store/slices/exerciseSlice";
 import Loading from "@/components/Loading";
 
@@ -85,6 +87,12 @@ export const ExerciseTestPage: React.FC = () => {
     }, [filters.category]);
 
     const activeFilterCount = [filters.category, filters.targetMuscle, filters.equipment].filter(Boolean).length;
+
+    // Egzersiz kartına tıklandığında çalışacak fonksiyon (Program oluşturucuya ekleme vb. için burayı özelleştirebilirsin)
+    const handleExerciseClick = (exercise: Exercise) => {
+        console.log("Seçilen Egzersiz:", exercise);
+        // Örn: dispatch(addExerciseToWorkout(exercise))
+    };
 
     return (
         <div className="min-h-screen bg-[var(--background)] py-10 font-sans text-[var(--foreground)]">
@@ -232,13 +240,19 @@ export const ExerciseTestPage: React.FC = () => {
                         {exercises.map((ex) => (
                             <div
                                 key={ex.publicId}
-                                className="group relative overflow-hidden rounded-xl border border-nav-border bg-nav-bg p-4 transition-all hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.5)]"
+                                onClick={() => handleExerciseClick(ex)}
+                                className="group relative overflow-hidden rounded-xl border border-nav-border bg-nav-bg p-4 text-left transition-all hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-[0_8px_24px_-8px_rgba(0,0,0,0.5)] cursor-pointer"
                             >
                                 <span className="absolute left-0 top-0 h-full w-1 bg-brand-500 opacity-0 transition-opacity group-hover:opacity-100" />
 
-                                <h4 className="mb-3 pr-1 text-[15px] font-bold leading-snug text-[var(--foreground)]">
-                                    {ex.name}
-                                </h4>
+                                <div className="flex items-start justify-between gap-2">
+                                    <h4 className="mb-3 pr-1 text-[15px] font-bold leading-snug text-[var(--foreground)]">
+                                        {ex.name}
+                                    </h4>
+                                    <span className="flex h-7 w-7 flex-none items-center justify-center rounded-lg border border-nav-border bg-[var(--background)] text-xs text-[var(--foreground)]/50 transition-colors group-hover:border-brand-500 group-hover:bg-brand-500 group-hover:text-white">
+                                        +
+                                    </span>
+                                </div>
 
                                 <div className="flex flex-wrap gap-1.5">
                                     {ex.targetMuscle && (

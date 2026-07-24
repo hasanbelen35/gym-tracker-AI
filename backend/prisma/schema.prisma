@@ -9,15 +9,15 @@ datasource db {
 
 // TRAINER ASSINGING TO MEMBER
 enum AssignmentStatus {
-  UNASSIGNED    
-  PENDING       
-  ASSIGNED     
+  UNASSIGNED
+  PENDING
+  ASSIGNED
 }
 
 // Gym
 model Gym {
   id        Int      @id @default(autoincrement())
-  publicId  String    @unique @default(uuid())  
+  publicId  String    @unique @default(uuid())
   name      String
   address   String?
   phone     String?
@@ -29,6 +29,7 @@ model Gym {
   sessions  Session[]
   trainers  Trainer[]
 }
+
 // Trainer
 model Trainer {
   id        Int      @id @default(autoincrement())
@@ -40,9 +41,9 @@ model Trainer {
   password  String
   createdAt DateTime @default(now())
   gym       Gym      @relation(fields: [gymId], references: [id])
-  myMembers Member[] 
-  programs  Program[]   
- 
+  myMembers Member[]
+  programs  Program[]
+
 }
 
 // Member
@@ -58,19 +59,20 @@ model Member {
   height    Float?
   weight    Float?
   phone     String?
-  trainerId Int? 
-  assignmentStatus AssignmentStatus @default(UNASSIGNED)    
+  trainerId Int?
+  assignmentStatus AssignmentStatus @default(UNASSIGNED)
   createdAt DateTime  @default(now())
   gym       Gym       @relation(fields: [gymId], references: [id])
   trainer   Trainer?  @relation(fields: [trainerId], references: [id])
   sessions  Session[]
-  programs  Program[]   
+  programs  Program[]
 
 }
+
 // Session
 model Session {
   id        Int       @id @default(autoincrement())
-  publicId  String    @unique @default(uuid()) 
+  publicId  String    @unique @default(uuid())
   memberId  Int
   gymId     Int
   checkIn   DateTime  @default(now())
@@ -89,9 +91,9 @@ model Exercise {
   bodyPart         String?
   equipment        String?
   targetMuscle     String?
-  instructions     String?  @db.Text // Türkçe açıklama metni
-  instruction_steps Json?   
-  gifUrl           String?  
+  instructions     String?  @db.Text 
+  instruction_steps Json?
+  gifUrl           String?
   workoutExercises WorkoutExercise[]
   createdAt        DateTime @default(now())
 }
@@ -119,25 +121,30 @@ model Program {
   publicId     String        @unique @default(uuid())
   memberId     Int
   trainerId    Int
-  title        String        
+  title        String
   type         ProgramType   @default(WORKOUT)
-  splitType    SplitCategory @default(PPL) 
+  splitType    SplitCategory @default(PPL)
   isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
-  
+  archivedAt   DateTime?     // set when isActive is flipped to false
+
   member       Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
   trainer      Trainer       @relation(fields: [trainerId], references: [id])
-  
+
   days         WorkoutDay[]
+
+  @@index([memberId, type, isActive])
+  @@index([archivedAt])
 }
 
 model WorkoutDay {
   id          Int               @id @default(autoincrement())
   publicId    String            @unique @default(uuid())
   programId   Int
-  dayName     String            
-  dayOrder    Int               
-  
+  dayName     String
+  dayOrder    Int
+  isRestDay   Boolean           @default(false)
+
   program     Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
   exercises   WorkoutExercise[]
 }
@@ -146,10 +153,10 @@ model WorkoutExercise {
   id           Int            @id @default(autoincrement())
   publicId     String         @unique @default(uuid())
   dayId        Int
-  exerciseId   Int            
-  orderIndex   Int            
-  notes        String?        @db.Text 
-  
+  exerciseId   Int
+  orderIndex   Int
+  notes        String?        @db.Text
+
   day          WorkoutDay     @relation(fields: [dayId], references: [id], onDelete: Cascade)
   exercise     Exercise       @relation(fields: [exerciseId], references: [id])
   sets         WorkoutSet[]
@@ -159,10 +166,10 @@ model WorkoutSet {
   id                Int             @id @default(autoincrement())
   publicId          String          @unique @default(uuid())
   workoutExerciseId Int
-  setNumber         Int             
-  targetReps        String?        
-  targetWeight      Float?          
-  rir               Int?            
-  
+  setNumber         Int
+  targetReps        String?
+  targetWeight      Float?
+  rir               Int?
+
   workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
 }

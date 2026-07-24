@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import axios, { AxiosError } from 'axios';
 
-// Exercise Interface
+// --- INTERFACES ---
+
 export interface Exercise {
     id: number;
     publicId: string;
@@ -14,11 +15,19 @@ export interface Exercise {
     gifUrl?: string;
 }
 
+export interface FilterOptions {
+    categories: string[];
+    equipments: string[];
+    targetMuscles: string[];
+}
+
 export interface ExerciseState {
     exercises: Exercise[];
+    filterOptions: FilterOptions;
     loading: boolean;
     error: string | null;
     filters: {
+        search: string;
         category: string;
         equipment: string;
         targetMuscle: string;
@@ -27,9 +36,15 @@ export interface ExerciseState {
 
 const initialState: ExerciseState = {
     exercises: [],
+    filterOptions: {
+        categories: [],
+        equipments: [],
+        targetMuscles: [],
+    },
     loading: false,
     error: null,
     filters: {
+        search: "",
         category: "",
         equipment: "",
         targetMuscle: "",
@@ -46,15 +61,15 @@ const API = axios.create({
     withCredentials: true,
 });
 
-// fetch exercises 
+// --- ASYNC THUNKS ---
+
 export const fetchExercises = createAsyncThunk(
     "exercises/fetchExercises",
-    async (filters: { category?: string; equipment?: string; targetMuscle?: string }, { rejectWithValue }) => {
+    async (filters: { search?: string; category?: string; equipment?: string; targetMuscle?: string }, { rejectWithValue }) => {
         try {
             const response = await API.get('/exercises/getExercisesByQuery', {
                 params: filters,
             });
-            console.log(response.data.data);
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
@@ -63,10 +78,15 @@ export const fetchExercises = createAsyncThunk(
     }
 );
 
+// --- SLICE ---
+
 const exerciseSlice = createSlice({
     name: "exercises",
     initialState,
     reducers: {
+        setSearchFilter(state, action: PayloadAction<string>) {
+            state.filters.search = action.payload;
+        },
         setCategoryFilter(state, action: PayloadAction<string>) {
             state.filters.category = action.payload;
         },
@@ -98,6 +118,7 @@ const exerciseSlice = createSlice({
 });
 
 export const {
+    setSearchFilter,
     setCategoryFilter,
     setEquipmentFilter,
     setTargetMuscleFilter,
