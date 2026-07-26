@@ -64,6 +64,8 @@ interface ExerciseTestPageProps {
 const selectBaseClasses =
     "peer w-full appearance-none rounded-md border border-nav-border bg-background px-3.5 py-3 pr-9 text-sm font-medium text-foreground shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-40";
 
+const optionStyle = { backgroundColor: "var(--nav-bg)", color: "var(--foreground)" };
+
 export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExercise, onExerciseAdded }) => {
     const dispatch = useDispatch<AppDispatch>();
     const { exercises, loading, error, filters } = useSelector((state: RootState) => state.exercises);
@@ -161,10 +163,11 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                                         dispatch(setTargetMuscleFilter(""));
                                     }}
                                     className={selectBaseClasses}
+                                    style={{ colorScheme: "dark" }}
                                 >
-                                    <option value="">All Categories</option>
+                                    <option value="" style={optionStyle}>All Categories</option>
                                     {CATEGORIES.map((cat) => (
-                                        <option key={cat} value={cat}>
+                                        <option key={cat} value={cat} style={optionStyle}>
                                             {cat.charAt(0).toUpperCase() + cat.slice(1)}
                                         </option>
                                     ))}
@@ -180,10 +183,13 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                                     value={filters.targetMuscle || ""}
                                     onChange={(e) => dispatch(setTargetMuscleFilter(e.target.value))}
                                     className={selectBaseClasses}
+                                    style={{ colorScheme: "dark" }}
                                 >
-                                    <option value="">{filters.category ? "Select Muscle" : "Select Category First"}</option>
+                                    <option value="" style={optionStyle}>
+                                        {filters.category ? "Select Muscle" : "Select Category First"}
+                                    </option>
                                     {availableTargetMuscles.map((muscle) => (
-                                        <option key={muscle} value={muscle}>
+                                        <option key={muscle} value={muscle} style={optionStyle}>
                                             {muscle.charAt(0).toUpperCase() + muscle.slice(1)}
                                         </option>
                                     ))}
@@ -199,10 +205,11 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                                     value={filters.equipment || ""}
                                     onChange={(e) => dispatch(setEquipmentFilter(e.target.value))}
                                     className={selectBaseClasses}
+                                    style={{ colorScheme: "dark" }}
                                 >
-                                    <option value="">All Equipments</option>
+                                    <option value="" style={optionStyle}>All Equipments</option>
                                     {EQUIPMENTS.map((eq) => (
-                                        <option key={eq} value={eq}>
+                                        <option key={eq} value={eq} style={optionStyle}>
                                             {eq.charAt(0).toUpperCase() + eq.slice(1)}
                                         </option>
                                     ))}

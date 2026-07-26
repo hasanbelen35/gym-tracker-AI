@@ -62,14 +62,12 @@ export default function CreateProgramPage() {
   return (
     <div className="max-w-7xl mx-auto py-8 px-4">
       <div className="flex items-center justify-center gap-4 mb-8">
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-          step === 1 ? "bg-brand-500 text-white border-brand-500" : "bg-nav-bg text-foreground border-nav-border"
-        }`}>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${step === 1 ? "bg-brand-500 text-white border-brand-500" : "bg-nav-bg text-foreground border-nav-border"
+          }`}>
           <span>1</span> Split & Details
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-          step === 2 ? "bg-brand-500 text-white border-brand-500" : "bg-nav-bg text-foreground border-nav-border"
-        }`}>
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${step === 2 ? "bg-brand-500 text-white border-brand-500" : "bg-nav-bg text-foreground border-nav-border"
+          }`}>
           <span>2</span> Days & Exercises
         </div>
       </div>
@@ -95,11 +93,7 @@ export default function CreateProgramPage() {
         <div className="max-w-4xl mx-auto">
           <ProgramDaysBuilder
             days={days}
-            setDays={(updatedDays) => {
-              console.log("Step 2 days updated:", updatedDays);
-              setDays(updatedDays as unknown as ProgramDayInput[]);
-            }}
-            availableExercises={[]}
+            setDays={(updatedDays) => setDays(updatedDays as unknown as ProgramDayInput[])}
             onBack={() => setStep(1)}
             onSubmit={handleFinalSubmit}
             loading={programCreating}
