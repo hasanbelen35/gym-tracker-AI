@@ -92,18 +92,18 @@ export class ExerciseService {
                         isRestDay: Boolean(day.isRestDay),
                         exercises: day.isRestDay ? undefined : {
                             create: (day.exercises || []).map((exercise: any, exIndex: number) => ({
-                                exerciseId: exerciseIdMap.get(exercise.exercisePublicId)!,
-                                orderIndex: Number(exercise.orderIndex ?? exIndex),
-                                notes: exercise.notes || null,
-                                sets: {
-                                    create: (exercise.sets || []).map((set: any, setIndex: number) => ({
-                                        setNumber: Number(set.setNumber ?? setIndex + 1),
-                                        targetReps: set.targetReps || null,
-                                        targetWeight: set.targetWeight ? Number(set.targetWeight) : null,
-                                        rir: set.rir !== undefined && set.rir !== null ? Number(set.rir) : null,
-                                    }))
-                                }
-                            }))
+                                    exerciseId: exerciseIdMap.get(exercise.exercisePublicId)!,
+                                    orderIndex: Number(exercise.orderIndex ?? exIndex),
+                                    notes: exercise.notes || null,
+                                    sets: {
+                                        create: (exercise.sets || []).map((set: any, setIndex: number) => ({
+                                            setNumber: Number(set.setNumber ?? setIndex + 1),
+                                            targetReps: set.targetReps || null,
+                                            targetWeight: set.targetWeight ? Number(set.targetWeight) : null,
+                                            rir: set.rir !== undefined && set.rir !== null ? Number(set.rir) : null,
+                                        }))
+                                    }
+                                }))
                         }
                     }))
                 }
