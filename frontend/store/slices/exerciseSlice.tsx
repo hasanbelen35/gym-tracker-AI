@@ -139,7 +139,7 @@ const API = axios.create({
 
 export const fetchExercises = createAsyncThunk(
     "exercises/fetchExercises",
-    async (filters: { search?: string; category?: string; equipment?: string; targetMuscle?: string }, { rejectWithValue }) => {
+    async (filters: { category?: string; equipment?: string; targetMuscle?: string }, { rejectWithValue }) => {
         try {
             const response = await API.get('/exercises/getExercisesByQuery', {
                 params: filters,

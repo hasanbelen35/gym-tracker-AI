@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "@/store/store";
 import {
@@ -9,11 +9,18 @@ import {
     setCategoryFilter,
     setTargetMuscleFilter,
     clearFilters,
-    Exercise
+    Exercise as BaseExercise
 } from "@/store/slices/exerciseSlice";
 import Loading from "@/components/Loading";
-
-// --- CATEGORY TO MUSCLE GROUPS CONFIG ---
+import { 
+    IconDumbbell, 
+    IconTarget, 
+    IconReset, 
+    IconChevron, 
+    IconClose 
+} from "@/icons/icon";
+ 
+// --- CONFIGURATIONS ---
 const CATEGORY_TO_MUSCLES: Record<string, string[]> = {
     "waist": ["abs", "spine"],
     "upper legs": ["quads", "glutes", "hamstrings", "adductors", "abductors"],
@@ -40,33 +47,14 @@ const EQUIPMENTS = [
     "stepmill machine"
 ];
 
-// --- ICONS ---
-const IconDumbbell = ({ className = "" }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-        <path d="M4.5 8.5v7M2.5 10v4M7 7v10M17 7v10M19.5 8.5v7M21.5 10v4M9 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
+// --- EXTENDED TYPES ---
+export interface Exercise extends BaseExercise {
+    bodyPart?: string;
+    gifUrl?: string;
+    instructions?: string;
+    instruction_steps?: string[];
+}
 
-const IconTarget = ({ className = "" }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
-        <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2" />
-        <circle cx="12" cy="12" r="1.4" fill="currentColor" />
-    </svg>
-);
-
-const IconReset = ({ className = "" }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 12a9 9 0 1 1 3 6.7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <path d="M3 21v-5h5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
-
-const IconChevron = ({ className = "" }: { className?: string }) => (
-    <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg">
-        <path d="m6 9 6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-);
 
 const selectBaseClasses =
     "peer w-full appearance-none rounded-md border border-nav-border bg-[var(--background)] px-3.5 py-3 pr-9 text-sm font-medium text-[var(--foreground)] shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] outline-none transition-colors focus:border-brand-500 focus:ring-2 focus:ring-brand-500/25 disabled:cursor-not-allowed disabled:opacity-40";
@@ -74,6 +62,7 @@ const selectBaseClasses =
 export const ExerciseTestPage: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { exercises, loading, error, filters } = useSelector((state: RootState) => state.exercises);
+    const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
     useEffect(() => {
         dispatch(fetchExercises(filters));
@@ -88,35 +77,33 @@ export const ExerciseTestPage: React.FC = () => {
 
     const activeFilterCount = [filters.category, filters.targetMuscle, filters.equipment].filter(Boolean).length;
 
-    // Egzersiz kartına tıklandığında çalışacak fonksiyon (Program oluşturucuya ekleme vb. için burayı özelleştirebilirsin)
     const handleExerciseClick = (exercise: Exercise) => {
-        console.log("Seçilen Egzersiz:", exercise);
-        // Örn: dispatch(addExerciseToWorkout(exercise))
+        setSelectedExercise(exercise);
     };
 
     return (
         <div className="min-h-screen bg-[var(--background)] py-10 font-sans text-[var(--foreground)]">
             <div className="mx-auto max-w-5xl px-4 sm:px-6">
 
-                {/* HEADER */}
+                {/* --- HEADER SECTION --- */}
                 <div className="mb-8 border-b border-nav-border pb-6">
                     <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.25em] text-brand-500">
                         <IconDumbbell className="h-3.5 w-3.5" />
-                        Egzersiz Veritabanı
+                        Exercise Database
                     </div>
                     <h1 className="text-3xl font-black uppercase tracking-tight text-[var(--foreground)] sm:text-4xl">
-                        Egzersiz Havuzu
+                        Exercise Pool
                     </h1>
                     <p className="mt-1.5 text-sm text-[var(--foreground)]/60">
-                        Bölge, kas grubu ve ekipmana göre filtrelenmiş hareket kütüphanesi.
+                        Filtered movement library by region, muscle group, and equipment.
                     </p>
                 </div>
 
-                {/* FILTER PANEL */}
+                {/* --- FILTER PANEL --- */}
                 <div className="mb-8 rounded-xl border border-nav-border bg-nav-bg p-4 shadow-nav sm:p-5">
                     <div className="mb-4 flex items-center justify-between">
                         <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--foreground)]/50">
-                            Filtreler {activeFilterCount > 0 && (
+                            Filters {activeFilterCount > 0 && (
                                 <span className="ml-1.5 rounded-full bg-brand-500/15 px-2 py-0.5 text-brand-500">{activeFilterCount}</span>
                             )}
                         </span>
@@ -125,26 +112,23 @@ export const ExerciseTestPage: React.FC = () => {
                             className="group inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-[var(--foreground)]/55 transition-colors hover:text-brand-500 cursor-pointer"
                         >
                             <IconReset className="h-3.5 w-3.5 transition-transform group-hover:-rotate-90" />
-                            Sıfırla
+                            Reset
                         </button>
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-
-                        {/* CATEGORY */}
                         <label className="block">
-                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--foreground)]/45">Bölge</span>
+                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--foreground)]/45">Category</span>
                             <div className="relative">
                                 <select
                                     value={filters.category || ""}
                                     onChange={(e) => {
-                                        const selectedCategory = e.target.value;
-                                        dispatch(setCategoryFilter(selectedCategory));
+                                        dispatch(setCategoryFilter(e.target.value));
                                         dispatch(setTargetMuscleFilter(""));
                                     }}
                                     className={selectBaseClasses}
                                 >
-                                    <option value="">Tüm Bölgeler</option>
+                                    <option value="">All Categories</option>
                                     {CATEGORIES.map((cat) => (
                                         <option key={cat} value={cat}>
                                             {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -155,16 +139,15 @@ export const ExerciseTestPage: React.FC = () => {
                             </div>
                         </label>
 
-                        {/* TARGET MUSCLE */}
                         <label className="block">
-                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--foreground)]/45">Hedef Kas</span>
+                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--foreground)]/45">Target Muscle</span>
                             <div className="relative">
                                 <select
                                     value={filters.targetMuscle || ""}
                                     onChange={(e) => dispatch(setTargetMuscleFilter(e.target.value))}
                                     className={selectBaseClasses}
                                 >
-                                    <option value="">{filters.category ? "Seçilen Bölgedeki Kaslar" : "Önce Bölge Seçin"}</option>
+                                    <option value="">{filters.category ? "Select Muscle" : "Select Category First"}</option>
                                     {availableTargetMuscles.map((muscle) => (
                                         <option key={muscle} value={muscle}>
                                             {muscle.charAt(0).toUpperCase() + muscle.slice(1)}
@@ -175,16 +158,15 @@ export const ExerciseTestPage: React.FC = () => {
                             </div>
                         </label>
 
-                        {/* EQUIPMENT */}
                         <label className="block">
-                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--foreground)]/45">Ekipman</span>
+                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--foreground)]/45">Equipment</span>
                             <div className="relative">
                                 <select
                                     value={filters.equipment || ""}
                                     onChange={(e) => dispatch(setEquipmentFilter(e.target.value))}
                                     className={selectBaseClasses}
                                 >
-                                    <option value="">Tüm Ekipmanlar</option>
+                                    <option value="">All Equipments</option>
                                     {EQUIPMENTS.map((eq) => (
                                         <option key={eq} value={eq}>
                                             {eq.charAt(0).toUpperCase() + eq.slice(1)}
@@ -197,47 +179,42 @@ export const ExerciseTestPage: React.FC = () => {
                     </div>
                 </div>
 
-                {/* RESULT COUNTER */}
+                {/* --- RESULT COUNTER --- */}
                 {!loading && !error && (
                     <div className="mb-4 flex items-center gap-2.5">
                         <span className="flex h-9 min-w-9 items-center justify-center rounded-full border-2 border-brand-500 px-2 text-sm font-black text-brand-500">
                             {exercises.length}
                         </span>
                         <span className="text-sm font-medium text-[var(--foreground)]/60">
-                            egzersiz bulundu
+                            exercises found
                         </span>
                     </div>
                 )}
 
-                {/* LOADING STATE */}
-                {loading && (
-                    <Loading />
-                )}
+                {loading && <Loading />}
 
-                {/* ERROR STATE */}
                 {error && (
                     <div className="flex items-start gap-3 rounded-xl border border-brand-600/40 bg-brand-50 p-4">
                         <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full bg-brand-500/20 text-xs font-black text-brand-500">!</span>
                         <div>
-                            <p className="text-sm font-semibold text-brand-dark">Egzersizler yüklenemedi</p>
+                            <p className="text-sm font-semibold text-brand-dark">Failed to load exercises</p>
                             <p className="mt-0.5 text-xs text-brand-text">{error}</p>
                         </div>
                     </div>
                 )}
 
-                {/* EMPTY STATE */}
                 {!loading && !error && exercises.length === 0 && (
                     <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-nav-border py-16 text-center">
                         <IconTarget className="h-8 w-8 text-nav-border" />
-                        <p className="text-sm font-semibold text-[var(--foreground)]/70">Bu filtrelerle eşleşen egzersiz yok</p>
-                        <p className="text-xs text-[var(--foreground)]/45">Bölge, kas grubu veya ekipmanı değiştirip tekrar deneyin.</p>
+                        <p className="text-sm font-semibold text-[var(--foreground)]/70">No exercises match these filters</p>
+                        <p className="text-xs text-[var(--foreground)]/45">Try changing the category, muscle group, or equipment.</p>
                     </div>
                 )}
 
-                {/* EXERCISE CARDS */}
+                {/* --- EXERCISE CARDS GRID --- */}
                 {!loading && !error && exercises.length > 0 && (
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                        {exercises.map((ex) => (
+                        {exercises.map((ex: Exercise) => (
                             <div
                                 key={ex.publicId}
                                 onClick={() => handleExerciseClick(ex)}
@@ -267,9 +244,9 @@ export const ExerciseTestPage: React.FC = () => {
                                             {ex.equipment}
                                         </span>
                                     )}
-                                    {ex.category && (
+                                    {ex.bodyPart && (
                                         <span className="inline-flex items-center rounded-full bg-brand-500/10 px-2.5 py-1 text-[10.5px] font-semibold uppercase tracking-wide text-brand-500">
-                                            {ex.category}
+                                            {ex.bodyPart}
                                         </span>
                                     )}
                                 </div>
@@ -277,6 +254,73 @@ export const ExerciseTestPage: React.FC = () => {
                         ))}
                     </div>
                 )}
+
+                {/* --- EXERCISE DETAIL MODAL --- */}
+                {selectedExercise && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm animate-fade-in">
+                        <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-nav-border bg-nav-bg p-6 shadow-2xl">
+                            
+                            <button
+                                onClick={() => setSelectedExercise(null)}
+                                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full border border-nav-border bg-[var(--background)] text-[var(--foreground)]/70 hover:bg-brand-500 hover:text-white transition-colors"
+                            >
+                                <IconClose className="h-4 w-4" />
+                            </button>
+
+                            <h2 className="text-2xl font-black uppercase tracking-tight text-[var(--foreground)] mb-4 pr-10">
+                                {selectedExercise.name}
+                            </h2>
+
+                            {selectedExercise.gifUrl && (
+                                <div className="mb-6 flex justify-center rounded-xl overflow-hidden border border-nav-border bg-[var(--background)] p-2">
+                                    <img 
+                                        src={selectedExercise.gifUrl} 
+                                        alt={selectedExercise.name} 
+                                        className="h-64 object-contain rounded-lg"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="mb-6 flex flex-wrap gap-2">
+                                {selectedExercise.bodyPart && (
+                                    <span className="rounded-full bg-brand-500/15 px-3 py-1 text-xs font-semibold uppercase text-brand-500">
+                                        Body Part: {selectedExercise.bodyPart}
+                                    </span>
+                                )}
+                                {selectedExercise.targetMuscle && (
+                                    <span className="rounded-full border border-nav-border bg-[var(--background)] px-3 py-1 text-xs font-semibold uppercase text-[var(--foreground)]/80">
+                                        Target: {selectedExercise.targetMuscle}
+                                    </span>
+                                )}
+                                {selectedExercise.equipment && (
+                                    <span className="rounded-full border border-nav-border bg-[var(--background)] px-3 py-1 text-xs font-semibold uppercase text-[var(--foreground)]/80">
+                                        Equipment: {selectedExercise.equipment}
+                                    </span>
+                                )}
+                            </div>
+
+                            {selectedExercise.instruction_steps && selectedExercise.instruction_steps.length > 0 && (
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-bold uppercase tracking-wider text-brand-500">
+                                        Instruction Steps
+                                    </h3>
+                                    <ol className="space-y-2">
+                                        {selectedExercise.instruction_steps.map((step, index) => (
+                                            <li key={index} className="flex items-start gap-3 rounded-lg border border-nav-border bg-[var(--background)] p-3 text-sm text-[var(--foreground)]/80">
+                                                <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-brand-500/20 text-xs font-bold text-brand-500">
+                                                    {index + 1}
+                                                </span>
+                                                <span className="mt-0.5">{step}</span>
+                                            </li>
+                                        ))}
+                                    </ol>
+                                </div>
+                            )}
+
+                        </div>
+                    </div>
+                )}
+
             </div>
         </div>
     );

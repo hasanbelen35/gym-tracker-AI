@@ -55,12 +55,31 @@ export interface Session {
   };
 }
 
+export interface SetInput {
+  setNumber: number;
+  reps: number | string;
+  weight: number;
+}
+
+export interface ProgramExerciseInput {
+  exercisePublicId: string;
+  sets: SetInput[];
+  order: number;
+}
+
+export interface ProgramDayInput {
+  dayNumber: number;
+  dayName: string;
+  exercises: ProgramExerciseInput[];
+}
+
 export interface Program {
   id?: number;
   publicId?: string;
   title?: string;
   description?: string;
   exercises?: Exercise[];
+  days?: ProgramDayInput[];
   [key: string]: unknown;
 }
 

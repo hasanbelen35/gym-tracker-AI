@@ -4,7 +4,6 @@ const prisma = new PrismaClient();
 
 export class ExerciseService {
     async getExercisesByQuery(query: {
-        search?: string;
         category?: string;
         equipment?: string;
         targetMuscle?: string;

@@ -32,4 +32,6 @@ export const LeftNavDataTrainer: LeftNavDataType[] = [
     { name: "Sporcu Kayıtlarım", route: "/trainer/athleteRecords" },
     { name: "profil", route: "/trainer/profile" },
     { name: "Ayarlar", route: "/dashboard/settings" },
+    { name: "test", route: "/trainer/create-new-workout-program" },
+
 ];

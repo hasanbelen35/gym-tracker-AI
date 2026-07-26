@@ -87,7 +87,7 @@ export const MemberDetail: React.FC = () => {
                             <p className="text-sm opacity-70 mt-1">{selectedMemberDetail.email}</p>
                         </div>
 
-                        {/* Sağ Üst Kısım: Gym Adı ve Kayıt Tarihi */}
+                        {/* Sağ Üst Kısım: Salon Adı ve Kayıt Tarihi */}
                         <div className="flex flex-col items-start sm:items-end gap-2 self-start sm:self-auto">
                             {selectedMemberDetail.gym?.name && (
                                 <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold tracking-wide shadow-sm">
@@ -130,7 +130,7 @@ export const MemberDetail: React.FC = () => {
                     </div>
                 </div>
 
-                {/* Programlar ve Seanslar Grid */}
+                {/* Programlar ve Seanslar Izgarası */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     {/* Antrenman Programları */}
@@ -147,7 +147,7 @@ export const MemberDetail: React.FC = () => {
                                     {selectedMemberDetail.programs?.length || 0}
                                 </span>
                                 <button
-                                    onClick={() => router.push(`/trainer/create-new-program/${memberPublicId}`)}
+                                    onClick={() => router.push(`/trainer/create-new-workout-program/${memberPublicId}`)}
                                     className="px-2.5 py-1 rounded-lg bg-[var(--brand-500)] text-white text-xs font-semibold hover:opacity-90 transition-all shadow-sm flex items-center gap-1"
                                     title="Yeni Program Ekle"
                                 >
