@@ -157,6 +157,7 @@ export const createProgram = createAsyncThunk(
     async (programData: CreateProgramPayload, { rejectWithValue }) => {
         try {
             const response = await API.post('/exercises/create-program', programData);
+
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;

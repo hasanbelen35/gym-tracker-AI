@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { ProgramType, SplitCategory } from "@prisma/client";
 
-// 1. Egzersiz Sorgulama Şeması (Query Parametreleri)
 export const getExercisesByQuerySchema = z.object({
     query: z.object({
         search: z.string().optional(),
@@ -20,7 +19,7 @@ const setSchema = z.object({
 
 const exerciseSchema = z.object({
   exercisePublicId: z.string().uuid(),
-  orderIndex: z.number().int().min(1),
+  orderIndex: z.number().int().min(0), 
   notes: z.string().optional(),
   sets: z.array(setSchema).min(1, "Her egzersizin en az bir seti olmalı"),
 });
@@ -34,6 +33,21 @@ const daySchema = z.object({
   (day) => day.isRestDay || day.exercises.length > 0,
   {
     message: "Dinlenme günü olmayan günlerde en az bir egzersiz olmalı",
+    path: ["exercises"],
+  }
+).refine(
+  (day) => !day.isRestDay || day.exercises.length === 0,
+  {
+    message: "Dinlenme günlerinde egzersiz olamaz",
+    path: ["exercises"],
+  }
+).refine(
+  (day) => {
+    const indices = day.exercises.map((ex) => ex.orderIndex);
+    return new Set(indices).size === indices.length;
+  },
+  {
+    message: "Aynı gün içinde tekrar eden orderIndex kullanılamaz",
     path: ["exercises"],
   }
 );

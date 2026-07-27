@@ -58,7 +58,7 @@ export interface Exercise extends BaseExercise {
 
 interface ExerciseTestPageProps {
     onSelectExercise?: (exercise: Exercise) => void;
-    onExerciseAdded?: (exercise: Exercise, sets: WorkoutSetInput[]) => void;
+    onExerciseAdded?: (exercise: Exercise, sets: WorkoutSetInput[], notes?: string) => void;
 }
 
 const selectBaseClasses =
@@ -72,6 +72,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
     const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
     const [configExercise, setConfigExercise] = useState<Exercise | null>(null);
     const [configSets, setConfigSets] = useState<WorkoutSetInput[]>([{ setNumber: 1 }]);
+    const [configNotes, setConfigNotes] = useState<string>("");
 
     useEffect(() => {
         dispatch(fetchExercises(filters));
@@ -95,6 +96,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
         setSelectedExercise(null);
         setConfigExercise(exercise);
         setConfigSets([{ setNumber: 1 }]);
+        setConfigNotes("");
     };
 
     const handleAddSet = () => {
@@ -113,7 +115,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
 
     const handleSaveConfig = () => {
         if (!configExercise) return;
-        onExerciseAdded?.(configExercise, configSets);
+        onExerciseAdded?.(configExercise, configSets, configNotes);
         setConfigExercise(null);
     };
 
@@ -125,13 +127,13 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                 <div className="mb-8 border-b border-nav-border pb-6">
                     <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.25em] text-brand-500">
                         <IconDumbbell className="h-3.5 w-3.5" />
-                        Exercise Database
+                        Egzersiz Veritabanı
                     </div>
                     <h1 className="text-3xl font-black uppercase tracking-tight text-foreground sm:text-4xl">
-                        Exercise Pool
+                        Egzersiz Havuzu
                     </h1>
                     <p className="mt-1.5 text-sm text-foreground/60">
-                        Filtered movement library by region, muscle group, and equipment.
+                        Bölgeye, kas grubuna ve ekipmana göre filtrelenmiş hareket kütüphanesi.
                     </p>
                 </div>
 
@@ -139,7 +141,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                 <div className="mb-8 rounded-xl border border-nav-border bg-nav-bg p-4 shadow-nav sm:p-5">
                     <div className="mb-4 flex items-center justify-between">
                         <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-foreground/50">
-                            Filters {activeFilterCount > 0 && (
+                            Filtreler {activeFilterCount > 0 && (
                                 <span className="ml-1.5 rounded-full bg-brand-500/15 px-2 py-0.5 text-brand-500">{activeFilterCount}</span>
                             )}
                         </span>
@@ -148,13 +150,13 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                             className="group inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-foreground/55 transition-colors hover:text-brand-500 cursor-pointer"
                         >
                             <IconReset className="h-3.5 w-3.5 transition-transform group-hover:-rotate-90" />
-                            Reset
+                            Sıfırla
                         </button>
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         <label className="block">
-                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-foreground/45">Category</span>
+                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-foreground/45">Kategori</span>
                             <div className="relative">
                                 <select
                                     value={filters.category || ""}
@@ -165,7 +167,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                                     className={selectBaseClasses}
                                     style={{ colorScheme: "dark" }}
                                 >
-                                    <option value="" style={optionStyle}>All Categories</option>
+                                    <option value="" style={optionStyle}>Tüm Kategoriler</option>
                                     {CATEGORIES.map((cat) => (
                                         <option key={cat} value={cat} style={optionStyle}>
                                             {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -177,7 +179,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                         </label>
 
                         <label className="block">
-                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-foreground/45">Target Muscle</span>
+                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-foreground/45">Hedef Kas</span>
                             <div className="relative">
                                 <select
                                     value={filters.targetMuscle || ""}
@@ -186,7 +188,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                                     style={{ colorScheme: "dark" }}
                                 >
                                     <option value="" style={optionStyle}>
-                                        {filters.category ? "Select Muscle" : "Select Category First"}
+                                        {filters.category ? "Kas Seçin" : "Önce Kategori Seçin"}
                                     </option>
                                     {availableTargetMuscles.map((muscle) => (
                                         <option key={muscle} value={muscle} style={optionStyle}>
@@ -199,7 +201,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                         </label>
 
                         <label className="block">
-                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-foreground/45">Equipment</span>
+                            <span className="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.15em] text-foreground/45">Ekipman</span>
                             <div className="relative">
                                 <select
                                     value={filters.equipment || ""}
@@ -207,7 +209,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                                     className={selectBaseClasses}
                                     style={{ colorScheme: "dark" }}
                                 >
-                                    <option value="" style={optionStyle}>All Equipments</option>
+                                    <option value="" style={optionStyle}>Tüm Ekipmanlar</option>
                                     {EQUIPMENTS.map((eq) => (
                                         <option key={eq} value={eq} style={optionStyle}>
                                             {eq.charAt(0).toUpperCase() + eq.slice(1)}
@@ -227,7 +229,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                             {exercises.length}
                         </span>
                         <span className="text-sm font-medium text-foreground/60">
-                            exercises found
+                            egzersiz bulundu
                         </span>
                     </div>
                 )}
@@ -238,7 +240,7 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                     <div className="flex items-start gap-3 rounded-xl border border-brand-600/40 bg-brand-50 p-4">
                         <span className="mt-0.5 flex h-6 w-6 flex-none items-center justify-center rounded-full bg-brand-500/20 text-xs font-black text-brand-500">!</span>
                         <div>
-                            <p className="text-sm font-semibold text-brand-dark">Failed to load exercises</p>
+                            <p className="text-sm font-semibold text-brand-dark">Egzersizler yüklenemedi</p>
                             <p className="mt-0.5 text-xs text-brand-text">{error}</p>
                         </div>
                     </div>
@@ -247,8 +249,8 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
                 {!loading && !error && exercises.length === 0 && (
                     <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-nav-border py-16 text-center">
                         <IconTarget className="h-8 w-8 text-nav-border" />
-                        <p className="text-sm font-semibold text-foreground/70">No exercises match these filters</p>
-                        <p className="text-xs text-foreground/45">Try changing the category, muscle group, or equipment.</p>
+                        <p className="text-sm font-semibold text-foreground/70">Bu kriterlere uygun egzersiz bulunamadı</p>
+                        <p className="text-xs text-foreground/45">Kategoriyi, kas grubunu veya ekipmanı değiştirmeyi deneyin.</p>
                     </div>
                 )}
 
@@ -309,10 +311,12 @@ export const ExerciseTestPage: React.FC<ExerciseTestPageProps> = ({ onSelectExer
             <ExerciseConfigModal
                 exercise={configExercise}
                 sets={configSets}
+                notes={configNotes}
                 onClose={() => setConfigExercise(null)}
                 onAddSet={handleAddSet}
                 onRemoveSet={handleRemoveSet}
                 onSetChange={handleSetChange}
+                onNotesChange={setConfigNotes}
                 onSave={handleSaveConfig}
             />
         </div>

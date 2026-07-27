@@ -1,49 +1,44 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client';
 
 import React from "react";
-import { Exercise } from "@/store/slices/exerciseSlice";
+import {
+  Exercise,
+  ProgramDayInput as BaseProgramDayInput,
+  ProgramExerciseInput as BaseProgramExerciseInput,
+  SetInput,
+} from "@/store/slices/exerciseSlice";
 import ExerciseComponent from "@/components/exercises/Exercises";
+import { WorkoutSetInput } from "@/components/exercises/ExerciseConfigModal";
 
-export interface SetInput {
-  setNumber: number;
-  targetReps?: string;
-  targetWeight?: number;
-  rir?: number;
+export interface ProgramExerciseInput extends BaseProgramExerciseInput {
+  exerciseName?: string;
 }
 
-export interface ProgramExerciseInput {
-  exercisePublicId: string;
-  orderIndex: number;
-  notes?: string;
-  sets: SetInput[];
-}
-
-export interface ProgramDayInput {
-  dayOrder: number;
-  dayName: string;
-  isRestDay?: boolean;
+export interface ProgramDayInput extends Omit<BaseProgramDayInput, "exercises"> {
   exercises: ProgramExerciseInput[];
 }
+
+export type { SetInput };
 
 interface ProgramDaysBuilderProps {
   days: ProgramDayInput[];
   setDays: React.Dispatch<React.SetStateAction<ProgramDayInput[]>>;
-  availableExercises: Exercise[];
   onBack: () => void;
   onSubmit: () => void;
   loading: boolean;
 }
 
 const DEFAULT_WEEK_DAYS = [
-  "Day 1 - Push",
-  "Day 2 - Pull",
-  "Day 3 - Legs",
-  "Day 4 - Rest",
-  "Day 5 - Upper",
-  "Day 6 - Lower",
-  "Day 7 - Rest",
+  "1. Gün - Push (İtme)",
+  "2. Gün - Pull (Çekme)",
+  "3. Gün - Legs (Bacak)",
+  "4. Gün - Dinlenme",
+  "5. Gün - Upper (Üst Vücut)",
+  "6. Gün - Lower (Alt Vücut)",
+  "7. Gün - Dinlenme",
 ];
+
+const MODAL_ANIMATION_MS = 400;
 
 export const ProgramDaysBuilder: React.FC<ProgramDaysBuilderProps> = ({
   days,
@@ -61,7 +56,7 @@ export const ProgramDaysBuilder: React.FC<ProgramDaysBuilderProps> = ({
       const initialDays: ProgramDayInput[] = DEFAULT_WEEK_DAYS.map((name, index) => ({
         dayOrder: index + 1,
         dayName: name,
-        isRestDay: name.includes("Rest"),
+        isRestDay: name.toLowerCase().includes("dinlenme"),
         exercises: [],
       }));
       setDays(initialDays);
@@ -69,21 +64,24 @@ export const ProgramDaysBuilder: React.FC<ProgramDaysBuilderProps> = ({
   }, [days.length, setDays]);
 
   const handleDayNameChange = (index: number, newName: string) => {
-    const updated = [...days];
-    updated[index].dayName = newName;
-    setDays(updated);
+    setDays((prevDays) => {
+      const updated = [...prevDays];
+      updated[index] = { ...updated[index], dayName: newName };
+      return updated;
+    });
   };
 
   const handleToggleRestDay = (index: number) => {
-    const updated = [...days];
-    const isRest = !updated[index].isRestDay;
-    updated[index].isRestDay = isRest;
-
-    if (isRest) {
-      updated[index].exercises = [];
-    }
-
-    setDays(updated);
+    setDays((prevDays) => {
+      const updated = [...prevDays];
+      const isRest = !updated[index].isRestDay;
+      updated[index] = {
+        ...updated[index],
+        isRestDay: isRest,
+        exercises: isRest ? [] : updated[index].exercises,
+      };
+      return updated;
+    });
   };
 
   const openExerciseModal = (dayIndex: number) => {
@@ -99,18 +97,56 @@ export const ProgramDaysBuilder: React.FC<ProgramDaysBuilderProps> = ({
     setTimeout(() => {
       setIsExerciseModalOpen(false);
       setSelectedDayIndex(null);
-    }, 400);
+    }, MODAL_ANIMATION_MS);
+  };
+
+  const handleExerciseAdded = (exercise: Exercise, sets: WorkoutSetInput[], notes?: string) => {
+    if (selectedDayIndex === null) return;
+
+    setDays((prevDays) => {
+      const updated = [...prevDays];
+      const day = { ...updated[selectedDayIndex] };
+
+      const newExercise: ProgramExerciseInput = {
+        exercisePublicId: exercise.publicId,
+        exerciseName: exercise.name,
+        orderIndex: day.exercises.length,
+        notes: notes && notes.trim().length > 0 ? notes.trim() : undefined,
+        sets: sets.map((s, idx) => ({
+          setNumber: s.setNumber ?? idx + 1,
+          targetReps: s.targetReps != null ? String(s.targetReps) : undefined,
+          targetWeight: s.targetWeight ?? undefined,
+          rir: s.rir ?? undefined,
+        })),
+      };
+
+      day.exercises = [...day.exercises, newExercise];
+      updated[selectedDayIndex] = day;
+      return updated;
+    });
+  };
+
+  const handleRemoveExerciseFromDay = (dayIndex: number, exerciseIndex: number) => {
+    setDays((prevDays) => {
+      const updated = [...prevDays];
+      const day = { ...updated[dayIndex] };
+      day.exercises = day.exercises
+        .filter((_, i) => i !== exerciseIndex)
+        .map((ex, i) => ({ ...ex, orderIndex: i }));
+      updated[dayIndex] = day;
+      return updated;
+    });
   };
 
   return (
     <>
-      <div className="space-y-6 bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-sm">
+      <div className="space-y-6 rounded-2xl border border-nav-border bg-nav-bg p-6 shadow-sm">
         <div>
           <h2 className="text-lg font-bold text-foreground mb-1">
-            2. Adım: Haftalık Günler & Dinlenme
+            2. Adım: Haftalık Günler ve Dinlenme Planı
           </h2>
-          <p className="text-xs text-foreground opacity-70">
-            7 günlük haftalık planı düzenleyin ve dinlenme günlerini işaretleyin.
+          <p className="text-xs text-foreground/70 font-medium">
+            7 günlük haftalık planı düzenleyin ve dinlenme günler varsayılanlarını belirleyin.
           </p>
         </div>
 
@@ -118,11 +154,10 @@ export const ProgramDaysBuilder: React.FC<ProgramDaysBuilderProps> = ({
           {days.map((day, index) => (
             <div
               key={index}
-              className={`p-4 rounded-xl border transition-all ${
-                day.isRestDay
-                  ? "bg-background/40 border-nav-border opacity-70"
-                  : "bg-background border-nav-border"
-              }`}
+              className={`p-4 rounded-xl border transition-all ${day.isRestDay
+                ? "bg-background/40 border-nav-border opacity-70"
+                : "bg-background border-nav-border"
+                }`}
             >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -152,22 +187,80 @@ export const ProgramDaysBuilder: React.FC<ProgramDaysBuilderProps> = ({
                   <button
                     type="button"
                     onClick={() => handleToggleRestDay(index)}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                      day.isRestDay
-                        ? "bg-amber-500/10 border-amber-500 text-amber-500"
-                        : "bg-nav-bg border-nav-border text-foreground hover:border-brand-500"
-                    }`}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${day.isRestDay
+                      ? "bg-amber-500/10 border-amber-500 text-amber-500"
+                      : "bg-nav-bg border-nav-border text-foreground hover:border-brand-500"
+                      }`}
                   >
-                    {day.isRestDay
-                      ? "Dinlenme Günü (Aktif)"
-                      : "Dinlenme Yap (Rest Day)"}
+                    {day.isRestDay ? "Dinlenme Günü (Aktif)" : "Dinlenme Günü Yap"}
                   </button>
                 </div>
               </div>
-
+              {/* is rest day exist  */}
               {day.isRestDay && (
                 <div className="mt-3 text-xs text-amber-500/80 font-medium">
-                  Bu gün dinlenme günü olarak ayarlandı, programa egzersiz eklenmeyecek.
+                  Bu gün dinlenme günü olarak ayarlandı, programa egzersiz eklenmeyecektir.
+                </div>
+              )}
+              {/* is rest day not exist  */}
+              {!day.isRestDay && day.exercises.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {day.exercises.map((ex, exIndex) => (
+                    <div
+                      key={`${ex.exercisePublicId}-${exIndex}`}
+                      className="flex items-start justify-between gap-3 rounded-xl border border-nav-border bg-nav-bg px-3.5 py-3 text-xs"
+                    >
+                      <div className="flex flex-col gap-2 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-foreground text-sm">
+                            {ex.exerciseName || ex.exercisePublicId}
+                          </span>
+                          <span className="rounded-md bg-brand-500/10 px-2 py-0.5 text-[11px] font-bold text-brand-500">
+                            {ex.sets.length} Set
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-1.5">
+                          {ex.sets.map((set, sIdx) => (
+                            <div
+                              key={sIdx}
+                              className="flex items-center gap-1.5 rounded-lg border border-nav-border bg-background px-2.5 py-1 text-[11px] font-medium text-foreground/80 shadow-2xs"
+                            >
+                              <span className="text-foreground/40 flex font-bold"><p className="text-red-500">SET- {set.setNumber || sIdx + 1}</p></span>
+                              <span className="text-foreground/90 font-semibold">{set.targetReps || 0} Reps</span>
+                              {set.targetWeight !== undefined && set.targetWeight !== null && (
+                                <span className="text-foreground/60">• {set.targetWeight} kg</span>
+                              )}
+                              {set.rir !== undefined && set.rir !== null && (
+                                <span className="text-brand-500 font-bold">• RIR: {set.rir}</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Not Alanı */}
+                        {ex.notes && (
+                          <div className="mt-1 flex items-start gap-2 rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs text-foreground/80 backdrop-blur-sm">
+                            <span className="mt-0.5 flex h-4 w-4 flex-none items-center justify-center rounded-full bg-amber-500/20 text-[10px] font-bold text-amber-500">
+                              !
+                            </span>
+                            <div className="flex-1 leading-relaxed">
+                              <span className="font-semibold text-amber-500 mr-1.5">Not:</span>
+                              <span className="italic opacity-90">{ex.notes}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveExerciseFromDay(index, exIndex)}
+                        className="text-red-500 hover:text-red-600 cursor-pointer shrink-0 font-medium pt-1"
+                      >
+                        Kaldır
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -196,18 +289,16 @@ export const ProgramDaysBuilder: React.FC<ProgramDaysBuilderProps> = ({
 
       {isExerciseModalOpen && (
         <div
-          className={`fixed inset-0 z-[9999] bg-black/40 backdrop-blur-md flex items-center justify-center p-6 transition-all duration-400 ${
-            isAnimating ? "opacity-100" : "opacity-0 pointer-events-none"
-          }`}
+          className={`fixed inset-0 z-[9999] bg-black/40 backdrop-blur-md flex items-center justify-center p-6 transition-all duration-400 ${isAnimating ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
           style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
           onClick={closeExerciseModal}
         >
           <div
-            className={`relative w-full max-w-7xl h-[90vh] rounded-2xl bg-background border border-nav-border overflow-hidden shadow-2xl transition-all duration-400 transform ${
-              isAnimating 
-                ? "scale-100 opacity-100 translate-y-0" 
-                : "scale-[0.97] opacity-0 translate-y-6"
-            }`}
+            className={`relative w-full max-w-7xl h-[90vh] rounded-2xl bg-background border border-nav-border overflow-hidden shadow-2xl transition-all duration-400 transform ${isAnimating
+              ? "scale-100 opacity-100 translate-y-0"
+              : "scale-[0.97] opacity-0 translate-y-6"
+              }`}
             style={{ transitionTimingFunction: "cubic-bezier(0.16, 1, 0.3, 1)" }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -218,7 +309,7 @@ export const ProgramDaysBuilder: React.FC<ProgramDaysBuilderProps> = ({
               ✕
             </button>
 
-            <ExerciseComponent />
+            <ExerciseComponent onExerciseAdded={handleExerciseAdded} />
           </div>
         </div>
       )}
