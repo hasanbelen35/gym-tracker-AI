@@ -5,15 +5,16 @@ import { useParams, useRouter } from "next/navigation";
 import { SplitSelector, ProgramTypeEnum, SplitCategoryEnum } from "@/components/exercises/SplitSelector";
 import { ProgramDaysBuilder } from "@/components/exercises/DaySelector";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { 
-  createProgram, 
-  ProgramDayInput as BaseProgramDayInput, 
-  ProgramExerciseInput as BaseProgramExerciseInput 
+import {
+  createProgram,
+  ProgramDayInput as BaseProgramDayInput,
+  ProgramExerciseInput as BaseProgramExerciseInput
 } from "@/store/slices/exerciseSlice";
 import { useAuth } from "@/hooks/useAuth";
 import { ErrorBox } from "@/components/ui/ErrorBox";
 import { SuccessBox } from "@/components/ui/SuccessBox";
 import { validateProgramForm } from "@/utils/programValidator";
+import { ArrowLeftIcon } from '@/icons/icon';
 
 export interface ProgramExerciseInput extends BaseProgramExerciseInput {
   exerciseName?: string;
@@ -95,6 +96,13 @@ export default function CreateProgramPage() {
           <ErrorBox message={errorMessage} />
         </div>
       )}
+      {/* back button*/}
+      <button
+        onClick={() => router.back()}
+        className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-nav-bg border border-nav-border text-sm font-medium text-foreground/80 hover:border-brand-500 hover:text-brand-500 transition-all shadow-sm cursor-pointer"
+      >
+       <ArrowLeftIcon /> Geri Dön
+      </button>
 
       <div className="flex items-center justify-center gap-4 mb-8">
         <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${step === 1 ? "bg-brand-500 text-white border-brand-500" : "bg-nav-bg text-foreground border-nav-border"}`}>

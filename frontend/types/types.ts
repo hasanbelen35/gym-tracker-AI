@@ -84,6 +84,7 @@ export interface Program {
 }
 
 export interface Member {
+  birthDate(birthDate: any): import("react").ReactNode;
   id: number;
   publicId: string;
   name: string;

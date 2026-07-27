@@ -29,14 +29,13 @@ export const Athletes: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[var(--background)] text-[var(--foreground)] p-6 sm:p-10 transition-colors duration-200">
+    <div className="min-h-screen w-full bg-background text-foreground p-6 sm:p-10 transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
 
-        {/* BACK BUTTON */}
         <div className="mb-6">
           <button
             onClick={() => router.back()}
-            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--nav-bg)] border border-[var(--nav-border)] text-sm font-medium hover:border-[var(--brand-500)] hover:text-[var(--brand-500)] transition-all shadow-sm"
+            className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-nav-bg border border-nav-border text-sm font-medium hover:border-brand-500 hover:text-brand-500 transition-all shadow-sm"
           >
             <span className="transition-transform group-hover:-translate-x-1">&larr;</span> Geri Dön
           </button>
@@ -55,12 +54,12 @@ export const Athletes: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-          <section className="bg-[var(--nav-bg)] border border-[var(--nav-border)] rounded-2xl p-6 shadow-[var(--shadow-nav)] flex flex-col h-[70vh]">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--nav-border)]">
+          <section className="bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-nav flex flex-col h-[70vh]">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-nav-border">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <span>⏳ Bekleyen Talepler</span>
               </h2>
-              <span className="px-3 py-1 text-xs font-bold rounded-full bg-[var(--brand-100)] text-[var(--brand-dark)]">
+              <span className="px-3 py-1 text-xs font-bold rounded-full bg-brand-100 text-brand-dark">
                 {pendingMembers.length}
               </span>
             </div>
@@ -74,13 +73,13 @@ export const Athletes: React.FC = () => {
                 pendingMembers.map((member) => (
                   <div
                     key={member.publicId}
-                    className="p-4 rounded-xl bg-[var(--background)] border border-[var(--nav-border)] flex items-center justify-between transition-all"
+                    className="p-4 rounded-xl bg-background border border-nav-border flex items-center justify-between transition-all"
                   >
                     <div>
                       <h3 className="font-semibold text-base">{member.name} {member.surname}</h3>
                       <p className="text-xs opacity-70">{member.email}</p>
                     </div>
-                    <span className="text-xs px-2.5 py-1 rounded-lg bg-[var(--brand-50)] text-[var(--brand-text)] font-medium">
+                    <span className="text-xs px-2.5 py-1 rounded-lg bg-brand-50 text-brand-text font-medium">
                       Onay Bekliyor
                     </span>
                   </div>
@@ -89,12 +88,12 @@ export const Athletes: React.FC = () => {
             </div>
           </section>
 
-          <section className="bg-[var(--nav-bg)] border border-[var(--nav-border)] rounded-2xl p-6 shadow-[var(--shadow-nav)] flex flex-col h-[70vh]">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--nav-border)]">
+          <section className="bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-nav flex flex-col h-[70vh]">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-nav-border">
               <h2 className="text-xl font-semibold flex items-center gap-2">
                 <span>💪 Sporcularım</span>
               </h2>
-              <span className="px-3 py-1 text-xs font-bold rounded-full bg-[var(--brand-100)] text-[var(--brand-dark)]">
+              <span className="px-3 py-1 text-xs font-bold rounded-full bg-brand-100 text-brand-dark">
                 {approvedMembers.length}
               </span>
             </div>
@@ -109,15 +108,15 @@ export const Athletes: React.FC = () => {
                   <div
                     key={member.publicId}
                     onClick={() => handleMemberClick(member.publicId)}
-                    className="p-4 rounded-xl bg-[var(--background)] border border-[var(--nav-border)] hover:border-[var(--brand-500)] cursor-pointer transition-all flex items-center justify-between group"
+                    className="p-4 rounded-xl bg-background border border-nav-border hover:border-brand-500 cursor-pointer transition-all flex items-center justify-between group"
                   >
                     <div>
-                      <h3 className="font-semibold text-base group-hover:text-[var(--brand-500)] transition-colors">
+                      <h3 className="font-semibold text-base group-hover:text-brand-500 transition-colors">
                         {member.name} {member.surname}
                       </h3>
                       <p className="text-xs opacity-70">{member.email}</p>
                     </div>
-                    <span className="text-xs px-3 py-1 rounded-lg bg-[var(--brand-500)] text-white font-medium shadow-sm">
+                    <span className="text-xs px-3 py-1 rounded-lg bg-brand-500 text-white font-medium shadow-sm">
                       Detay &rarr;
                     </span>
                   </div>

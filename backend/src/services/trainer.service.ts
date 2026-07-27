@@ -73,6 +73,7 @@ export class TrainerService {
                 assignmentStatus: true,
                 weight: true,
                 height: true,
+                age: true,
 
                 gym: {
                     select: { name: true }
