@@ -92,9 +92,11 @@ export interface FilterOptions {
 export interface ExerciseState {
     exercises: Exercise[];
     programs: Program[];
+    currentProgramDetail: Program | null;
     filterOptions: FilterOptions;
     loading: boolean;
     programCreating: boolean;
+    programDetailLoading: boolean;
     error: string | null;
     successMessage: string | null;
     filters: {
@@ -108,6 +110,7 @@ export interface ExerciseState {
 const initialState: ExerciseState = {
     exercises: [],
     programs: [],
+    currentProgramDetail: null,
     filterOptions: {
         categories: [],
         equipments: [],
@@ -115,6 +118,7 @@ const initialState: ExerciseState = {
     },
     loading: false,
     programCreating: false,
+    programDetailLoading: false,
     error: null,
     successMessage: null,
     filters: {
@@ -137,6 +141,7 @@ const API = axios.create({
 
 // --- ASYNC THUNKS ---
 
+// GET ALL EXERCISES
 export const fetchExercises = createAsyncThunk(
     "exercises/fetchExercises",
     async (filters: { category?: string; equipment?: string; targetMuscle?: string }, { rejectWithValue }) => {
@@ -152,12 +157,12 @@ export const fetchExercises = createAsyncThunk(
     }
 );
 
+// CREATE PROGRAM
 export const createProgram = createAsyncThunk(
     "exercises/createProgram",
     async (programData: CreateProgramPayload, { rejectWithValue }) => {
         try {
             const response = await API.post('/exercises/create-program', programData);
-
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
@@ -166,8 +171,37 @@ export const createProgram = createAsyncThunk(
     }
 );
 
-// --- SLICE ---
+// DELETE PROGRAM
+export const deleteProgram = createAsyncThunk(
+    "exercises/deleteProgram",
+    async (programPublicId: string, { rejectWithValue }) => {
+        try {
+            await API.delete(`/exercises/delete-program/${programPublicId}`);
+            return programPublicId;
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || "Program can not deleted.");
+        }
+    }
+);
 
+// FETCH PROGRAM DETAIL
+export const fetchProgramDetail = createAsyncThunk(
+    "exercises/fetchProgramDetail",
+    async (programPublicId: string, { rejectWithValue }) => {
+        try {
+            const response = await API.get(`/exercises/program-detail/${programPublicId}`);
+            console.log(response.data.data)
+            return response.data.data;
+            
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.error || err.response?.data?.message || "Program detayı yüklenemedi.");
+        }
+    }
+);
+
+// --- SLICE ---
 const exerciseSlice = createSlice({
     name: "exercises",
     initialState,
@@ -190,6 +224,9 @@ const exerciseSlice = createSlice({
         clearMessages(state) {
             state.error = null;
             state.successMessage = null;
+        },
+        clearProgramDetail(state) {
+            state.currentProgramDetail = null;
         }
     },
     extraReducers: (builder) => {
@@ -221,6 +258,36 @@ const exerciseSlice = createSlice({
             .addCase(createProgram.rejected, (state, action) => {
                 state.programCreating = false;
                 state.error = action.payload as string;
+            })
+            // Delete Program
+            .addCase(deleteProgram.pending, (state) => {
+                state.error = null;
+                state.successMessage = null;
+            })
+            .addCase(deleteProgram.fulfilled, (state, action) => {
+                state.successMessage = "Program başarıyla silindi.";
+                state.programs = state.programs.filter(
+                    (program) => program.publicId !== action.payload
+                );
+                if (state.currentProgramDetail?.publicId === action.payload) {
+                    state.currentProgramDetail = null;
+                }
+            })
+            .addCase(deleteProgram.rejected, (state, action) => {
+                state.error = action.payload as string;
+            })
+            // Fetch Program Detail
+            .addCase(fetchProgramDetail.pending, (state) => {
+                state.programDetailLoading = true;
+                state.error = null;
+            })
+            .addCase(fetchProgramDetail.fulfilled, (state, action) => {
+                state.programDetailLoading = false;
+                state.currentProgramDetail = action.payload;
+            })
+            .addCase(fetchProgramDetail.rejected, (state, action) => {
+                state.programDetailLoading = false;
+                state.error = action.payload as string;
             });
     },
 });
@@ -232,6 +299,7 @@ export const {
     setTargetMuscleFilter,
     clearFilters,
     clearMessages,
+    clearProgramDetail,
 } = exerciseSlice.actions;
 
 export default exerciseSlice.reducer;

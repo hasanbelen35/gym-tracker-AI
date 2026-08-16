@@ -33,5 +33,13 @@ router.delete(
     (req: AuthRequest, res: Response, next: NextFunction) =>
         exerciseController.deleteProgramController(req, res, next)
 );
+// GET WORKOUT PROGRAM BY USER ROUTE
+router.get(
+    "/program-detail/:programPublicId",
+    authenticate,
+    authorizeTrainer,
+    (req: AuthRequest, res: Response, next: NextFunction) =>
+        exerciseController.getProgramDetailController(req, res, next)
+);
 
 export default router;

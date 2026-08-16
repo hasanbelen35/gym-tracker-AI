@@ -84,6 +84,7 @@ export interface Program {
 }
 
 export interface Member {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   birthDate(birthDate: any): import("react").ReactNode;
   id: number;
   publicId: string;
@@ -182,7 +183,7 @@ export interface TrainerState {
   approvedMembers: Member[];
   availableMembers: Member[];
   selectedMemberDetail?: Member | null;
-  loading: boolean;
+selectedProgramDetail?: Program | null; 
   error: string | null;
 }
 

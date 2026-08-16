@@ -148,4 +148,53 @@ export class ExerciseService {
             message: "The program and all associated content have been successfully deleted."
         };
     }
+
+    // GET WORKOUT PROGRAM DETAIL BY USER
+    async getProgramDetail(programPublicId: string, trainerId: number) {
+        const program = await prisma.program.findFirst({
+            where: {
+                publicId: programPublicId,
+                trainerId: trainerId,
+            },
+            include: {
+                days: {
+                    orderBy: {
+                        dayOrder: 'asc',
+                    },
+                    include: {
+                        exercises: {
+                            orderBy: {
+                                orderIndex: 'asc',
+                            },
+                            include: {
+                                exercise: true, 
+                                sets: {
+                                    orderBy: {
+                                        setNumber: 'asc',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                member: {
+                    select: {
+                        publicId: true,
+                        name: true,
+                        surname: true,
+                        email: true,
+                    },
+                },
+            },
+        });
+
+        if (!program) {
+            throw new Error("Program was either not found or you do not have permission to view this program.");
+        }
+
+        return {
+            success: true,
+            data: program,
+        };
+    }
 }

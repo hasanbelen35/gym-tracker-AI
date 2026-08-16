@@ -59,7 +59,6 @@ export class ExerciseController {
         try {
             const trainerId = req.user!.id;
             const programPublicId = req.params.programPublicId as string;
-            
             if (!programPublicId) {
                 return res.status(400).json({
                     success: false,
@@ -74,6 +73,27 @@ export class ExerciseController {
                 message: "The program and all associated content have been successfully deleted.",
                 data: result,
             });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // GET WORKOUT PROGRAM DETAIL BY USER CONTROLLER
+    async getProgramDetailController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const trainerId = req.user!.id;
+            const programPublicId = req.params.programPublicId as string;
+
+            if (!programPublicId) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Program public ID was not provided.",
+                });
+            }
+
+            const result = await exerciseService.getProgramDetail(programPublicId, trainerId);
+
+            res.status(200).json(result);
         } catch (error) {
             next(error);
         }
