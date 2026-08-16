@@ -25,7 +25,7 @@ export class ExerciseController {
     // create workout program controller
     async createProgramController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const trainerId = req.user!.id; 
+            const trainerId = req.user!.id;
             const { memberPublicId, title, type, splitType, days } = req.body;
 
             if (!memberPublicId || !title || !days || !Array.isArray(days)) {
@@ -48,6 +48,31 @@ export class ExerciseController {
                 success: true,
                 message: "Antrenman programı başarıyla oluşturuldu.",
                 data: newProgram,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // DELETE WORKOUT PROGRAM BY USER CONTROLLER
+    async deleteProgramController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const trainerId = req.user!.id;
+            const programPublicId = req.params.programPublicId as string;
+            
+            if (!programPublicId) {
+                return res.status(400).json({
+                    success: false,
+                    error: "Program public ID was not provided."
+                });
+            }
+
+            const result = await exerciseService.deleteWorkoutProgram(programPublicId, trainerId);
+
+            res.status(200).json({
+                success: true,
+                message: "The program and all associated content have been successfully deleted.",
+                data: result,
             });
         } catch (error) {
             next(error);

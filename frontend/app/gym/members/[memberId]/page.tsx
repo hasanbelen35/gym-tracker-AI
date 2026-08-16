@@ -3,14 +3,14 @@ import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchMemberDetail, clearMemberDetail } from "@/store/slices/gymSlice";
-import Loading from '@/components/Loading'
+import Loading from '@/components/Loading';
 
 export default function MemberDetail() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const memberPublicId = params.memberId as string;
+  const memberPublicId = params?.memberId as string;
 
   const { memberDetail, memberDetailLoading, memberDetailError } = useAppSelector(
     (state) => state.gym
@@ -39,19 +39,18 @@ export default function MemberDetail() {
   }
 
   if (!memberDetail) return null;
-  {/*  TODO : DETAYLANDIRILICAK*/ }
 
   return (
     <div className="p-6 max-w-2xl">
       <button
         onClick={() => router.back()}
-        className="mb-6 text-sm text-gray-500 hover:text-gray-800 dark:text-gray-400"
+        className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-nav-bg border border-nav-border text-sm font-medium text-foreground/80 hover:border-brand-500 hover:text-brand-500 transition-all shadow-sm cursor-pointer mb-6"
       >
-        ← Üyelere Geri Dön
+        <span className="transition-transform group-hover:-translate-x-1">&larr;</span> Geri Dön
       </button>
 
-      <div className="bg-white dark:bg-[#1A1A2E] rounded-2xl p-8 shadow-sm border border-gray-100 dark:border-gray-800">
-        <h1 className="text-2xl font-bold text-[#1A1A2E] dark:text-white mb-6">
+      <div className="bg-nav-bg border border-nav-border rounded-2xl p-8 shadow-nav backdrop-blur-md">
+        <h1 className="text-2xl font-bold text-foreground mb-6">
           {memberDetail.name} {memberDetail.surname}
         </h1>
 
@@ -63,7 +62,7 @@ export default function MemberDetail() {
           <DetailRow label="Kilo" value={memberDetail.weight ? `${memberDetail.weight} kg` : "-"} />
           <DetailRow
             label="Kayıt Tarihi"
-            value={new Date(memberDetail.createdAt).toLocaleDateString("tr-TR")}
+            value={memberDetail.createdAt ? new Date(memberDetail.createdAt).toLocaleDateString("tr-TR") : "-"}
           />
         </div>
       </div>
@@ -72,10 +71,9 @@ export default function MemberDetail() {
   );
 }
 
-// Küçük yardımcı bileşen
 const DetailRow = ({ label, value }: { label: string, value: string | number }) => (
-  <div className="flex justify-between py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
-    <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{value}</span>
+  <div className="flex justify-between py-3 border-b border-nav-border last:border-0">
+    <span className="text-sm text-foreground/60">{label}</span>
+    <span className="text-sm font-medium text-foreground">{value}</span>
   </div>
 );

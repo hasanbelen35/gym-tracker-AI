@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 export class ExerciseService {
+
     async getExercisesByQuery(query: {
         category?: string;
         equipment?: string;
@@ -92,18 +93,18 @@ export class ExerciseService {
                         isRestDay: Boolean(day.isRestDay),
                         exercises: day.isRestDay ? undefined : {
                             create: (day.exercises || []).map((exercise: any, exIndex: number) => ({
-                                    exerciseId: exerciseIdMap.get(exercise.exercisePublicId)!,
-                                    orderIndex: Number(exercise.orderIndex ?? exIndex),
-                                    notes: exercise.notes || null,
-                                    sets: {
-                                        create: (exercise.sets || []).map((set: any, setIndex: number) => ({
-                                            setNumber: Number(set.setNumber ?? setIndex + 1),
-                                            targetReps: set.targetReps || null,
-                                            targetWeight: set.targetWeight ? Number(set.targetWeight) : null,
-                                            rir: set.rir !== undefined && set.rir !== null ? Number(set.rir) : null,
-                                        }))
-                                    }
-                                }))
+                                exerciseId: exerciseIdMap.get(exercise.exercisePublicId)!,
+                                orderIndex: Number(exercise.orderIndex ?? exIndex),
+                                notes: exercise.notes || null,
+                                sets: {
+                                    create: (exercise.sets || []).map((set: any, setIndex: number) => ({
+                                        setNumber: Number(set.setNumber ?? setIndex + 1),
+                                        targetReps: set.targetReps || null,
+                                        targetWeight: set.targetWeight ? Number(set.targetWeight) : null,
+                                        rir: set.rir !== undefined && set.rir !== null ? Number(set.rir) : null,
+                                    }))
+                                }
+                            }))
                         }
                     }))
                 }
@@ -121,5 +122,30 @@ export class ExerciseService {
         });
 
         return newProgram;
+    }
+
+    // DELETE WORKOUT PROGRAM BY USER 
+    async deleteWorkoutProgram(programPublicId: string, trainerId: number) {
+        const program = await prisma.program.findFirst({
+            where: {
+                publicId: programPublicId,
+                trainerId: trainerId,
+            },
+        });
+
+        if (!program) {
+            throw new Error("The program was either not found or you do not have permission to perform this operation.");
+        }
+
+        await prisma.program.delete({
+            where: {
+                id: program.id,
+            },
+        });
+
+        return {
+            success: true,
+            message: "The program and all associated content have been successfully deleted."
+        };
     }
 }
