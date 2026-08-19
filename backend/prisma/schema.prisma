@@ -46,6 +46,12 @@ model Trainer {
 
 }
 
+// MEMBER GENDER ENUM 
+enum Gender {
+  MALE
+  FEMALE
+}
+
 // Member
 model Member {
   id        Int       @id @default(autoincrement())
@@ -59,6 +65,9 @@ model Member {
   height    Float?
   weight    Float?
   phone     String?
+  medicalNotes String?
+  gender    Gender?
+  avatarUrl String?
   trainerId Int?
   assignmentStatus AssignmentStatus @default(UNASSIGNED)
   createdAt DateTime  @default(now())
