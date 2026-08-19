@@ -53,28 +53,28 @@ export default function AthleteRegister() {
     const payload = {
       ...formData,
       gymId: parseInt(formData.gymId),
-      age: parseInt(formData.age),
-      height: parseInt(formData.height),
-      weight: parseInt(formData.weight),
+      age: formData.age ? parseInt(formData.age) : undefined,
+      height: formData.height ? parseFloat(formData.height) : undefined,
+      weight: formData.weight ? parseFloat(formData.weight) : undefined,
     };
 
-    const result = await dispatch(registerMember(payload));
+    const result = await dispatch(registerMember(payload as any));
     if (registerMember.fulfilled.match(result)) {
       router.push("/login/athlete");
     }
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center relative overflow-hidden bg-[var(--background)] text-[var(--foreground)] py-10 transition-colors duration-300" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+    <main className="flex min-h-screen items-center justify-center relative overflow-hidden bg-(--background) text-(--foreground) py-10 transition-colors duration-300" style={{ fontFamily: "'DM Sans', sans-serif" }}>
       {/* Top Brand Accent Line */}
       <div className="absolute top-0 left-0 right-0 h-1.5 bg-brand-500" />
 
-      <button onClick={() => router.push(CONFIG.backPath)} className="absolute top-5 left-5 bg-nav-bg border border-nav-border rounded-xl px-3.5 py-2 text-xs font-medium text-[var(--foreground)] hover:border-brand-400 transition flex items-center gap-1.5 shadow-nav">
+      <button onClick={() => router.push(CONFIG.backPath)} className="absolute top-5 left-5 bg-nav-bg border border-nav-border rounded-xl px-3.5 py-2 text-xs font-medium text-(--foreground) hover:border-brand-400 transition flex items-center gap-1.5 shadow-nav">
         ← Geri
       </button>
 
       <form onSubmit={handleRegister} className="bg-nav-bg border border-nav-border rounded-2xl p-10 w-full max-w-sm shadow-nav relative z-10">
-        <div className="mb-4 inline-flex p-3 rounded-xl bg-[var(--background)] border border-nav-border text-brand-500">
+        <div className="mb-4 inline-flex p-3 rounded-xl bg-(--background) border border-nav-border text-brand-500">
           <AthleteIcon className="w-8 h-8" />
         </div>
         
@@ -86,22 +86,22 @@ export default function AthleteRegister() {
         <div className="flex gap-3 mb-4">
           <div className="flex-1">
             <label className="block text-xs font-medium opacity-80 mb-1.5">Ad <span className="text-brand-text">*</span></label>
-            <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" required />
+            <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-(--background) px-3 text-sm text-(--foreground) outline-none focus:border-brand-400 transition" required />
           </div>
           <div className="flex-1">
             <label className="block text-xs font-medium opacity-80 mb-1.5">Soyad <span className="text-brand-text">*</span></label>
-            <input name="surname" type="text" value={formData.surname} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" required />
+            <input name="surname" type="text" value={formData.surname} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-(--background) px-3 text-sm text-(--foreground) outline-none focus:border-brand-400 transition" required />
           </div>
         </div>
 
         <div className="mb-4">
           <label className="block text-xs font-medium opacity-80 mb-1.5">E-posta <span className="text-brand-text">*</span></label>
-          <input name="email" type="email" placeholder="sporcu@example.com" value={formData.email} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3.5 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" required />
+          <input name="email" type="email" placeholder="sporcu@example.com" value={formData.email} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-(--background) px-3.5 text-sm text-(--foreground) outline-none focus:border-brand-400 transition" required />
         </div>
 
         <div className="mb-4">
           <label className="block text-xs font-medium opacity-80 mb-1.5">Şifre <span className="text-brand-text">*</span></label>
-          <input name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3.5 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" required />
+          <input name="password" type="password" placeholder="••••••••" value={formData.password} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-(--background) px-3.5 text-sm text-(--foreground) outline-none focus:border-brand-400 transition" required />
         </div>
 
         <div className="mb-4">
@@ -110,7 +110,7 @@ export default function AthleteRegister() {
             name="gymId"
             value={formData.gymId}
             onChange={handleChange}
-            className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3.5 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition"
+            className="w-full h-11 rounded-xl border border-nav-border bg-(--background) px-3.5 text-sm text-(--foreground) outline-none focus:border-brand-400 transition"
             required
           >
             <option value="" disabled>
@@ -118,7 +118,7 @@ export default function AthleteRegister() {
             </option>
             {Array.isArray(gyms) &&
               gyms.map((gym: Gym) => (
-                <option key={gym.id} value={gym.id} className="bg-[var(--background)] text-[var(--foreground)]">
+                <option key={gym.id} value={gym.id} className="bg-(--background) text-(--foreground)">
                   {gym.name}
                 </option>
               ))}
@@ -128,11 +128,11 @@ export default function AthleteRegister() {
         <div className="flex gap-3 mb-6">
           <div className="flex-1">
             <label className="block text-xs font-medium opacity-80 mb-1.5">Yaş</label>
-            <input name="age" type="number" value={formData.age} onChange={handleChange} onWheel={(e) => e.currentTarget.blur()} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" />
+            <input name="age" type="number" value={formData.age} onChange={handleChange} onWheel={(e) => e.currentTarget.blur()} className="w-full h-11 rounded-xl border border-nav-border bg-(--background) px-3 text-sm text-(--foreground) outline-none focus:border-brand-400 transition" />
           </div>
           <div className="flex-1">
             <label className="block text-xs font-medium opacity-80 mb-1.5">Telefon</label>
-            <input name="phone" type="tel" placeholder="0500..." value={formData.phone} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-[var(--background)] px-3 text-sm text-[var(--foreground)] outline-none focus:border-brand-400 transition" />
+            <input name="phone" type="tel" placeholder="0500..." value={formData.phone} onChange={handleChange} className="w-full h-11 rounded-xl border border-nav-border bg-(--background) px-3 text-sm text-(--foreground) outline-none focus:border-brand-400 transition" />
           </div>
         </div>
 

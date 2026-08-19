@@ -29,6 +29,7 @@ export interface PortalDataRegister extends PortalData {}
 // ==========================================
 
 export interface Gym {
+  length: number;
   id: number | string;
   name: string;
   publicId?: string;

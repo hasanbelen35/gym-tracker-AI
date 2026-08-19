@@ -11,7 +11,7 @@ export class MemberController {
             const userId = req.user?.id;
 
             if (!userId) {
-                return res.status(401).json({ message: "Yetkilendirme başarısız." });
+                return res.status(401).json({ message: "Authorization failed!" });
             }
 
             const trainer = await memberService.getAssignedTrainerForMember(userId);
@@ -21,12 +21,43 @@ export class MemberController {
             }
 
             return res.status(200).json({
-                message: "success",
+                success: true,
                 data: trainer
             });
 
         } catch (error: any) {
             next(error)
+        }
+    }
+
+    // UPDATE MEMBER PROFILE CONTROLLER
+    async updateProfileController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.id;
+
+            if (!userId) {
+                return res.status(401).json({ message: "Authorization failed!" });
+            }
+
+            const { age, height, weight, gender, medicalNotes, avatarUrl } = req.body;
+
+            const updatedProfile = await memberService.updateMemberProfile(userId, {
+                age: age !== undefined && age !== "" ? Number(age) : undefined,
+                height: height !== undefined && height !== "" ? Number(height) : undefined,
+                weight: weight !== undefined && weight !== "" ? Number(weight) : undefined,
+                gender,
+                medicalNotes,
+                avatarUrl,
+            });
+
+            return res.status(200).json({
+                success: true,
+                message: "Profile updated succesfully!",
+                data: updatedProfile
+            });
+
+        } catch (error: any) {
+            next(error);
         }
     }
 }

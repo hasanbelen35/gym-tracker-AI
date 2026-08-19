@@ -56,8 +56,10 @@ export const createProgramSchema = z.object({
   body: z.object({
     memberPublicId: z.string().uuid(),
     title: z.string().min(1),
-    type: z.nativeEnum(ProgramType).default(ProgramType.WORKOUT),
-    splitType: z.nativeEnum(SplitCategory),
+    
+    type: z.enum(Object.values(ProgramType) as [ProgramType, ...ProgramType[]]).default(ProgramType.WORKOUT),
+    splitType: z.enum(Object.values(SplitCategory) as [SplitCategory, ...SplitCategory[]]),
+    
     days: z.array(daySchema).min(1, "En az bir gün eklenmeli"),
   }).refine(
     (data) => {
