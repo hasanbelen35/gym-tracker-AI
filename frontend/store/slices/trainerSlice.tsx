@@ -1,17 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { Member } from '@/types/types';
+import { API } from "@/lib/api"; 
 
 export type { Member };
 
 interface ApiErrorResponse {
     message?: string;
 }
-
-const api = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
-    withCredentials: true,
-});
 
 interface TrainerState {
     pendingMembers: Member[];
@@ -40,7 +36,7 @@ export const fetchMembersByStatus = createAsyncThunk(
     'trainer/fetchMembers',
     async ({ gymId, status }: FetchMembersArgs, { rejectWithValue }) => {
         try {
-            const response = await api.get(`/api/trainer/getMembers/${gymId}?status=${status}`);
+            const response = await API.get(`/trainer/getMembers/${gymId}?status=${status}`);
             return { data: response.data, status };
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
@@ -53,7 +49,7 @@ export const requestAssignment = createAsyncThunk(
     'trainer/requestAssignment',
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
-            await api.post('/api/trainer/requestAssignment', { memberPublicId });
+            await API.post('/trainer/requestAssignment', { memberPublicId });
             return memberPublicId;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
@@ -66,7 +62,7 @@ export const cancelAssignment = createAsyncThunk(
     'trainer/cancelAssignment',
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
-            await api.delete('/api/trainer/cancelAssignment', { data: { memberPublicId } });
+            await API.delete('/trainer/cancelAssignment', { data: { memberPublicId } });
             return memberPublicId;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
@@ -79,12 +75,10 @@ export const fetchMemberDetail = createAsyncThunk(
     'trainer/fetchMemberDetail',
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
-            const response = await api.get(`/api/trainer/my-members/${memberPublicId}`);
-            console.log(response.data.data)
+            const response = await API.get(`/trainer/my-members/${memberPublicId}`);
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
-            console.log(err.response?.data.message)
             return rejectWithValue(err.response?.data?.message || 'Üye detayı alınamadı');
         }
     }
@@ -94,7 +88,6 @@ const trainerSlice = createSlice({
     name: 'trainer',
     initialState,
     reducers: {
-        // Prevents stale member data flashing when navigating between detail pages
         clearSelectedMember: (state) => {
             state.selectedMemberDetail = null;
             state.error = null;

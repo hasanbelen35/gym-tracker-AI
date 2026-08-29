@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction, AnyAction } from '@reduxjs/toolkit';
 import { Gym, Member, AuthState } from '@/types/types';
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
+import { API } from "@/lib/api";
 
 interface ApiErrorResponse {
     message?: string;
@@ -13,10 +14,6 @@ const initialState: AuthState = {
     error: null,
 };
 
-const API = axios.create({
-    baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
-    withCredentials: true,
-});
 
 // ------------------------------------------------------------------------REGISTER ------------------------------------------------------------------------
 

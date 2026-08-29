@@ -1,16 +1,12 @@
 // src/store/slices/gymSessionSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { GymSessionState } from '@/types/types';
+import { API } from "@/lib/api";
 
 interface ApiErrorResponse {
     message?: string;
 }
-
-const API = axios.create({
-    baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
-    withCredentials: true,
-});
 
 const initialState: GymSessionState = {
     allSessions: [],

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
+import { API } from "@/lib/api";
 
 // --- INTERFACES ---
 
@@ -134,10 +135,6 @@ interface ApiErrorResponse {
     message?: string;
 }
 
-const API = axios.create({
-    baseURL: process.env.SERVER_API_URL || "http://localhost:5000/api",
-    withCredentials: true,
-});
 
 // --- ASYNC THUNKS ---
 
@@ -193,7 +190,7 @@ export const fetchProgramDetail = createAsyncThunk(
             const response = await API.get(`/exercises/program-detail/${programPublicId}`);
             console.log(response.data.data)
             return response.data.data;
-            
+
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
             return rejectWithValue(err.response?.data?.error || err.response?.data?.message || "Program detayı yüklenemedi.");
