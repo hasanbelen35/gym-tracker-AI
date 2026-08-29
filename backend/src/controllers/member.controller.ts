@@ -60,4 +60,26 @@ export class MemberController {
             next(error);
         }
     }
+    
+    // get current member's data controller
+    async getCurrentMemberController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.id;
+
+            if (!userId) {
+                return res.status(401).json({ message: "Authorization failed!" });
+            }
+
+            const member = await memberService.getCurrentMember(userId);
+
+            return res.status(200).json({
+                success: true,
+                data: member
+            });
+
+        } catch (error: any) {
+            next(error);
+        }
+    }
+
 }

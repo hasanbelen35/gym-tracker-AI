@@ -2,6 +2,7 @@ import prisma from "../lib/db";
 import { CompleteProfileInput } from '../types/types';
 
 export class MemberService {
+   // wıll delete 
     async getAssignedTrainerForMember(memberId: number) {
         const member = await prisma.member.findUnique({
             where: { id: memberId },
@@ -49,8 +50,44 @@ export class MemberService {
             where: { id: memberId },
             data: updatedData,
         });
-
-      
         return updatedData;
+    }
+
+    // get current member profile data
+    async getCurrentMember(memberId: number) {
+        const member = await prisma.member.findUnique({
+            where: { id: memberId },
+            select: {
+                name: true,
+                surname: true,
+                email: true,
+                age: true,
+                height: true,
+                weight: true,
+                phone: true,
+                medicalNotes: true,
+                gender: true,
+                avatarUrl: true,
+                assignmentStatus: true,
+                gym: {
+                    select: {
+                        name: true,
+                    }
+                },
+                trainer: {
+                    select: {
+                        name: true,
+                        surname: true,
+                        email: true,
+                    }
+                }
+            }
+        });
+
+        if (!member) {
+            throw new Error("Member can not founded.");
+        }
+
+        return member;
     }
 }

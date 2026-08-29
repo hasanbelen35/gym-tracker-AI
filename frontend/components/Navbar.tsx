@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -6,7 +6,7 @@ import { useTheme } from "@/providers/ThemeProvider";
 import { useAppDispatch } from "@/store/store";
 import { logoutUser } from "@/store/slices/authSlice";
 import { useAuth } from "@/hooks/useAuth";
-import { IconSun, IconMoon } from "@/icons/icon";
+import { IconSun, IconMoon, IconUser, IconLogout } from "@/icons/icon";
 
 const CONFIG = {
   logoLetter: "G",
@@ -17,6 +17,7 @@ const CONFIG = {
   profileMenuLabel: "Profil menüsü",
   logoutLabel: "Çıkış Yap",
   logoutErrorMessage: "Çıkış işlemi başarısız:",
+  profileButton: "Profilim"
 };
 
 export const Navbar = () => {
@@ -52,11 +53,9 @@ export const Navbar = () => {
 
   return (
     <nav className="flex items-center justify-between px-8 py-3 bg-nav-bg border-b border-nav-border shadow-nav transition-colors">
-
-      {/* Logo + Rol Badge */}
       <div className="flex items-center gap-3 ">
         <div className="flex items-center gap-2 cursor-pointer">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-linear-to-br from-brand-400 to-brand-600 flex items-center justify-center shadow-sm">
             <span className="text-white text-sm font-bold">{CONFIG.logoLetter}</span>
           </div>
           <span className="text-xl font-bold tracking-tight text-brand-600 ">
@@ -75,7 +74,6 @@ export const Navbar = () => {
         )}
       </div>
 
-      {/* Search Bar */}
       <div className="relative w-1/3">
         <input
           type="text"
@@ -90,7 +88,6 @@ export const Navbar = () => {
         </svg>
       </div>
 
-      {/* Right Buttons */}
       <div className="flex items-center gap-3">
         <button
           onClick={toggleTheme}
@@ -104,11 +101,10 @@ export const Navbar = () => {
           )}
         </button>
 
-        {/* Profile + Dropdown */}
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setIsMenuOpen((prev) => !prev)}
-            className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white shadow-sm hover:from-brand-600 hover:to-brand-dark transition-all cursor-pointer"
+            className="w-9 h-9 rounded-lg bg-linear-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white shadow-sm hover:from-brand-600 hover:to-brand-dark transition-all cursor-pointer"
             aria-label={CONFIG.profileMenuLabel}
             aria-expanded={isMenuOpen}
           >
@@ -125,12 +121,22 @@ export const Navbar = () => {
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600
-                           hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                           hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors cursor-pointer"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
+                <IconLogout className="w-4 h-4" />
                 {CONFIG.logoutLabel}
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  //router.push("/profile");
+                }}
+                className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground dark:text-brand-400
+                           hover:bg-brand-50 dark:hover:bg-brand-500/10 transition-colors cursor-pointer"
+              >
+                <IconUser className="w-4 h-4" />
+                {CONFIG.profileButton}
               </button>
             </div>
           )}

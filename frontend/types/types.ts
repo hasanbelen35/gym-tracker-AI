@@ -22,7 +22,7 @@ export interface PortalData {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface PortalDataRegister extends PortalData {}
+export interface PortalDataRegister extends PortalData { }
 
 // ==========================================
 // 2. TEMEL MODEL TİPLERİ (MODELS)
@@ -184,7 +184,7 @@ export interface TrainerState {
   approvedMembers: Member[];
   availableMembers: Member[];
   selectedMemberDetail?: Member | null;
-selectedProgramDetail?: Program | null; 
+  selectedProgramDetail?: Program | null;
   error: string | null;
 }
 
@@ -192,6 +192,24 @@ selectedProgramDetail?: Program | null;
 export interface MemberState {
   trainer: TrainerInfo | null;
   assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
+  profile: {
+    name?: string;
+    surname?: string;
+    email?: string;
+    age?: number | null;
+    height?: number | null;
+    weight?: number | null;
+    phone?: string | null;
+    medicalNotes?: string | null;
+    gender?: 'MALE' | 'FEMALE' | null;
+    avatarUrl?: string | null;
+    assignmentStatus?: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
+    gym?: {
+      name: string;
+    };
+    trainer?: TrainerInfo | null;
+    [key: string]: unknown;
+  } | null;
   loading: boolean;
   error: string | null;
 }

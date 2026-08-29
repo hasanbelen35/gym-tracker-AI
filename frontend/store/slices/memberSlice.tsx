@@ -15,9 +15,23 @@ interface UpdateProfilePayload {
 const initialState: MemberState = {
     trainer: null,
     assignmentStatus: null,
+    profile: null,
     loading: false,
     error: null,
 };
+
+export const fetchCurrentMember = createAsyncThunk(
+    "member/fetchCurrentMember",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await API.get("/member/me");
+            return response.data.data; 
+        } catch (error) {
+            const err = error as AxiosError<{ message?: string }>;
+            return rejectWithValue(err.response?.data?.message || "Profile datas can not fetched.");
+        }
+    }
+);
 
 export const fetchMyTrainer = createAsyncThunk(
     "member/fetchMyTrainer",
@@ -54,7 +68,18 @@ const memberSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            // --- fetchMyTrainer ---
+            .addCase(fetchCurrentMember.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchCurrentMember.fulfilled, (state, action) => {
+                state.loading = false;
+                state.profile = action.payload;
+            })
+            .addCase(fetchCurrentMember.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
             .addCase(fetchMyTrainer.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -68,14 +93,15 @@ const memberSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-
-            // --- updateMemberProfile ---
             .addCase(updateMemberProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(updateMemberProfile.fulfilled, (state) => {
+            .addCase(updateMemberProfile.fulfilled, (state, action) => {
                 state.loading = false;
+                if (state.profile) {
+                    state.profile = { ...state.profile, ...action.payload };
+                }
             })
             .addCase(updateMemberProfile.rejected, (state, action) => {
                 state.loading = false;

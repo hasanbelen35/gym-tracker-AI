@@ -4,6 +4,8 @@ import { useAppDispatch, useAppSelector } from "@/store/store";
 import { updateMemberProfile } from "@/store/slices/memberSlice";
 import { ArrowLeftIcon } from "@/icons/icon";
 import { useRouter } from "next/navigation";
+import { ErrorBox } from "@/components/ui/ErrorBox";
+import { SuccessBox } from "@/components/ui/SuccessBox";
 
 const ComplateProfilePage = () => {
   const dispatch = useAppDispatch();
@@ -52,7 +54,6 @@ const ComplateProfilePage = () => {
     if (updateMemberProfile.fulfilled.match(resultAction)) {
       setSuccessMessage("Profiliniz başarıyla güncellendi.");
     }
-    router.push("/dashboard/athlete")
   };
 
   return (
@@ -74,19 +75,10 @@ const ComplateProfilePage = () => {
             <p className="text-sm opacity-70 mt-1">Sana en uygun programları hazırlayabilmemiz için lütfen bilgilerini gir.</p>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm text-center shadow-lg">
-              <p className="font-semibold mb-1">Bir Hata Oluştu</p>
-              <p className="opacity-90">{error}</p>
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-sm text-center shadow-lg">
-              <p className="font-semibold mb-1">Başarılı</p>
-              <p className="opacity-90">{successMessage}</p>
-            </div>
-          )}
+          <div className="mb-6 space-y-3">
+            <ErrorBox message={error} />
+            <SuccessBox message={successMessage} />
+          </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-3 gap-4">
