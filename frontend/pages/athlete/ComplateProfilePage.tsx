@@ -54,6 +54,7 @@ const ComplateProfilePage = () => {
     if (updateMemberProfile.fulfilled.match(resultAction)) {
       setSuccessMessage("Profiliniz başarıyla güncellendi.");
     }
+    router.push("/dashboard/athlete")
   };
 
   return (
