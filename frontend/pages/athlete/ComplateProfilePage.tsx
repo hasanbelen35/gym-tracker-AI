@@ -54,7 +54,7 @@ const ComplateProfilePage = () => {
     if (updateMemberProfile.fulfilled.match(resultAction)) {
       setSuccessMessage("Profiliniz başarıyla güncellendi.");
     }
-    router.push("/dashboard/athlete")
+    router.push("/dashboard/athlete");
   };
 
   return (
@@ -166,6 +166,16 @@ const ComplateProfilePage = () => {
             >
               {loading ? "Kaydediliyor..." : "Profili Güncelle"}
             </button>
+
+            <div className="text-center ">
+              <button
+                type="button"
+                onClick={() => router.push("/dashboard/athlete")}
+                className="text-xs text-foreground/40 hover:text-foreground/70 transition-colors bg-transparent border-none cursor-pointer"
+              >
+                Daha sonra güncelle
+              </button>
+            </div>
           </form>
         </div>
       </div>

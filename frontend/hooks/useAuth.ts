@@ -14,6 +14,7 @@ interface TokenPayload {
   gymName?: string;
   gymId?: number;
   gymPublicId: string;
+  isProfileCompleted?: boolean;
 }
 
 export const useAuth = () => {
@@ -34,6 +35,6 @@ export const useAuth = () => {
 
     setLoading(false);
   }, []);
-
+  //  console.log(user)
   return { user, loading };
 };

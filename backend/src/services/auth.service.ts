@@ -116,7 +116,9 @@ export class AuthService {
         name: member.name,
         email: member.email,
         gymId: member.gymId,
-        gymName: member.gym?.name
+        gymName: member.gym?.name,
+        isProfileCompleted: member.isProfileCompleted 
+        
       }
     };
   }
