@@ -2,7 +2,7 @@ import prisma from "../lib/db";
 import { CompleteProfileInput } from '../types/types';
 
 export class MemberService {
-   // wıll delete 
+    // wıll delete 
     async getAssignedTrainerForMember(memberId: number) {
         const member = await prisma.member.findUnique({
             where: { id: memberId },
@@ -44,6 +44,7 @@ export class MemberService {
             ...(data.gender !== undefined && { gender: data.gender }),
             ...(data.medicalNotes !== undefined && { medicalNotes: data.medicalNotes }),
             ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
+            isProfileCompleted: true,
         };
         // update data in db
         await prisma.member.update({
@@ -69,6 +70,7 @@ export class MemberService {
                 gender: true,
                 avatarUrl: true,
                 assignmentStatus: true,
+                isProfileCompleted: true,
                 gym: {
                     select: {
                         name: true,
@@ -79,6 +81,12 @@ export class MemberService {
                         name: true,
                         surname: true,
                         email: true,
+                    }
+                },
+                sessions: {
+                    select: {
+                        checkIn: true,
+                        checkOut: true,
                     }
                 }
             }

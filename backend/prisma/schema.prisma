@@ -70,6 +70,7 @@ model Member {
   avatarUrl String?
   trainerId Int?
   assignmentStatus AssignmentStatus @default(UNASSIGNED)
+  isProfileCompleted Boolean @default(false)
   createdAt DateTime  @default(now())
   gym       Gym       @relation(fields: [gymId], references: [id])
   trainer   Trainer?  @relation(fields: [trainerId], references: [id])

@@ -73,6 +73,7 @@ export class AuthService {
         password: true,
         email: true,
         gymId: true,
+        isProfileCompleted: true,
         gym: {
           select: {
             name: true,
@@ -100,6 +101,7 @@ export class AuthService {
         role: "member",
         name: member.name,
         surname: member.surname,
+        isProfileCompleted: member.isProfileCompleted
       },
       process.env.JWT_SECRET!,
       {
@@ -176,7 +178,7 @@ export class AuthService {
       {
         id: trainer.id,
         gymId: trainer.gymId,
-        gymPublicId: trainer.gym?.publicId,  
+        gymPublicId: trainer.gym?.publicId,
         gymName: trainer.gym?.name,
         role: "trainer",
         name: trainer.name,

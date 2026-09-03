@@ -208,6 +208,7 @@ export interface MemberState {
       name: string;
     };
     trainer?: TrainerInfo | null;
+    sessions?: Session[]; 
     [key: string]: unknown;
   } | null;
   loading: boolean;

@@ -15,4 +15,4 @@ export function SuccessBox({ message }: SuccessBoxProps) {
       <span className="font-semibold">{message}</span>
     </div>
   );
-}
+} 

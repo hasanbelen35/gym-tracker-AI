@@ -64,8 +64,7 @@ export const authorizeTrainer = (req: AuthRequest, res: Response, next: NextFunc
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-
-  if (req.user?.role !== "trainer") {
+    if (req.user?.role !== "trainer") {
     res.status(403).json({ error: "Access denied" });
     return;
   }
