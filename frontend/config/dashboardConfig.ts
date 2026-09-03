@@ -3,13 +3,12 @@ import { LeftNavDataType } from "@/types/types";
 {/* LEFT SIDE-MENU ATHLETE CONFIG*/ }
 export const LeftNavDataAthlete: LeftNavDataType[] = [
     { name: "Ana Sayfa", route: "/dashboard/athlete" },
-    { name: "Geçmiş Antrenmanlarım", route: "/athlete/session" },
-    { name: "Salonum", route: "/athlete/myGym" },
-    { name: "Antrenörlerim", route: "/athlete/myTrainer" },
+    { name: "Aktif Durum", route: "/athlete/session" },
+    { name: "Antrenörüm", route: "/athlete/myTrainer" },
     { name: "Beslenme Programlarım", route: "/athlete/nutritions" },
     { name: "Antrenman Programlarım", route: "/athlete/workouts" },
     { name: "İstatistikler", route: "/dashboard/statistics" },
-    { name: "Profil", route: "/dashboard/profile" },
+    { name: "Profil", route: "/athlete/profile" },
 ];
 
 {/* LEFT SIDE-MENU GYM CONFIG*/ }

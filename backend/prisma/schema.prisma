@@ -76,7 +76,31 @@ model Member {
   trainer   Trainer?  @relation(fields: [trainerId], references: [id])
   sessions  Session[]
   programs  Program[]
+  measurements       MemberMeasurement[]
+}
 
+// Member Measurements
+model MemberMeasurement {
+  id            Int      @id @default(autoincrement())
+  publicId  String    @unique @default(uuid())
+  
+  memberId      Int
+  member        Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  
+  
+  bodyFatRate   Float?   
+  muscleMass    Float?   
+  chest         Float?   
+  waist         Float?   
+  arm           Float?   
+  hip           Float?   
+  shoulder      Float? 
+
+  photos        Json?  
+  notes         String?  
+
+  measuredAt    DateTime @default(now())
+  createdAt     DateTime @default(now())
 }
 
 // Session

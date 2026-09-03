@@ -53,8 +53,7 @@ export class MemberService {
         });
         return updatedData;
     }
-
-    // get current member profile data
+// get current member profile data
     async getCurrentMember(memberId: number) {
         const member = await prisma.member.findUnique({
             where: { id: memberId },
@@ -84,10 +83,14 @@ export class MemberService {
                     }
                 },
                 sessions: {
+                    take: 5,
+                    orderBy: {
+                        checkIn: 'desc',
+                    },
                     select: {
                         checkIn: true,
                         checkOut: true,
-                    }
+                    },
                 }
             }
         });
