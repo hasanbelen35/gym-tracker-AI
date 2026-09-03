@@ -1,4 +1,5 @@
 import prisma from "../lib/db";
+import { CreateMeasurementType } from '../types/types';
 
 export class TrainerService {
 
@@ -16,7 +17,6 @@ export class TrainerService {
         });
     }
 
-    // draw back pendıng or assıgned status
     async cancelMyAssignmentRequest(memberPublicId: string, trainerId: number, gymPublicId: string) {
         return await prisma.member.updateMany({
             where: {
@@ -32,7 +32,6 @@ export class TrainerService {
         });
     }
 
-    // get all members ın exıst gym
     async getMembersByStatus(
         trainerId: number,
         gymPublicId: string,
@@ -54,7 +53,6 @@ export class TrainerService {
         });
     }
 
-    // get member's detailed data
     async getMemberDetail(trainerId: number, memberPublicId: string) {
         return await prisma.member.findFirst({
             where: {
@@ -74,7 +72,6 @@ export class TrainerService {
                 weight: true,
                 height: true,
                 age: true,
-
                 gym: {
                     select: { name: true }
                 },
@@ -88,6 +85,74 @@ export class TrainerService {
                 }
             }
         });
+    }
+
+    async addMemberMeasurement(
+        trainerId: number, 
+        memberPublicId: string, 
+        dto: CreateMeasurementType
+    ) {
+        const member = await prisma.member.findFirst({
+            where: {
+                publicId: memberPublicId,
+                trainerId: trainerId,
+                assignmentStatus: 'ASSIGNED'
+            },
+            select: { id: true }
+        });
+
+        if (!member) {
+            throw new Error("Member not found or you do not have permission to add measurements for this member.");
+        }
+
+        const { 
+            bodyFatRate, 
+            muscleMass, 
+            chest, 
+            waist, 
+            arm, 
+            hip, 
+            shoulder, 
+            photos, 
+            notes 
+        } = dto;
+
+        return await prisma.memberMeasurement.create({
+            data: {
+                memberId: member.id,
+                bodyFatRate,
+                muscleMass,
+                chest,
+                waist,
+                arm,
+                hip,
+                shoulder,
+                photos: photos || [],
+                notes,
+            }
+        });
+    }
+
+    async getMemberMeasurements(trainerId: number, memberPublicId: string) {
+        const member = await prisma.member.findFirst({
+            where: {
+                publicId: memberPublicId,
+                trainerId: trainerId,
+                assignmentStatus: 'ASSIGNED'
+            },
+            select: {
+                id: true,
+                measurements: {
+                    orderBy: { measuredAt: 'desc' }
+                }
+            }
+        });
+
+        if (!member) {
+            throw new Error("Member not found or you do not have access to this member's measurements.");
+        }
+
+        return member.measurements;
     }
 
 }

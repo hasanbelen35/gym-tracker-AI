@@ -7,4 +7,16 @@ export interface CompleteProfileInput {
   gender?: Gender;
   medicalNotes?: string;
   avatarUrl?: string;
-}
+};
+
+export interface CreateMeasurementType {
+    bodyFatRate?: number;
+    muscleMass?: number;
+    chest?: number;
+    waist?: number;
+    arm?: number;
+    hip?: number;
+    shoulder?: number;
+    photos?: string[];
+    notes?: string;
+};

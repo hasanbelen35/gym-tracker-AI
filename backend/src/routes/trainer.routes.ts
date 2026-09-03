@@ -23,5 +23,13 @@ router.get("/getMembers/:gymId", authenticate, authorizeTrainer, (req, res, next
 router.get("/my-members/:memberPublicId", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.getAssignedMemberDetailController(req, res, next)
 );
+// add measurement to assigned member
+router.post("/my-members/addMeasurement/:memberPublicId", authenticate, authorizeTrainer, (req, res, next) =>
+    trainer.addMemberMeasurement(req, res, next)
+);
 
+// get measurement history of assigned member
+router.get("/my-members/getMembersMeasurements/:memberPublicId", authenticate, authorizeTrainer, (req, res, next) =>
+    trainer.getMemberMeasurements(req, res, next)
+);
 export default router;
