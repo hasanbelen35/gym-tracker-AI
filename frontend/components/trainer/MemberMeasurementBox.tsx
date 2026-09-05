@@ -1,9 +1,11 @@
 'use client'
 import React, { useState, useEffect } from "react";
 import { useAppDispatch } from "@/store/store";
-import { addMemberMeasurement, fetchMemberMeasurements } from "@/store/slices/trainerSlice";
+import { addMemberMeasurement, deleteMemberMeasurement, fetchMemberMeasurements } from "@/store/slices/trainerSlice";
 import { CreateMeasurementPayload, MemberMeasurement } from "@/types/types";
-import { IconArrowRight } from '@/icons/icon';
+import { IconArrowRight, IconTrash } from '@/icons/icon';
+import { useAuth } from "@/hooks/useAuth";
+import ConfirmModal from '@/components/ConfirmModel';
 
 interface MemberMeasurementsSectionProps {
     memberPublicId: string;
@@ -40,11 +42,15 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
     onMeasurementAdded,
 }) => {
     const dispatch = useAppDispatch();
-    
+    const { user } = useAuth();
+
     const [selectedId, setSelectedId] = useState<number | string | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [formLoading, setFormLoading] = useState(false);
     const [formData, setFormData] = useState<CreateMeasurementPayload>(INITIAL_FORM_STATE);
+
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [deleteLoading, setDeleteLoading] = useState(false);
 
     useEffect(() => {
         if (memberPublicId) {
@@ -93,6 +99,38 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
         }
     };
 
+    const handleDeleteClick = () => {
+        if (!selectedMeasurement) return;
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!selectedMeasurement || !memberPublicId || !user?.id) return;
+
+        const measurementPublicId = String(
+            selectedMeasurement.publicId ?? selectedMeasurement.id
+        );
+
+
+
+        setDeleteLoading(true);
+        try {
+            const resultAction = await dispatch(deleteMemberMeasurement({
+                trainerId: user.id,
+                memberPublicId,
+                measurementPublicId,
+            }));
+
+            if (deleteMemberMeasurement.fulfilled.match(resultAction)) {
+                setIsDeleteModalOpen(false);
+                setSelectedId(null);
+                dispatch(fetchMemberMeasurements(memberPublicId));
+            }
+        } finally {
+            setDeleteLoading(false);
+        }
+    };
+
     const formatDate = (dateString?: string) => {
         if (!dateString) return "-";
         return new Date(dateString).toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' });
@@ -116,22 +154,21 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex flex-col space-y-2 max-h-[350px] overflow-y-auto pr-1">
+                <div className="flex flex-col space-y-2 max-h-87.5 overflow-y-auto pr-1">
                     <p className="text-xs font-semibold opacity-50 px-1 uppercase tracking-wider mb-1">Ölçüm Tarihleri</p>
                     {safeMeasurements.length > 0 ? (
                         safeMeasurements.map((m, idx) => {
                             const isSelected = selectedMeasurement?.id === m.id;
                             const displayDate = formatDate(m.measuredAt || m.createdAt);
-                            
+
                             return (
                                 <div
                                     key={m.id || idx}
                                     onClick={() => m.id !== undefined && setSelectedId(m.id)}
-                                    className={`p-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer flex items-center justify-between ${
-                                        isSelected 
-                                            ? 'bg-brand-500/10 border-brand-500 text-brand-500 shadow-sm' 
-                                            : 'bg-background border-nav-border hover:border-brand-500/40 text-foreground/80'
-                                    }`}
+                                    className={`p-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer flex items-center justify-between ${isSelected
+                                        ? 'bg-brand-500/10 border-brand-500 text-brand-500 shadow-sm'
+                                        : 'bg-background border-nav-border hover:border-brand-500/40 text-foreground/80'
+                                        }`}
                                 >
                                     <div className="flex items-center gap-2.5">
                                         <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-brand-500' : 'bg-nav-border'}`} />
@@ -144,7 +181,7 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                     ) : (
                         <div className="p-6 text-center bg-background border border-nav-border rounded-xl opacity-60 flex flex-col items-center justify-center space-y-2">
                             <p className="text-xs">Henüz kayıtlı ölçüm bulunmuyor.</p>
-                            <button 
+                            <button
                                 onClick={() => setIsAddModalOpen(true)}
                                 className="text-xs text-brand-500 font-bold underline cursor-pointer"
                             >
@@ -161,16 +198,25 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                                 <span className="text-xs font-semibold opacity-60">
                                     Ölçüm Tarihi: {formatDate(selectedMeasurement.measuredAt || selectedMeasurement.createdAt)}
                                 </span>
-                                <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-bold">
-                                    Detay Görünümü
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-bold">
+                                        Detay Görünümü
+                                    </span>
+                                    <button
+                                        onClick={handleDeleteClick}
+                                        className="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500/20 transition-all cursor-pointer"
+                                        title="Ölçümü Sil"
+                                    >
+                                        <IconTrash className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 {MEASUREMENT_CONFIG.filter(field => field.key !== 'photos').map((field) => {
                                     const val = selectedMeasurement[field.key as keyof MemberMeasurement];
                                     const formattedVal = val != null ? (field.unit === '%' ? `%${val}` : `${val} ${field.unit}`) : "-";
-                                    
+
                                     return (
                                         <div key={field.key} className={`p-3 rounded-xl bg-nav-bg border border-nav-border ${field.colSpan ? 'col-span-2 sm:col-span-3' : ''}`}>
                                             <p className="text-[11px] opacity-60 font-medium">{field.label}</p>
@@ -289,6 +335,15 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                     </div>
                 </div>
             )}
+
+            <ConfirmModal
+                isOpen={isDeleteModalOpen}
+                title="Ölçümü Sil"
+                message="Bu ölçüm kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
+                loading={deleteLoading}
+                onConfirm={handleDeleteConfirm}
+                onCancel={() => setIsDeleteModalOpen(false)}
+            />
         </div>
     );
 };

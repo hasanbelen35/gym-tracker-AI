@@ -103,7 +103,7 @@ export interface Member {
   trainer?: TrainerInfo | null;
   programs?: Program[];
   sessions?: Session[];
-  measurements?: MemberMeasurement[]; 
+  measurements?: MemberMeasurement[];
   createdAt?: string;
 }
 
@@ -209,7 +209,7 @@ export interface MemberState {
       name: string;
     };
     trainer?: TrainerInfo | null;
-    sessions?: Session[]; 
+    sessions?: Session[];
     [key: string]: unknown;
   } | null;
   loading: boolean;
@@ -235,30 +235,48 @@ export interface ExerciseState {
 // ==========================================
 
 export interface MemberMeasurement {
-    id?: number;
-    publicId?: string;
-    memberId?: number;
-    bodyFatRate?: number | null;
-    muscleMass?: number | null;
-    chest?: number | null;
-    waist?: number | null;
-    arm?: number | null;
-    hip?: number | null;
-    shoulder?: number | null;
-    photos?: string[]  
-    notes?: string | null;
-    measuredAt?: string;
-    createdAt?: string;
+  id?: number;
+  publicId: string;
+  memberId?: number;
+  bodyFatRate?: number | null;
+  muscleMass?: number | null;
+  chest?: number | null;
+  waist?: number | null;
+  arm?: number | null;
+  hip?: number | null;
+  shoulder?: number | null;
+  photos?: string[]
+  notes?: string | null;
+  measuredAt?: string;
+  createdAt?: string;
 }
 
 export interface CreateMeasurementPayload {
-    bodyFatRate?: number;
-    muscleMass?: number;
-    chest?: number;
-    waist?: number;
-    arm?: number;
-    hip?: number;
-    shoulder?: number;
-    photos?: string[];
-    notes?: string;
+  bodyFatRate?: number;
+  muscleMass?: number;
+  chest?: number;
+  waist?: number;
+  arm?: number;
+  hip?: number;
+  shoulder?: number;
+  photos?: string[];
+  notes?: string;
+}
+
+export interface DeleteMeasurementArgs {
+  trainerId: number;
+
+  memberPublicId: string;
+  measurementPublicId: string;
+}
+
+export interface FetchMembersArgs {
+  gymId: string;
+  status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED';
+}
+
+
+export interface AddMeasurementArgs {
+  memberPublicId: string;
+  measurementData: CreateMeasurementPayload;
 }

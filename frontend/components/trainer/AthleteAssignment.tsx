@@ -12,7 +12,7 @@ import { IconPlus, IconClock, IconCheck, IconArrowRight, IconUserX } from '@/ico
 
 // Avatar initials chip, shared across all columns
 const Avatar = ({ name, surname }: { name: string; surname: string }) => (
-    <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full border border-nav-border bg-[var(--background)] text-xs font-black uppercase text-[var(--foreground)]/70">
+    <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full border border-nav-border bg-(--background) text-xs font-black uppercase text-(--foreground)/70">
         {name?.[0]}{surname?.[0]}
     </span>
 );
@@ -78,7 +78,7 @@ export default function TrainerAthletesPage() {
 
     if (!user) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+            <div className="flex min-h-screen items-center justify-center bg-(--background)">
                 <p className="text-sm font-semibold text-brand-dark">Lütfen giriş yapın.</p>
             </div>
         );
@@ -86,7 +86,7 @@ export default function TrainerAthletesPage() {
 
     if (!gymId) {
         return (
-            <div className="flex min-h-screen items-center justify-center bg-[var(--background)]">
+            <div className="flex min-h-screen items-center justify-center bg-(--background)">
                 <p className="text-sm font-semibold text-brand-text">Gym ID verisi bulunamadı.</p>
             </div>
         );
@@ -120,7 +120,7 @@ export default function TrainerAthletesPage() {
     ];
 
     return (
-        <div className="min-h-screen bg-[var(--background)] py-10 font-sans text-[var(--foreground)]">
+        <div className="min-h-screen bg-(--background) py-10 font-sans text-(--foreground)">
             <div className="mx-auto max-w-6xl px-4 sm:px-6">
 
                 {/* BACK BUTTON */}
@@ -141,7 +141,7 @@ export default function TrainerAthletesPage() {
                     <h1 className="text-3xl font-black uppercase tracking-tight sm:text-4xl">
                         Atama Merkezi
                     </h1>
-                    <p className="mt-1.5 text-sm text-[var(--foreground)]/60">
+                    <p className="mt-1.5 text-sm text-(--foreground)/60">
                         Sporcular havuzdan talep aşamasına, oradan da onaylı listenize geçer.
                     </p>
                 </div>
@@ -154,10 +154,10 @@ export default function TrainerAthletesPage() {
                                 <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full border border-brand-500 text-[10px] font-black text-brand-500">
                                     {s.step}
                                 </span>
-                                <span className="text-xs font-bold uppercase tracking-wide text-[var(--foreground)]/80">{s.title}</span>
+                                <span className="text-xs font-bold uppercase tracking-wide text-(--foreground)/80">{s.title}</span>
                             </div>
                             {i < stages.length - 1 && (
-                                <IconArrowRight className="h-4 w-4 flex-none text-[var(--foreground)]/25" />
+                                <IconArrowRight className="h-4 w-4 flex-none text-(--foreground)/25" />
                             )}
                         </div>
                     ))}
@@ -187,7 +187,7 @@ export default function TrainerAthletesPage() {
                                         </span>
                                         <div>
                                             <h2 className="text-sm font-bold uppercase tracking-wide">{stage.title}</h2>
-                                            <p className="text-[11px] text-[var(--foreground)]/50">{stage.subtitle}</p>
+                                            <p className="text-[11px] text-(--foreground)/50">{stage.subtitle}</p>
                                         </div>
                                     </div>
                                     <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-brand-500/15 px-2 text-xs font-black text-brand-500">
@@ -197,24 +197,24 @@ export default function TrainerAthletesPage() {
 
                                 <div className="flex-1 space-y-2 overflow-y-auto p-3">
                                     {loading && stage.members.length === 0 ? (
-                                        <p className="py-10 text-center text-sm text-[var(--foreground)]/45">Yükleniyor...</p>
+                                        <p className="py-10 text-center text-sm text-(--foreground)/45">Yükleniyor...</p>
                                     ) : stage.members.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-nav-border py-10 text-center">
                                             <StageIcon className="h-6 w-6 text-nav-border" />
-                                            <p className="px-4 text-xs text-[var(--foreground)]/45">{stage.emptyText}</p>
+                                            <p className="px-4 text-xs text-(--foreground)/45">{stage.emptyText}</p>
                                         </div>
                                     ) : stage.step === "01" ? (
                                         stage.members.map((m: Member) => (
                                             <button
                                                 key={m.publicId}
                                                 onClick={() => openRequestModal(m.publicId)}
-                                                className="group flex w-full items-center justify-between gap-3 rounded-lg border border-nav-border bg-[var(--background)] p-3 text-left transition-colors hover:border-brand-500/55"
+                                                className="group flex w-full items-center justify-between gap-3 rounded-lg border border-nav-border bg-(--background) p-3 text-left transition-colors hover:border-brand-500/55"
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <Avatar name={m.name} surname={m.surname} />
                                                     <div>
                                                         <p className="text-sm font-semibold">{m.name} {m.surname}</p>
-                                                        <p className="text-xs text-[var(--foreground)]/50">{m.email}</p>
+                                                        <p className="text-xs text-(--foreground)/50">{m.email}</p>
                                                     </div>
                                                 </div>
                                                 <span className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand-500/10 text-brand-500 transition-colors group-hover:bg-brand-500 group-hover:text-white">
@@ -226,18 +226,18 @@ export default function TrainerAthletesPage() {
                                         stage.members.map((m: Member) => (
                                             <div
                                                 key={m.publicId}
-                                                className="flex items-center justify-between gap-3 rounded-lg border border-nav-border bg-[var(--background)] p-3"
+                                                className="flex items-center justify-between gap-3 rounded-lg border border-nav-border bg-(--background) p-3"
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <Avatar name={m.name} surname={m.surname} />
                                                     <div>
                                                         <p className="text-sm font-semibold">{m.name} {m.surname}</p>
-                                                        <p className="text-xs text-[var(--foreground)]/50">{m.email}</p>
+                                                        <p className="text-xs text-(--foreground)/50">{m.email}</p>
                                                     </div>
                                                 </div>
                                                 <button
                                                     onClick={() => openCancelModal(m.publicId)}
-                                                    className="flex cursor-pointer flex-none items-center gap-1 rounded-lg border border-nav-border px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-[var(--foreground)]/55 transition-colors hover:border-brand-600/40 hover:text-brand-text"
+                                                    className="flex cursor-pointer flex-none items-center gap-1 rounded-lg border border-nav-border px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-(--foreground)/55 transition-colors hover:border-brand-600/40 hover:text-brand-text"
                                                 >
                                                     <IconUserX className="h-3.5 w-3.5" />
                                                     Geri Çek

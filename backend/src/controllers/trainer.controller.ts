@@ -134,7 +134,7 @@ export class TrainerController {
             }
 
             const memberPublicId = req.params.memberPublicId as string;
-            const measurementPublicId = req.params.measurementId as string;
+            const measurementPublicId = req.params.measurementPublicId as string;
 
             if (!measurementPublicId) {
                 return res.status(400).json({ success: false, message: "Measurement ID is required." });

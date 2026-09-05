@@ -12,7 +12,7 @@ const Trainers = () => {
   const router = useRouter();
   const { trainers, trainersLoading, trainersError } = useAppSelector((state) => state.gym);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [trainerToDelete, setTrainerToDelete] = useState<any | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 

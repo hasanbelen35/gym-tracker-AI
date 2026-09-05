@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
-import { Member, CreateMeasurementPayload } from '@/types/types';
+import { Member, AddMeasurementArgs, DeleteMeasurementArgs, FetchMembersArgs, MemberMeasurement } from '@/types/types';
 import { API } from "@/lib/api";
-
 export type { Member };
 
 interface ApiErrorResponse {
@@ -27,11 +26,7 @@ const initialState: TrainerState = {
     error: null,
 };
 
-interface FetchMembersArgs {
-    gymId: string;
-    status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED';
-}
-
+// FETCH MEMBERS BY ASSIGNMENT STATUS
 export const fetchMembersByStatus = createAsyncThunk(
     'trainer/fetchMembers',
     async ({ gymId, status }: FetchMembersArgs, { rejectWithValue }) => {
@@ -40,11 +35,11 @@ export const fetchMembersByStatus = createAsyncThunk(
             return { data: response.data.data, status };
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message || 'Üyeler getirilirken bir hata oluştu');
+            return rejectWithValue(err.response?.data?.message);
         }
     }
 );
-
+// SEND REQUEST TO GYM FOT ASSIGN MEMBER TO ON TRAINER
 export const requestAssignment = createAsyncThunk(
     'trainer/requestAssignment',
     async (memberPublicId: string, { rejectWithValue }) => {
@@ -53,11 +48,11 @@ export const requestAssignment = createAsyncThunk(
             return memberPublicId;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message || 'Talep gönderilemedi');
+            return rejectWithValue(err.response?.data?.message);
         }
     }
 );
-
+// CANCEL ASSIGNMENT REQUEST FROM GYM
 export const cancelAssignment = createAsyncThunk(
     'trainer/cancelAssignment',
     async (memberPublicId: string, { rejectWithValue }) => {
@@ -66,11 +61,11 @@ export const cancelAssignment = createAsyncThunk(
             return memberPublicId;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message || 'Talep iptal edilemedi');
+            return rejectWithValue(err.response?.data?.message);
         }
     }
 );
-
+// FETCH MEMBER'S DETAILED  DATA
 export const fetchMemberDetail = createAsyncThunk(
     'trainer/fetchMemberDetail',
     async (memberPublicId: string, { rejectWithValue }) => {
@@ -79,16 +74,13 @@ export const fetchMemberDetail = createAsyncThunk(
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message || 'Üye detayı alınamadı');
+            return rejectWithValue(err.response?.data?.message);
         }
     }
 );
 
-interface AddMeasurementArgs {
-    memberPublicId: string;
-    measurementData: CreateMeasurementPayload;
-}
 
+// ADD MEASUREMENTS TO MEMBER
 export const addMemberMeasurement = createAsyncThunk(
     'trainer/addMemberMeasurement',
     async ({ memberPublicId, measurementData }: AddMeasurementArgs, { rejectWithValue }) => {
@@ -97,23 +89,35 @@ export const addMemberMeasurement = createAsyncThunk(
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message || 'Ölçüm eklenemedi');
+            return rejectWithValue(err.response?.data?.message);
         }
     }
 );
-
+// FETCH ALL MEASUREMENTS FROM MEMBER
 export const fetchMemberMeasurements = createAsyncThunk(
     'trainer/fetchMemberMeasurements',
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
             const response = await API.get(`/trainer/my-members/getMembersMeasurements/${memberPublicId}`);
-            console.log("basarılı cekmek")
 
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
-            console.log("hata verıyor cekmek")
-            return rejectWithValue(err.response?.data?.message || 'Ölçüm geçmişi alınamadı');
+            return rejectWithValue(err.response?.data?.message);
+        }
+    }
+);
+
+// DELETE MEASUREMENTS FROM MEMBER
+export const deleteMemberMeasurement = createAsyncThunk(
+    'trainer/deleteMemberMeasurement',
+    async ({ memberPublicId, measurementPublicId }: DeleteMeasurementArgs, { rejectWithValue }) => {
+        try {
+            await API.delete(`/trainer/my-members/deleteMemberMeasurement/${memberPublicId}/${measurementPublicId}`);
+            return measurementPublicId;
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message);
         }
     }
 );
@@ -213,7 +217,23 @@ const trainerSlice = createSlice({
             .addCase(fetchMemberMeasurements.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
-            });
+            })
+            .addCase(deleteMemberMeasurement.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(deleteMemberMeasurement.fulfilled, (state, action) => {
+                state.loading = false;
+                if (state.selectedMemberDetail && state.selectedMemberDetail.measurements) {
+                    state.selectedMemberDetail.measurements = state.selectedMemberDetail.measurements.filter(
+                        (m: MemberMeasurement) => m.publicId !== action.payload
+                    );
+                }
+            })
+            .addCase(deleteMemberMeasurement.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
     },
 });
 
