@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
-import { Member } from '@/types/types';
-import { API } from "@/lib/api"; 
+import { Member, CreateMeasurementPayload } from '@/types/types';
+import { API } from "@/lib/api";
 
 export type { Member };
 
@@ -37,7 +37,7 @@ export const fetchMembersByStatus = createAsyncThunk(
     async ({ gymId, status }: FetchMembersArgs, { rejectWithValue }) => {
         try {
             const response = await API.get(`/trainer/getMembers/${gymId}?status=${status}`);
-            return { data: response.data, status };
+            return { data: response.data.data, status };
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
             return rejectWithValue(err.response?.data?.message || 'Üyeler getirilirken bir hata oluştu');
@@ -84,6 +84,40 @@ export const fetchMemberDetail = createAsyncThunk(
     }
 );
 
+interface AddMeasurementArgs {
+    memberPublicId: string;
+    measurementData: CreateMeasurementPayload;
+}
+
+export const addMemberMeasurement = createAsyncThunk(
+    'trainer/addMemberMeasurement',
+    async ({ memberPublicId, measurementData }: AddMeasurementArgs, { rejectWithValue }) => {
+        try {
+            const response = await API.post(`/trainer/my-members/addMeasurement/${memberPublicId}`, measurementData);
+            return response.data.data;
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || 'Ölçüm eklenemedi');
+        }
+    }
+);
+
+export const fetchMemberMeasurements = createAsyncThunk(
+    'trainer/fetchMemberMeasurements',
+    async (memberPublicId: string, { rejectWithValue }) => {
+        try {
+            const response = await API.get(`/trainer/my-members/getMembersMeasurements/${memberPublicId}`);
+            console.log("basarılı cekmek")
+
+            return response.data.data;
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            console.log("hata verıyor cekmek")
+            return rejectWithValue(err.response?.data?.message || 'Ölçüm geçmişi alınamadı');
+        }
+    }
+);
+
 const trainerSlice = createSlice({
     name: 'trainer',
     initialState,
@@ -104,11 +138,11 @@ const trainerSlice = createSlice({
                 const { data, status } = action.payload;
 
                 if (status === 'UNASSIGNED') {
-                    state.availableMembers = data;
+                    state.availableMembers = data || [];
                 } else if (status === 'PENDING') {
-                    state.pendingMembers = data;
+                    state.pendingMembers = data || [];
                 } else if (status === 'ASSIGNED') {
-                    state.approvedMembers = data;
+                    state.approvedMembers = data || [];
                 }
             })
             .addCase(fetchMembersByStatus.rejected, (state, action) => {
@@ -146,6 +180,37 @@ const trainerSlice = createSlice({
                 state.selectedMemberDetail = action.payload;
             })
             .addCase(fetchMemberDetail.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+            .addCase(addMemberMeasurement.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(addMemberMeasurement.fulfilled, (state, action) => {
+                state.loading = false;
+                if (state.selectedMemberDetail && action.payload) {
+                    if (!state.selectedMemberDetail.measurements) {
+                        state.selectedMemberDetail.measurements = [];
+                    }
+                    state.selectedMemberDetail.measurements.unshift(action.payload);
+                }
+            })
+            .addCase(addMemberMeasurement.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+            .addCase(fetchMemberMeasurements.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchMemberMeasurements.fulfilled, (state, action) => {
+                state.loading = false;
+                if (state.selectedMemberDetail) {
+                    state.selectedMemberDetail.measurements = action.payload;
+                }
+            })
+            .addCase(fetchMemberMeasurements.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             });

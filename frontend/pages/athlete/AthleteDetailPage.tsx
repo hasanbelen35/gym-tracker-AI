@@ -5,6 +5,7 @@ import { fetchMemberDetail } from "@/store/slices/trainerSlice";
 import { useParams, useRouter } from "next/navigation";
 import { Program, Session } from "@/types/types";
 import { IconClock, IconArrowRight, ArrowLeftIcon } from '@/icons/icon';
+import { MemberMeasurementsSection } from "@/components/trainer/MemberMeasurementBox";
 
 export const MemberDetail: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -18,6 +19,12 @@ export const MemberDetail: React.FC = () => {
             dispatch(fetchMemberDetail(memberPublicId));
         }
     }, [dispatch, memberPublicId]);
+
+    const handleMeasurementAdded = () => {
+        if (memberPublicId) {
+            dispatch(fetchMemberDetail(memberPublicId));
+        }
+    };
 
     if (loading && !selectedMemberDetail) {
         return (
@@ -38,7 +45,7 @@ export const MemberDetail: React.FC = () => {
                     <p className="opacity-90">{error}</p>
                     <button
                         onClick={() => router.back()}
-                        className="mt-4 px-4 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-all"
+                        className="mt-4 px-4 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-all cursor-pointer"
                     >
                         Geri Dön
                     </button>
@@ -67,7 +74,6 @@ export const MemberDetail: React.FC = () => {
             <div className="max-w-5xl mx-auto space-y-6 animate-fadeIn">
 
                 <div className="flex items-center justify-between">
-                    {/* back button*/}
                     <button
                         onClick={() => router.back()}
                         className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-nav-bg border border-nav-border text-sm font-medium text-foreground/80 hover:border-brand-500 hover:text-brand-500 transition-all shadow-sm cursor-pointer"
@@ -127,6 +133,13 @@ export const MemberDetail: React.FC = () => {
                     </div>
                 </div>
 
+                {/* measurements */}
+                <MemberMeasurementsSection
+                    memberPublicId={memberPublicId}
+                    measurements={selectedMemberDetail.measurements || []}
+                    onMeasurementAdded={handleMeasurementAdded}
+                />
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-nav flex flex-col h-[42vh]">
@@ -143,7 +156,7 @@ export const MemberDetail: React.FC = () => {
                                 </span>
                                 <button
                                     onClick={() => router.push(`/trainer/create-new-workout-program/${memberPublicId}`)}
-                                    className="px-2.5 py-1 rounded-lg bg-brand-500 text-white text-xs font-semibold hover:opacity-90 transition-all shadow-sm flex items-center gap-1"
+                                    className="px-2.5 py-1 rounded-lg bg-brand-500 text-white text-xs font-semibold hover:opacity-90 transition-all shadow-sm flex items-center gap-1 cursor-pointer"
                                     title="Yeni Program Ekle"
                                 >
                                     <span>+ Yeni</span>

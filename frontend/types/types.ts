@@ -103,6 +103,7 @@ export interface Member {
   trainer?: TrainerInfo | null;
   programs?: Program[];
   sessions?: Session[];
+  measurements?: MemberMeasurement[]; 
   createdAt?: string;
 }
 
@@ -228,3 +229,36 @@ export interface ExerciseState {
   };
 }
 
+
+// ==========================================
+// MEMBER MEASUREMENT TİPLERİ
+// ==========================================
+
+export interface MemberMeasurement {
+    id?: number;
+    publicId?: string;
+    memberId?: number;
+    bodyFatRate?: number | null;
+    muscleMass?: number | null;
+    chest?: number | null;
+    waist?: number | null;
+    arm?: number | null;
+    hip?: number | null;
+    shoulder?: number | null;
+    photos?: string[]  
+    notes?: string | null;
+    measuredAt?: string;
+    createdAt?: string;
+}
+
+export interface CreateMeasurementPayload {
+    bodyFatRate?: number;
+    muscleMass?: number;
+    chest?: number;
+    waist?: number;
+    arm?: number;
+    hip?: number;
+    shoulder?: number;
+    photos?: string[];
+    notes?: string;
+}

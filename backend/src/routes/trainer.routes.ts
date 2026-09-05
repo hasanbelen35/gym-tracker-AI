@@ -9,12 +9,10 @@ const trainer = new TrainerController();
 router.post("/requestAssignment", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.requestMemberAssignment(req, res, next)
 );
-
 // draw back assıngment
 router.delete("/cancelAssignment", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.cancelMyAssignmentRequest(req, res, next)
 );
-
 // list members as assıngment status 
 router.get("/getMembers/:gymId", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.getMembersByStatus(req, res, next)
@@ -27,9 +25,12 @@ router.get("/my-members/:memberPublicId", authenticate, authorizeTrainer, (req, 
 router.post("/my-members/addMeasurement/:memberPublicId", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.addMemberMeasurement(req, res, next)
 );
-
 // get measurement history of assigned member
 router.get("/my-members/getMembersMeasurements/:memberPublicId", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.getMemberMeasurements(req, res, next)
+);
+// delete measurement of assigned member
+router.delete("/my-members/deleteMemberMeasurement/:memberPublicId/:measurementPublicId", authenticate, authorizeTrainer, (req, res, next) =>
+    trainer.deleteMemberMeasurement(req, res, next)
 );
 export default router;

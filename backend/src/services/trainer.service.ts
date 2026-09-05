@@ -2,7 +2,7 @@ import prisma from "../lib/db";
 import { CreateMeasurementType } from '../types/types';
 
 export class TrainerService {
-
+    // SEND ASSIGNMENT REQ TO GYM FOR MEMBER
     async requestMemberAssignment(memberPublicId: string, trainerId: number, gymPublicId: string) {
         return await prisma.member.updateMany({
             where: {
@@ -16,7 +16,7 @@ export class TrainerService {
             }
         });
     }
-
+    // CANCEL ASSIGNMENT REQ FROM GYM FOR MEMBER
     async cancelMyAssignmentRequest(memberPublicId: string, trainerId: number, gymPublicId: string) {
         return await prisma.member.updateMany({
             where: {
@@ -31,7 +31,7 @@ export class TrainerService {
             }
         });
     }
-
+    // GET MEMBER'S ASSIGNMENT STATUS
     async getMembersByStatus(
         trainerId: number,
         gymPublicId: string,
@@ -52,7 +52,7 @@ export class TrainerService {
             }
         });
     }
-
+    // GET MEMBER'S DETAILED DATA 
     async getMemberDetail(trainerId: number, memberPublicId: string) {
         return await prisma.member.findFirst({
             where: {
@@ -86,10 +86,10 @@ export class TrainerService {
             }
         });
     }
-
+    // ADD MEASUREMENTS TO MEMBERS
     async addMemberMeasurement(
-        trainerId: number, 
-        memberPublicId: string, 
+        trainerId: number,
+        memberPublicId: string,
         dto: CreateMeasurementType
     ) {
         const member = await prisma.member.findFirst({
@@ -105,16 +105,16 @@ export class TrainerService {
             throw new Error("Member not found or you do not have permission to add measurements for this member.");
         }
 
-        const { 
-            bodyFatRate, 
-            muscleMass, 
-            chest, 
-            waist, 
-            arm, 
-            hip, 
-            shoulder, 
-            photos, 
-            notes 
+        const {
+            bodyFatRate,
+            muscleMass,
+            chest,
+            waist,
+            arm,
+            hip,
+            shoulder,
+            photos,
+            notes
         } = dto;
 
         return await prisma.memberMeasurement.create({
@@ -132,7 +132,7 @@ export class TrainerService {
             }
         });
     }
-
+    // GET MEASUREMENTS FROM MEMBERS
     async getMemberMeasurements(trainerId: number, memberPublicId: string) {
         const member = await prisma.member.findFirst({
             where: {
@@ -154,5 +154,36 @@ export class TrainerService {
 
         return member.measurements;
     }
+    // DELETE MEMBER'S MEASUREMENT BY PUBLIC ID
+    async deleteMemberMeasurement(trainerId: number, memberPublicId: string, measurementPublicId: string) {
+        const member = await prisma.member.findFirst({
+            where: {
+                publicId: memberPublicId,
+                trainerId: trainerId,
+                assignmentStatus: 'ASSIGNED'
+            },
+            select: { id: true }
+        });
 
+        if (!member) {
+            throw new Error("Member not found or you do not have permission to modify this member's measurements.");
+        }
+
+        const measurement = await prisma.memberMeasurement.findFirst({
+            where: {
+                publicId: measurementPublicId,
+                memberId: member.id
+            }
+        });
+
+        if (!measurement) {
+            throw new Error("Measurement record not found.");
+        }
+
+        return await prisma.memberMeasurement.delete({
+            where: {
+                publicId: measurementPublicId
+            }
+        });
+    }
 }

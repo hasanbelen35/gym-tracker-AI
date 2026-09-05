@@ -105,7 +105,7 @@ export class TrainerController {
             next(error);
         }
     };
-    
+
     // GET MEASUREMENT DATAS FROM ASSIGNED MEMBERS
     getMemberMeasurements = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
@@ -119,6 +119,30 @@ export class TrainerController {
             const measurements = await trainerService.getMemberMeasurements(trainerId, memberPublicId);
 
             return res.status(200).json({ success: true, data: measurements });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    // DELETE MEMBER'S MEASUREMENT BY PUBLIC ID
+    deleteMemberMeasurement = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user?.id;
+
+            if (!trainerId) {
+                return res.status(401).json({ success: false, message: "Unauthorized access." });
+            }
+
+            const memberPublicId = req.params.memberPublicId as string;
+            const measurementPublicId = req.params.measurementId as string;
+
+            if (!measurementPublicId) {
+                return res.status(400).json({ success: false, message: "Measurement ID is required." });
+            }
+
+            await trainerService.deleteMemberMeasurement(trainerId, memberPublicId, measurementPublicId);
+
+            return res.status(200).json({ success: true, message: "Measurement deleted successfully." });
         } catch (error) {
             next(error);
         }
