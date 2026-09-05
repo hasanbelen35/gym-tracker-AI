@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Program, Session } from "@/types/types";
 import { IconClock, IconArrowRight, ArrowLeftIcon } from '@/icons/icon';
 import { MemberMeasurementsSection } from "@/components/trainer/MemberMeasurementBox";
-
+import Image from "next/image";
 export const MemberDetail: React.FC = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
@@ -69,6 +69,17 @@ export const MemberDetail: React.FC = () => {
         }
     };
 
+    const getGenderLabel = (gender?: string | null) => {
+        switch (gender) {
+            case 'MALE':
+                return 'Erkek';
+            case 'FEMALE':
+                return 'Kadın';
+            default:
+                return gender || '-';
+        }
+    };
+
     return (
         <div className="min-h-screen w-full bg-background text-foreground p-6 sm:p-10 transition-colors duration-200">
             <div className="max-w-5xl mx-auto space-y-6 animate-fadeIn">
@@ -85,11 +96,26 @@ export const MemberDetail: React.FC = () => {
 
                 <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 sm:p-8 shadow-nav backdrop-blur-md">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                                {selectedMemberDetail.name} {selectedMemberDetail.surname}
-                            </h1>
-                            <p className="text-sm opacity-70 mt-1">{selectedMemberDetail.email}</p>
+                        <div className="flex items-center gap-4">
+                            {selectedMemberDetail.avatarUrl ? (
+                                <Image
+                                    src={selectedMemberDetail.avatarUrl}
+                                    alt={`${selectedMemberDetail.name} ${selectedMemberDetail.surname}`}
+                                    width={80}
+                                    height={80}
+                                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border border-nav-border shadow-sm"
+                                />
+                            ) : (
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-brand-100 text-brand-dark flex items-center justify-center text-xl font-bold border border-nav-border shadow-sm">
+                                    {selectedMemberDetail.name?.[0]}{selectedMemberDetail.surname?.[0]}
+                                </div>
+                            )}
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                                    {selectedMemberDetail.name} {selectedMemberDetail.surname}
+                                </h1>
+                                <p className="text-sm opacity-70 mt-1">{selectedMemberDetail.email}</p>
+                            </div>
                         </div>
 
                         <div className="flex flex-col items-start sm:items-end gap-2 self-start sm:self-auto">
@@ -107,10 +133,14 @@ export const MemberDetail: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-nav-border">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-6 pt-6 border-t border-nav-border">
                         <div className="p-4 rounded-xl bg-background border border-nav-border hover:border-brand-500/40 transition-all">
                             <p className="text-xs opacity-60 font-medium">Yaş</p>
                             <p className="text-xl font-bold mt-1 tracking-tight">{selectedMemberDetail.age ?? "-"}</p>
+                        </div>
+                        <div className="p-4 rounded-xl bg-background border border-nav-border hover:border-brand-500/40 transition-all">
+                            <p className="text-xs opacity-60 font-medium">Cinsiyet</p>
+                            <p className="text-xl font-bold mt-1 tracking-tight">{getGenderLabel(selectedMemberDetail.gender)}</p>
                         </div>
                         <div className="p-4 rounded-xl bg-background border border-nav-border hover:border-brand-500/40 transition-all">
                             <p className="text-xs opacity-60 font-medium">Boy</p>
@@ -131,9 +161,30 @@ export const MemberDetail: React.FC = () => {
                             </p>
                         </div>
                     </div>
+
+                    {selectedMemberDetail.medicalNotes && (
+                        <div className="mt-4 relative overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent p-5">
+                            <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-red-500/10 blur-2xl" />
+                            <div className="relative flex items-start gap-3">
+                                <div className="flex-shrink-0 p-2.5 rounded-xl bg-red-500/15 border border-red-500/20 text-red-500">
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                    </svg>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                        <p className="text-xs font-bold text-red-500 uppercase tracking-wider">Sağlık Notları</p>
+                                        <span className="px-2 py-0.5 rounded-full bg-red-500/15 text-red-500 text-[10px] font-bold border border-red-500/20">
+                                            Dikkat
+                                        </span>
+                                    </div>
+                                    <p className="text-sm opacity-90 leading-relaxed">{selectedMemberDetail.medicalNotes}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
-                {/* measurements */}
                 <MemberMeasurementsSection
                     memberPublicId={memberPublicId}
                     measurements={selectedMemberDetail.measurements || []}

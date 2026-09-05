@@ -13,6 +13,8 @@ interface TrainerState {
     approvedMembers: Member[];
     availableMembers: Member[];
     selectedMemberDetail: Member | null;
+    measurements: MemberMeasurement[];
+    measurementsLoading: boolean;
     loading: boolean;
     error: string | null;
 }
@@ -22,6 +24,8 @@ const initialState: TrainerState = {
     approvedMembers: [],
     availableMembers: [],
     selectedMemberDetail: null,
+    measurements: [],
+    measurementsLoading: false,
     loading: false,
     error: null,
 };
@@ -99,7 +103,6 @@ export const fetchMemberMeasurements = createAsyncThunk(
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
             const response = await API.get(`/trainer/my-members/getMembersMeasurements/${memberPublicId}`);
-
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
@@ -128,6 +131,7 @@ const trainerSlice = createSlice({
     reducers: {
         clearSelectedMember: (state) => {
             state.selectedMemberDetail = null;
+            state.measurements = [];
             state.error = null;
         },
     },
@@ -188,50 +192,37 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
             .addCase(addMemberMeasurement.pending, (state) => {
-                state.loading = true;
                 state.error = null;
             })
             .addCase(addMemberMeasurement.fulfilled, (state, action) => {
-                state.loading = false;
-                if (state.selectedMemberDetail && action.payload) {
-                    if (!state.selectedMemberDetail.measurements) {
-                        state.selectedMemberDetail.measurements = [];
-                    }
-                    state.selectedMemberDetail.measurements.unshift(action.payload);
+                if (action.payload) {
+                    state.measurements.unshift(action.payload);
                 }
             })
             .addCase(addMemberMeasurement.rejected, (state, action) => {
-                state.loading = false;
                 state.error = action.payload as string;
             })
             .addCase(fetchMemberMeasurements.pending, (state) => {
-                state.loading = true;
+                state.measurementsLoading = true;
                 state.error = null;
             })
             .addCase(fetchMemberMeasurements.fulfilled, (state, action) => {
-                state.loading = false;
-                if (state.selectedMemberDetail) {
-                    state.selectedMemberDetail.measurements = action.payload;
-                }
+                state.measurementsLoading = false;
+                state.measurements = action.payload || [];
             })
             .addCase(fetchMemberMeasurements.rejected, (state, action) => {
-                state.loading = false;
+                state.measurementsLoading = false;
                 state.error = action.payload as string;
             })
             .addCase(deleteMemberMeasurement.pending, (state) => {
-                state.loading = true;
                 state.error = null;
             })
             .addCase(deleteMemberMeasurement.fulfilled, (state, action) => {
-                state.loading = false;
-                if (state.selectedMemberDetail && state.selectedMemberDetail.measurements) {
-                    state.selectedMemberDetail.measurements = state.selectedMemberDetail.measurements.filter(
-                        (m: MemberMeasurement) => m.publicId !== action.payload
-                    );
-                }
+                state.measurements = state.measurements.filter(
+                    (m: MemberMeasurement) => m.publicId !== action.payload
+                );
             })
             .addCase(deleteMemberMeasurement.rejected, (state, action) => {
-                state.loading = false;
                 state.error = action.payload as string;
             })
     },

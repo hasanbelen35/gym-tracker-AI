@@ -61,7 +61,6 @@ export class TrainerService {
                 assignmentStatus: 'ASSIGNED'
             },
             select: {
-                id: true,
                 publicId: true,
                 name: true,
                 surname: true,
@@ -72,6 +71,9 @@ export class TrainerService {
                 weight: true,
                 height: true,
                 age: true,
+                medicalNotes:true,
+                gender:true,
+                avatarUrl:true,
                 gym: {
                     select: { name: true }
                 },

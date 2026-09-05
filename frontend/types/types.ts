@@ -83,7 +83,6 @@ export interface Program {
   days?: ProgramDayInput[];
   [key: string]: unknown;
 }
-
 export interface Member {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   birthDate(birthDate: any): import("react").ReactNode;
@@ -96,6 +95,9 @@ export interface Member {
   age?: number | null;
   height?: number | null;
   weight?: number | null;
+  gender?: 'MALE' | 'FEMALE' | string | null;
+  avatarUrl?: string | null;
+  medicalNotes?: string | null;
   assignmentStatus?: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
   gymId?: number;
   gym?: Gym;

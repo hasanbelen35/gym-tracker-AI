@@ -1,16 +1,15 @@
 'use client'
 import React, { useState, useEffect } from "react";
-import { useAppDispatch } from "@/store/store";
+import { useAppDispatch, useAppSelector } from "@/store/store";
 import { addMemberMeasurement, deleteMemberMeasurement, fetchMemberMeasurements } from "@/store/slices/trainerSlice";
 import { CreateMeasurementPayload, MemberMeasurement } from "@/types/types";
 import { IconArrowRight, IconTrash } from '@/icons/icon';
 import { useAuth } from "@/hooks/useAuth";
 import ConfirmModal from '@/components/ConfirmModel';
+import Image from "next/image";
 
 interface MemberMeasurementsSectionProps {
     memberPublicId: string;
-    measurements: MemberMeasurement[];
-    onMeasurementAdded: () => void;
 }
 
 const MEASUREMENT_CONFIG = [
@@ -38,11 +37,10 @@ const INITIAL_FORM_STATE: CreateMeasurementPayload = {
 
 export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps> = ({
     memberPublicId,
-    measurements = [],
-    onMeasurementAdded,
 }) => {
     const dispatch = useAppDispatch();
     const { user } = useAuth();
+    const { measurements, measurementsLoading } = useAppSelector((state) => state.trainer);
 
     const [selectedId, setSelectedId] = useState<number | string | null>(null);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -91,8 +89,6 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
             if (addMemberMeasurement.fulfilled.match(resultAction)) {
                 setIsAddModalOpen(false);
                 setFormData(INITIAL_FORM_STATE);
-                onMeasurementAdded();
-                dispatch(fetchMemberMeasurements(memberPublicId));
             }
         } finally {
             setFormLoading(false);
@@ -111,8 +107,6 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
             selectedMeasurement.publicId ?? selectedMeasurement.id
         );
 
-
-
         setDeleteLoading(true);
         try {
             const resultAction = await dispatch(deleteMemberMeasurement({
@@ -124,7 +118,6 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
             if (deleteMemberMeasurement.fulfilled.match(resultAction)) {
                 setIsDeleteModalOpen(false);
                 setSelectedId(null);
-                dispatch(fetchMemberMeasurements(memberPublicId));
             }
         } finally {
             setDeleteLoading(false);
@@ -153,106 +146,113 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="flex flex-col space-y-2 max-h-87.5 overflow-y-auto pr-1">
-                    <p className="text-xs font-semibold opacity-50 px-1 uppercase tracking-wider mb-1">Ölçüm Tarihleri</p>
-                    {safeMeasurements.length > 0 ? (
-                        safeMeasurements.map((m, idx) => {
-                            const isSelected = selectedMeasurement?.id === m.id;
-                            const displayDate = formatDate(m.measuredAt || m.createdAt);
-
-                            return (
-                                <div
-                                    key={m.id || idx}
-                                    onClick={() => m.id !== undefined && setSelectedId(m.id)}
-                                    className={`p-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer flex items-center justify-between ${isSelected
-                                        ? 'bg-brand-500/10 border-brand-500 text-brand-500 shadow-sm'
-                                        : 'bg-background border-nav-border hover:border-brand-500/40 text-foreground/80'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-2.5">
-                                        <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-brand-500' : 'bg-nav-border'}`} />
-                                        <span>{displayDate !== "-" ? displayDate : `Ölçüm #${safeMeasurements.length - idx}`}</span>
-                                    </div>
-                                    <IconArrowRight className={`w-4 h-4 transition-transform ${isSelected ? 'opacity-150 translate-x-0.5' : 'opacity-40'}`} />
-                                </div>
-                            );
-                        })
-                    ) : (
-                        <div className="p-6 text-center bg-background border border-nav-border rounded-xl opacity-60 flex flex-col items-center justify-center space-y-2">
-                            <p className="text-xs">Henüz kayıtlı ölçüm bulunmuyor.</p>
-                            <button
-                                onClick={() => setIsAddModalOpen(true)}
-                                className="text-xs text-brand-500 font-bold underline cursor-pointer"
-                            >
-                                İlk ölçümü hemen ekle
-                            </button>
-                        </div>
-                    )}
+            {measurementsLoading && safeMeasurements.length === 0 ? (
+                <div className="flex items-center justify-center py-10 gap-3">
+                    <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-xs opacity-60">Ölçümler yükleniyor...</p>
                 </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="flex flex-col space-y-2 max-h-87.5 overflow-y-auto pr-1">
+                        <p className="text-xs font-semibold opacity-50 px-1 uppercase tracking-wider mb-1">Ölçüm Tarihleri</p>
+                        {safeMeasurements.length > 0 ? (
+                            safeMeasurements.map((m, idx) => {
+                                const isSelected = selectedMeasurement?.id === m.id;
+                                const displayDate = formatDate(m.measuredAt || m.createdAt);
 
-                <div className="md:col-span-2 bg-background border border-nav-border rounded-2xl p-5 flex flex-col justify-between">
-                    {selectedMeasurement ? (
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between pb-3 border-b border-nav-border">
-                                <span className="text-xs font-semibold opacity-60">
-                                    Ölçüm Tarihi: {formatDate(selectedMeasurement.measuredAt || selectedMeasurement.createdAt)}
-                                </span>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-bold">
-                                        Detay Görünümü
-                                    </span>
-                                    <button
-                                        onClick={handleDeleteClick}
-                                        className="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500/20 transition-all cursor-pointer"
-                                        title="Ölçümü Sil"
+                                return (
+                                    <div
+                                        key={m.id || idx}
+                                        onClick={() => m.id !== undefined && setSelectedId(m.id)}
+                                        className={`p-3.5 rounded-xl border text-sm font-medium transition-all cursor-pointer flex items-center justify-between ${isSelected
+                                            ? 'bg-brand-500/10 border-brand-500 text-brand-500 shadow-sm'
+                                            : 'bg-background border-nav-border hover:border-brand-500/40 text-foreground/80'
+                                            }`}
                                     >
-                                        <IconTrash className="w-3.5 h-3.5" />
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                {MEASUREMENT_CONFIG.filter(field => field.key !== 'photos').map((field) => {
-                                    const val = selectedMeasurement[field.key as keyof MemberMeasurement];
-                                    const formattedVal = val != null ? (field.unit === '%' ? `%${val}` : `${val} ${field.unit}`) : "-";
-
-                                    return (
-                                        <div key={field.key} className={`p-3 rounded-xl bg-nav-bg border border-nav-border ${field.colSpan ? 'col-span-2 sm:col-span-3' : ''}`}>
-                                            <p className="text-[11px] opacity-60 font-medium">{field.label}</p>
-                                            <p className="text-base font-bold mt-0.5">{formattedVal}</p>
+                                        <div className="flex items-center gap-2.5">
+                                            <span className={`w-2 h-2 rounded-full ${isSelected ? 'bg-brand-500' : 'bg-nav-border'}`} />
+                                            <span>{displayDate !== "-" ? displayDate : `Ölçüm #${safeMeasurements.length - idx}`}</span>
                                         </div>
-                                    );
-                                })}
+                                        <IconArrowRight className={`w-4 h-4 transition-transform ${isSelected ? 'opacity-150 translate-x-0.5' : 'opacity-40'}`} />
+                                    </div>
+                                );
+                            })
+                        ) : (
+                            <div className="p-6 text-center bg-background border border-nav-border rounded-xl opacity-60 flex flex-col items-center justify-center space-y-2">
+                                <p className="text-xs">Henüz kayıtlı ölçüm bulunmuyor.</p>
+                                <button
+                                    onClick={() => setIsAddModalOpen(true)}
+                                    className="text-xs text-brand-500 font-bold underline cursor-pointer"
+                                >
+                                    İlk ölçümü hemen ekle
+                                </button>
                             </div>
+                        )}
+                    </div>
 
-                            {selectedMeasurement.photos && selectedMeasurement.photos.length > 0 && (
-                                <div className="p-3 rounded-xl bg-nav-bg border border-nav-border">
-                                    <p className="text-[11px] opacity-60 font-medium mb-2">Ölçüm Fotoğrafları</p>
-                                    <div className="flex gap-2 flex-wrap">
-                                        {selectedMeasurement.photos.map((photoUrl, pIdx) => (
-                                            <a key={pIdx} href={photoUrl} target="_blank" rel="noopener noreferrer" className="block w-16 h-16 rounded-lg overflow-hidden border border-nav-border hover:opacity-80 transition-opacity">
-                                                <img src={photoUrl} alt="Ölçüm" className="w-full h-full object-cover" />
-                                            </a>
-                                        ))}
+                    <div className="md:col-span-2 bg-background border border-nav-border rounded-2xl p-5 flex flex-col justify-between">
+                        {selectedMeasurement ? (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between pb-3 border-b border-nav-border">
+                                    <span className="text-xs font-semibold opacity-60">
+                                        Ölçüm Tarihi: {formatDate(selectedMeasurement.measuredAt || selectedMeasurement.createdAt)}
+                                    </span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 font-bold">
+                                            Detay Görünümü
+                                        </span>
+                                        <button
+                                            onClick={handleDeleteClick}
+                                            className="w-7 h-7 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center hover:bg-red-500/20 transition-all cursor-pointer"
+                                            title="Ölçümü Sil"
+                                        >
+                                            <IconTrash className="w-3.5 h-3.5" />
+                                        </button>
                                     </div>
                                 </div>
-                            )}
 
-                            {selectedMeasurement.notes && (
-                                <div className="p-3 rounded-xl bg-nav-bg border border-nav-border">
-                                    <p className="text-[11px] opacity-60 font-medium mb-1">Notlar</p>
-                                    <p className="text-xs opacity-90">{selectedMeasurement.notes}</p>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {MEASUREMENT_CONFIG.filter(field => field.key !== 'photos').map((field) => {
+                                        const val = selectedMeasurement[field.key as keyof MemberMeasurement];
+                                        const formattedVal = val != null ? (field.unit === '%' ? `%${val}` : `${val} ${field.unit}`) : "-";
+
+                                        return (
+                                            <div key={field.key} className={`p-3 rounded-xl bg-nav-bg border border-nav-border ${field.colSpan ? 'col-span-2 sm:col-span-3' : ''}`}>
+                                                <p className="text-[11px] opacity-60 font-medium">{field.label}</p>
+                                                <p className="text-base font-bold mt-0.5">{formattedVal}</p>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="h-full flex flex-col items-center justify-center text-center py-12 opacity-60">
-                            <p className="text-sm">Görüntülemek için soldan bir ölçüm tarihi seçin.</p>
-                        </div>
-                    )}
+
+                                {selectedMeasurement.photos && selectedMeasurement.photos.length > 0 && (
+                                    <div className="p-3 rounded-xl bg-nav-bg border border-nav-border">
+                                        <p className="text-[11px] opacity-60 font-medium mb-2">Ölçüm Fotoğrafları</p>
+                                        <div className="flex gap-2 flex-wrap">
+                                            {selectedMeasurement.photos.map((photoUrl, pIdx) => (
+                                                <a key={pIdx} href={photoUrl} target="_blank" rel="noopener noreferrer" className="block w-16 h-16 rounded-lg overflow-hidden border border-nav-border hover:opacity-80 transition-opacity relative">
+                                                    <Image src={photoUrl} alt="Ölçüm" fill sizes="64px" className="object-cover" />
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedMeasurement.notes && (
+                                    <div className="p-3 rounded-xl bg-nav-bg border border-nav-border">
+                                        <p className="text-[11px] opacity-60 font-medium mb-1">Notlar</p>
+                                        <p className="text-xs opacity-90">{selectedMeasurement.notes}</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-center py-12 opacity-60">
+                                <p className="text-sm">Görüntülemek için soldan bir ölçüm tarihi seçin.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
 
             {isAddModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">

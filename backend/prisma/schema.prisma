@@ -57,7 +57,7 @@ model Member {
   id        Int       @id @default(autoincrement())
   publicId  String    @unique @default(uuid())
   gymId     Int
-  name      String
+  name      String 
   surname   String
   email     String    @unique
   password  String
