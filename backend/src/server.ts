@@ -3,13 +3,16 @@ import cors from "cors";
 import dotenv from "dotenv";
 import prisma from "./lib/db";
 import authRouter from "./routes/auth.routes";
-import { errorHandler } from "./middleware/errorHandler";
+import { errorHandler } from "./middleware/errorMiddleware";
 import sessionRouter from "./routes/session.route";
 import cookieParser from "cookie-parser";
 import gymRouter from "./routes/gym.route";
 import trainerRouter from './routes/trainer.routes';
 import memberRouter from './routes/member.routes';
 import exercisesRouter from './routes/workout.routes';
+import morgan from 'morgan';
+import { logger } from './config/logger';
+
 dotenv.config();
 
 const app = express();
@@ -25,10 +28,17 @@ app.use(cors({
   exposedHeaders: ["Set-Cookie"]
 }));
 
+// LOGGING
+const morganStream = {
+  write: (message: string) => logger.http(message.trim()),
+};
+const morganFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
 
 app.use(express.json());
 app.use(cookieParser());
 
+// LOGGING
+app.use(morgan(morganFormat, { stream: morganStream }));
 // routes
 app.use("/api/auth", authRouter);
 app.use("/api/session", sessionRouter);

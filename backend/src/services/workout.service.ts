@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { logger } from "../config/logger";
 
 const prisma = new PrismaClient();
 
@@ -9,6 +10,7 @@ export class ExerciseService {
         equipment?: string;
         targetMuscle?: string;
     }) {
+        logger.info("Fetching exercises with query filters", { query });
         const { category, equipment, targetMuscle } = query;
 
         const whereClause: any = {};
@@ -33,6 +35,7 @@ export class ExerciseService {
             },
         });
 
+        logger.info(`Successfully fetched ${exercises.length} exercises based on query`);
         return exercises;
     }
 
@@ -45,6 +48,7 @@ export class ExerciseService {
         splitType?: string;
         days: any[];
     }) {
+        logger.info(`Trainer ID ${programData.trainerId} attempting to create workout program for member publicId: ${programData.memberPublicId}`);
         const { trainerId, memberPublicId, title, type, splitType, days } = programData;
 
         const member = await prisma.member.findUnique({
@@ -52,10 +56,12 @@ export class ExerciseService {
         });
 
         if (!member) {
+            logger.warn(`Workout program creation failed: Member not found with publicId: ${memberPublicId}`);
             throw new Error("Üye bulunamadı.");
         }
 
         if (member.trainerId !== trainerId) {
+            logger.warn(`Workout program creation unauthorized: Trainer ID ${trainerId} does not match member's trainer ID ${member.trainerId}`);
             throw new Error("Bu üyeye program oluşturma yetkiniz yok.");
         }
 
@@ -74,6 +80,7 @@ export class ExerciseService {
 
         for (const pid of exercisePublicIds) {
             if (!exerciseIdMap.has(pid)) {
+                logger.warn(`Workout program creation failed: Exercise not found with publicId: ${pid}`);
                 throw new Error(`Egzersiz bulunamadı: ${pid}`);
             }
         }
@@ -121,11 +128,13 @@ export class ExerciseService {
             }
         });
 
+        logger.info(`Workout program successfully created with ID: ${newProgram.id} for member ID: ${member.id}`);
         return newProgram;
     }
 
     // DELETE WORKOUT PROGRAM BY USER 
     async deleteWorkoutProgram(programPublicId: string, trainerId: number) {
+        logger.info(`Trainer ID ${trainerId} attempting to delete workout program with publicId: ${programPublicId}`);
         const program = await prisma.program.findFirst({
             where: {
                 publicId: programPublicId,
@@ -134,6 +143,7 @@ export class ExerciseService {
         });
 
         if (!program) {
+            logger.warn(`Workout program deletion failed: Program not found or unauthorized with publicId: ${programPublicId} for trainer ID: ${trainerId}`);
             throw new Error("The program was either not found or you do not have permission to perform this operation.");
         }
 
@@ -143,6 +153,7 @@ export class ExerciseService {
             },
         });
 
+        logger.info(`Workout program successfully deleted with ID: ${program.id}`);
         return {
             success: true,
             message: "The program and all associated content have been successfully deleted."
@@ -151,6 +162,7 @@ export class ExerciseService {
 
     // GET WORKOUT PROGRAM DETAIL BY USER
     async getProgramDetail(programPublicId: string, trainerId: number) {
+        logger.info(`Fetching workout program detail for publicId: ${programPublicId} by trainer ID: ${trainerId}`);
         const program = await prisma.program.findFirst({
             where: {
                 publicId: programPublicId,
@@ -189,9 +201,11 @@ export class ExerciseService {
         });
 
         if (!program) {
+            logger.warn(`Workout program detail fetch failed: Program not found or unauthorized with publicId: ${programPublicId} for trainer ID: ${trainerId}`);
             throw new Error("Program was either not found or you do not have permission to view this program.");
         }
 
+        logger.info(`Successfully fetched workout program detail for ID: ${program.id}`);
         return {
             success: true,
             data: program,

@@ -207,3 +207,68 @@ model WorkoutSet {
 
   workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
 }
+
+// NUTRUTION PROGRAM MODELS
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+}
+
+model DietProgram {
+  id           Int       @id @default(autoincrement())
+  publicId     String    @unique @default(uuid())
+  memberId     Int
+  trainerId    Int
+  title        String
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  archivedAt   DateTime?
+
+  member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  trainer      Trainer   @relation(fields: [trainerId], references: [id])
+
+  days         DietDay[]
+
+  @@index([memberId, isActive])
+}
+
+model DietDay {
+  id           Int       @id @default(autoincrement())
+  publicId     String    @unique @default(uuid())
+  dietProgramId Int
+  dayName      String
+  dayOrder     Int
+
+  dietProgram  DietProgram @relation(fields: [dietProgramId], references: [id], onDelete: Cascade)
+  meals        Meal[]
+}
+
+model Meal {
+  id           Int       @id @default(autoincrement())
+  publicId     String    @unique @default(uuid())
+  dietDayId    Int
+  mealType     MealType
+  mealTitle    String?
+  orderIndex   Int
+
+  dietDay      DietDay   @relation(fields: [dietDayId], references: [id], onDelete: Cascade)
+  items        MealItem[]
+}
+
+model MealItem {
+  id           Int       @id @default(autoincrement())
+  publicId     String    @unique @default(uuid())
+  mealId       Int
+  foodName     String
+  amount       Float
+  unit         String
+  calories     Float?
+  protein      Float?
+  carbs        Float?
+  fat          Float?
+  notes        String?   @db.Text
+
+  meal         Meal      @relation(fields: [mealId], references: [id], onDelete: Cascade)
+}

@@ -20,11 +20,7 @@ export const MemberDetail: React.FC = () => {
         }
     }, [dispatch, memberPublicId]);
 
-    const handleMeasurementAdded = () => {
-        if (memberPublicId) {
-            dispatch(fetchMemberDetail(memberPublicId));
-        }
-    };
+
 
     if (loading && !selectedMemberDetail) {
         return (
@@ -163,7 +159,7 @@ export const MemberDetail: React.FC = () => {
                     </div>
 
                     {selectedMemberDetail.medicalNotes && (
-                        <div className="mt-4 relative overflow-hidden rounded-2xl border border-red-500/20 bg-gradient-to-br from-red-500/10 via-red-500/5 to-transparent p-5">
+                        <div className="mt-4 relative overflow-hidden rounded-2xl border border-red-500/20 bg-linear-to-br from-red-500/10 via-red-500/5 to-transparent p-5">
                             <div className="absolute -right-4 -top-4 w-24 h-24 rounded-full bg-red-500/10 blur-2xl" />
                             <div className="relative flex items-start gap-3">
                                 <div className="flex-shrink-0 p-2.5 rounded-xl bg-red-500/15 border border-red-500/20 text-red-500">
@@ -187,8 +183,6 @@ export const MemberDetail: React.FC = () => {
 
                 <MemberMeasurementsSection
                     memberPublicId={memberPublicId}
-                    measurements={selectedMemberDetail.measurements || []}
-                    onMeasurementAdded={handleMeasurementAdded}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
