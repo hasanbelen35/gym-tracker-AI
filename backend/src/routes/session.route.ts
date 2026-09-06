@@ -1,12 +1,14 @@
 import { Router } from "express";
 import { SessionController } from "../controllers/session.controller";
 import { authenticate, authorizeGym, authorizeMember } from "../middleware/auth.middleware";
+import { validate } from "../middleware/validate.middleware";
+import { checkInSchema } from "../validations/session.validation";
 
 const router = Router();
 const session = new SessionController();
 
 // Member scans QR and starts workout session
-router.post("/checkin", authenticate, authorizeMember, (req, res, next) => session.checkIn(req, res, next));
+router.post("/checkin", authenticate, authorizeMember, validate(checkInSchema), (req, res, next) => session.checkIn(req, res, next));
 
 // Member scans QR again and ends workout session
 router.post("/checkout", authenticate, authorizeMember, (req, res, next) => session.checkOut(req, res, next));

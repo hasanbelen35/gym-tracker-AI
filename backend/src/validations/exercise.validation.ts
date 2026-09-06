@@ -1,76 +1,51 @@
 import { z } from "zod";
-import { ProgramType, SplitCategory } from "@prisma/client";
 
-export const getExercisesByQuerySchema = z.object({
-    query: z.object({
-        search: z.string().optional(),
-        category: z.string().optional(),
-        equipment: z.string().optional(),
-        targetMuscle: z.string().optional(),
-    }),
-});
-
-const setSchema = z.object({
-  setNumber: z.number().int().min(1),
-  targetReps: z.string().min(1).optional(),
-  targetWeight: z.number().positive().optional(),
-  rir: z.number().int().min(0).max(10).optional(),
-});
-
-const exerciseSchema = z.object({
-  exercisePublicId: z.string().uuid(),
-  orderIndex: z.number().int().min(0), 
-  notes: z.string().optional(),
-  sets: z.array(setSchema).min(1, "Her egzersizin en az bir seti olmalı"),
-});
-
-const daySchema = z.object({
-  dayOrder: z.number().int().min(1).max(7),
-  dayName: z.string().min(1),
-  isRestDay: z.boolean().default(false),
-  exercises: z.array(exerciseSchema).default([]),
-}).refine(
-  (day) => day.isRestDay || day.exercises.length > 0,
-  {
-    message: "Dinlenme günü olmayan günlerde en az bir egzersiz olmalı",
-    path: ["exercises"],
-  }
-).refine(
-  (day) => !day.isRestDay || day.exercises.length === 0,
-  {
-    message: "Dinlenme günlerinde egzersiz olamaz",
-    path: ["exercises"],
-  }
-).refine(
-  (day) => {
-    const indices = day.exercises.map((ex) => ex.orderIndex);
-    return new Set(indices).size === indices.length;
-  },
-  {
-    message: "Aynı gün içinde tekrar eden orderIndex kullanılamaz",
-    path: ["exercises"],
-  }
+const uuidSchema = z.string().regex(
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/,
+  "Invalid UUID format"
 );
 
-export const createProgramSchema = z.object({
-  body: z.object({
-    memberPublicId: z.string().uuid(),
-    title: z.string().min(1),
-    
-    type: z.enum(Object.values(ProgramType) as [ProgramType, ...ProgramType[]]).default(ProgramType.WORKOUT),
-    splitType: z.enum(Object.values(SplitCategory) as [SplitCategory, ...SplitCategory[]]),
-    
-    days: z.array(daySchema).min(1, "En az bir gün eklenmeli"),
-  }).refine(
-    (data) => {
-      const orders = data.days.map((d) => d.dayOrder);
-      return new Set(orders).size === orders.length;
-    },
-    {
-      message: "Her gün için farklı bir dayOrder kullanılmalı",
-      path: ["days"],
-    }
-  ),
+export const getExercisesQuerySchema = z.object({
+  query: z.object({
+    category: z.string().optional(),
+    equipment: z.string().optional(),
+    targetMuscle: z.string().optional(),
+  }),
 });
 
-export type CreateProgramInput = z.infer<typeof createProgramSchema>["body"];
+export const createWorkoutProgramSchema = z.object({
+  body: z.object({
+    memberPublicId: uuidSchema,
+    title: z.string().min(1, "Title is required"),
+    type: z.string().optional(),
+    splitType: z.string().optional(),
+    days: z.array(
+      z.object({
+        dayName: z.string().min(1, "Day name is required"),
+        dayOrder: z.number().int().nonnegative(),
+        isRestDay: z.boolean().optional(),
+        exercises: z.array(
+          z.object({
+            exercisePublicId: uuidSchema,
+            orderIndex: z.number().int().nonnegative().optional(),
+            notes: z.string().optional(),
+            sets: z.array(
+              z.object({
+                setNumber: z.number().int().positive().optional(),
+                targetReps: z.string().optional(),
+                targetWeight: z.number().optional(),
+                rir: z.number().optional(),
+              })
+            ).optional(),
+          })
+        ).optional(),
+      })
+    ).min(1, "At least one day is required"),
+  }),
+});
+
+export const programParamSchema = z.object({
+  params: z.object({
+    programId: uuidSchema,
+  }),
+});
