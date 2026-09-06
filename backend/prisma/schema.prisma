@@ -43,6 +43,7 @@ model Trainer {
   gym       Gym      @relation(fields: [gymId], references: [id])
   myMembers Member[]
   programs  Program[]
+  dietPrograms DietProgram[]
 
 }
 
@@ -77,6 +78,7 @@ model Member {
   sessions  Session[]
   programs  Program[]
   measurements       MemberMeasurement[]
+  dietPrograms DietProgram[]
 }
 
 // Member Measurements
