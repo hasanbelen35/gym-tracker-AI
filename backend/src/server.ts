@@ -1,61 +1,16 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
+import app from "./app";
 import prisma from "./lib/db";
-import authRouter from "./routes/auth.routes";
-import { errorHandler } from "./middleware/errorMiddleware";
-import sessionRouter from "./routes/session.route";
-import cookieParser from "cookie-parser";
-import gymRouter from "./routes/gym.route";
-import trainerRouter from './routes/trainer.routes';
-import memberRouter from './routes/member.routes';
-import exercisesRouter from './routes/workout.routes';
-import morgan from 'morgan';
-import nutritionsRouter from './routes/nutrition.routes';
 import { logger } from './config/logger';
 
-dotenv.config();
-
-const app = express();
 const PORT = process.env.PORT || 5000;
 
-
-
-app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",
-  credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  exposedHeaders: ["Set-Cookie"]
-}));
-
-// LOGGING
-const morganStream = {
-  write: (message: string) => logger.http(message.trim()),
-};
-const morganFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
-
-app.use(express.json());
-app.use(cookieParser());
-
-// LOGGING
-app.use(morgan(morganFormat, { stream: morganStream }));
-// routes
-app.use("/api/auth", authRouter);
-app.use("/api/session", sessionRouter);
-app.use("/api/gym", gymRouter);
-app.use("/api/trainer", trainerRouter);
-app.use("/api/member", memberRouter);
-app.use("/api/exercises", exercisesRouter);
-app.use("/api/nutritions", nutritionsRouter);
-
-app.get("/", (req, res) => {
-  res.json({ message: "GymTrack API is running 🚀" });
-});
-
-app.use(errorHandler);
-
 app.listen(PORT, async () => {
-  await prisma.$connect();
-  console.log(`Server is running on port ${PORT}`);
+  try {
+    await prisma.$connect();
+    logger.info(`Database connected successfully.`);
+    console.log(`Server is running on port ${PORT}`);
+  } catch (error) {
+    logger.error(`Failed to connect to the database: ${error}`);
+    process.exit(1);
+  }
 });
