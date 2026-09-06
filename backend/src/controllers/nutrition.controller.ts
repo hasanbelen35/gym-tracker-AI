@@ -14,8 +14,9 @@ export class DietController {
                 logger.warn("Unauthorized diet program creation attempt: Missing trainer ID in request");
                 return res.status(401).json({ success: false, message: "Unauthorized." });
             }
-
-            const { memberPublicId, title, days } = req.body;
+            const memberPublicId = req.params.memberPublicId as string;
+            
+            const { title, days } = req.body;
             logger.info(`Trainer ID ${trainerId} requesting diet program creation for member publicId: ${memberPublicId}`);
 
             const newProgram = await dietService.createDietProgram({
