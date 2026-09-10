@@ -39,7 +39,6 @@ model Trainer {
   surname   String
   email     String   @unique
   password  String
-  //
   gender    Gender?
   age       Int?
   height    Float?

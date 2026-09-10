@@ -8,6 +8,7 @@ import {
   trainerMemberParamSchema,
   createMeasurementSchema,
   deleteMeasurementSchema,
+  completeTrainerProfileSchema
 } from "../validations/trainer.validations";
 
 const router = Router();
@@ -46,6 +47,11 @@ router.get("/my-members/getMembersMeasurements/:memberPublicId", authenticate, a
 // delete measurement of assigned member
 router.delete("/my-members/deleteMemberMeasurement/:memberPublicId/:measurementPublicId", authenticate, authorizeTrainer, validate(deleteMeasurementSchema), (req, res, next) =>
     trainer.deleteMemberMeasurement(req, res, next)
+);
+
+// complete trainer profile
+router.put("/complete-profile", authenticate, authorizeTrainer, validate(completeTrainerProfileSchema), (req, res, next) =>
+    trainer.completeTrainerProfileController(req, res, next)
 );
 
 export default router;

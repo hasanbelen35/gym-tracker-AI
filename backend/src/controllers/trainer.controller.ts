@@ -193,4 +193,38 @@ export class TrainerController {
             next(error);
         }
     };
+
+    // COMPLETE TRAINER PROFILE CONTROLLER
+    completeTrainerProfileController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user?.id;
+            logger.info(`Trainer ID ${trainerId} attempting to complete profile`);
+
+            if (!trainerId) {
+                logger.warn("Complete trainer profile failed: Unauthorized access, missing trainer ID");
+                return res.status(401).json({ success: false, message: "Unauthorized access." });
+            }
+
+            const { phone, gender, age, height, weight, avatarUrl } = req.body;
+
+            const updatedProfile = await trainerService.completeTrainerProfileService(trainerId, {
+                phone,
+                gender,
+                age,
+                height,
+                weight,
+                avatarUrl,
+            });
+
+            logger.info(`Successfully completed profile for trainer ID: ${trainerId}`);
+            return res.status(200).json({
+                success: true,
+                message: "Profile successfully completed.",
+                data: updatedProfile,
+            });
+        } catch (error) {
+            logger.error("Error in completeTrainerProfileController", { error: error instanceof Error ? error.message : error });
+            next(error);
+        }
+    };
 }

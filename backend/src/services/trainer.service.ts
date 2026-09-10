@@ -1,7 +1,7 @@
 import prisma from "../lib/db";
 import { CreateMeasurementType } from '../types/types';
 import { logger } from "../config/logger";
-
+import { Gender } from "@prisma/client";
 export class TrainerService {
     // SEND ASSIGNMENT REQ TO GYM FOR MEMBER
     async requestMemberAssignment(memberPublicId: string, trainerId: number, gymPublicId: string) {
@@ -221,4 +221,59 @@ export class TrainerService {
         logger.info(`Measurement successfully deleted with publicId: ${measurementPublicId}`);
         return deletedMeasurement;
     }
+
+    // COMPLETE TRAINER PROFILE SERVICE
+  async completeTrainerProfileService(
+    trainerId: number,
+    data: {
+      phone?: string;
+      gender?: Gender;
+      age?: number;
+      height?: number;
+      weight?: number;
+      avatarUrl?: string;
+    }
+  ) {
+    logger.info(`Attempting to complete profile for trainer ID: ${trainerId}`);
+
+    const existingTrainer = await prisma.trainer.findUnique({
+      where: { id: trainerId },
+    });
+
+    if (!existingTrainer) {
+      logger.warn(`Trainer profile completion failed: Trainer not found with ID: ${trainerId}`);
+      throw new Error("Trainer not found");
+    }
+
+    const updatedTrainer = await prisma.trainer.update({
+      where: { id: trainerId },
+      data: {
+        ...(data.phone !== undefined && { phone: data.phone }),
+        ...(data.gender !== undefined && { gender: data.gender }),
+        ...(data.age !== undefined && { age: data.age }),
+        ...(data.height !== undefined && { height: data.height }),
+        ...(data.weight !== undefined && { weight: data.weight }),
+        ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
+        
+        isProfileCompleted: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        surname: true,
+        email: true,
+        phone: true,
+        gender: true,
+        age: true,
+        height: true,
+        weight: true,
+        avatarUrl: true,
+        isProfileCompleted: true,
+        updatedAt: true,
+      },
+    });
+
+    logger.info(`Successfully completed profile for trainer ID: ${trainerId}`);
+    return updatedTrainer;
+  }
 }
