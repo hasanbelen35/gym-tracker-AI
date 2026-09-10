@@ -75,9 +75,11 @@ export const fetchMemberDetail = createAsyncThunk(
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
             const response = await API.get(`/trainer/my-members/${memberPublicId}`);
+            console.log(response.data.data)
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
+            console.log(err)
             return rejectWithValue(err.response?.data?.message);
         }
     }

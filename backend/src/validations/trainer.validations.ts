@@ -21,7 +21,7 @@ export const getTrainerMembersByStatusQuerySchema = z.object({
 
 export const trainerMemberParamSchema = z.object({
   params: z.object({
-    memberId: uuidSchema,
+    memberPublicId: uuidSchema,
   }),
 });
 

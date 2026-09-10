@@ -4,6 +4,16 @@ import prisma from "../lib/db";
 import { logger } from "../config/logger";
 
 export class AuthService {
+  // Global email uniqueness check across all user types (Gym, Member, Trainer)
+  private async isEmailTaken(email: string): Promise<boolean> {
+    const [gym, member, trainer] = await Promise.all([
+      prisma.gym.findUnique({ where: { email } }),
+      prisma.member.findUnique({ where: { email } }),
+      prisma.trainer.findUnique({ where: { email } }),
+    ]);
+    return !!(gym || member || trainer);
+  }
+
   // ----------------------------------------------------- GYM METHODS -----------------------------------------------------
 
   // REGISTER GYM
@@ -16,8 +26,7 @@ export class AuthService {
   }) {
     logger.info(`Attempting to register gym with email: ${data.email}`);
     
-    const existing = await prisma.gym.findUnique({ where: { email: data.email } });
-    if (existing) {
+    if (await this.isEmailTaken(data.email)) {
       logger.warn(`Gym registration failed: Email already exists - ${data.email}`);
       throw new Error("Email already exists");
     }
@@ -65,8 +74,7 @@ export class AuthService {
   }) {
     logger.info(`Attempting to register member with email: ${data.email}, gymId: ${data.gymId}`);
 
-    const existing = await prisma.member.findUnique({ where: { email: data.email } });
-    if (existing) {
+    if (await this.isEmailTaken(data.email)) {
       logger.warn(`Member registration failed: Email already exists - ${data.email}`);
       throw new Error("Email already exists");
     }
@@ -162,8 +170,7 @@ export class AuthService {
   }) {
     logger.info(`Attempting to register trainer with email: ${data.email}, gymId: ${data.gymId}`);
 
-    const existing = await prisma.trainer.findUnique({ where: { email: data.email } });
-    if (existing) {
+    if (await this.isEmailTaken(data.email)) {
       logger.warn(`Trainer registration failed: Email already exists - ${data.email}`);
       throw new Error("Email already exists");
     }
