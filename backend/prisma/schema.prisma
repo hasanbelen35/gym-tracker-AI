@@ -39,12 +39,19 @@ model Trainer {
   surname   String
   email     String   @unique
   password  String
+  //
+  gender    Gender?
+  age       Int?
+  height    Float?
+  weight    Float?
+  phone     String?
+  avatarUrl String?
+  isProfileCompleted Boolean @default(false)
   createdAt DateTime @default(now())
   gym       Gym      @relation(fields: [gymId], references: [id])
   myMembers Member[]
   programs  Program[]
   dietPrograms DietProgram[]
-
 }
 
 // MEMBER GENDER ENUM 
