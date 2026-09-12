@@ -46,10 +46,12 @@ export class AuthController {
       logger.info("Received request to register a new member");
       const data = req.body;
       const result = await authService.registerMember(data);
+      
       logger.info("Member successfully registered via controller");
       res.status(201).json(result);
     } catch (err) {
       logger.error("Error in registerMember controller", { error: err instanceof Error ? err.message : err });
+      console.log(err)
       next(err);
     }
   }

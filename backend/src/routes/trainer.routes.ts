@@ -7,7 +7,6 @@ import {
   getTrainerMembersByStatusQuerySchema,
   trainerMemberParamSchema,
   createMeasurementSchema,
-  deleteMeasurementSchema,
   completeTrainerProfileSchema
 } from "../validations/trainer.validations";
 
@@ -45,7 +44,7 @@ router.get("/my-members/getMembersMeasurements/:memberPublicId", authenticate, a
 );
 
 // delete measurement of assigned member
-router.delete("/my-members/deleteMemberMeasurement/:memberPublicId/:measurementPublicId", authenticate, authorizeTrainer, validate(deleteMeasurementSchema), (req, res, next) =>
+router.delete("/my-members/deleteMemberMeasurement/:memberPublicId/:measurementPublicId", authenticate, authorizeTrainer,  (req, res, next) =>
     trainer.deleteMemberMeasurement(req, res, next)
 );
 

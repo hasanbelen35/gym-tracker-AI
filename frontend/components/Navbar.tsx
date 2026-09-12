@@ -27,7 +27,7 @@ export const Navbar = () => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const { user } = useAuth();
-  
+
   const { profile } = useAppSelector((state) => state.member);
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -57,6 +57,8 @@ export const Navbar = () => {
       router.refresh();
     } catch (error) {
       console.error(CONFIG.logoutErrorMessage, error);
+    } finally {
+      window.location.href = "/login";
     }
   };
 
@@ -100,7 +102,7 @@ export const Navbar = () => {
       <div className="flex items-center gap-3">
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-lg text-brand-600 hover:bg-brand-50 transition-colors"
+          className="p-2 cursor-pointer rounded-lg text-brand-600 hover:bg-brand-50 transition-colors"
           aria-label={CONFIG.themeToggleLabel}
         >
           {isDark ? (

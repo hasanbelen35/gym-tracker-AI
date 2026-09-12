@@ -1,22 +1,20 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
-import { Member, AddMeasurementArgs, DeleteMeasurementArgs, FetchMembersArgs, MemberMeasurement } from '@/types/types';
+import {
+    Member,
+    AddMeasurementArgs,
+    DeleteMeasurementArgs,
+    FetchMembersArgs,
+    MemberMeasurement,
+    CompleteTrainerProfileData,
+    TrainerState,
+} from '@/types/types';
 import { API } from "@/lib/api";
+
 export type { Member };
 
 interface ApiErrorResponse {
     message?: string;
-}
-
-interface TrainerState {
-    pendingMembers: Member[];
-    approvedMembers: Member[];
-    availableMembers: Member[];
-    selectedMemberDetail: Member | null;
-    measurements: MemberMeasurement[];
-    measurementsLoading: boolean;
-    loading: boolean;
-    error: string | null;
 }
 
 const initialState: TrainerState = {
@@ -30,7 +28,6 @@ const initialState: TrainerState = {
     error: null,
 };
 
-// FETCH MEMBERS BY ASSIGNMENT STATUS
 export const fetchMembersByStatus = createAsyncThunk(
     'trainer/fetchMembers',
     async ({ gymId, status }: FetchMembersArgs, { rejectWithValue }) => {
@@ -43,7 +40,7 @@ export const fetchMembersByStatus = createAsyncThunk(
         }
     }
 );
-// SEND REQUEST TO GYM FOT ASSIGN MEMBER TO ON TRAINER
+
 export const requestAssignment = createAsyncThunk(
     'trainer/requestAssignment',
     async (memberPublicId: string, { rejectWithValue }) => {
@@ -56,7 +53,7 @@ export const requestAssignment = createAsyncThunk(
         }
     }
 );
-// CANCEL ASSIGNMENT REQUEST FROM GYM
+
 export const cancelAssignment = createAsyncThunk(
     'trainer/cancelAssignment',
     async (memberPublicId: string, { rejectWithValue }) => {
@@ -69,24 +66,20 @@ export const cancelAssignment = createAsyncThunk(
         }
     }
 );
-// FETCH MEMBER'S DETAILED  DATA
+
 export const fetchMemberDetail = createAsyncThunk(
     'trainer/fetchMemberDetail',
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
             const response = await API.get(`/trainer/my-members/${memberPublicId}`);
-            console.log(response.data.data)
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
-            console.log(err)
             return rejectWithValue(err.response?.data?.message);
         }
     }
 );
 
-
-// ADD MEASUREMENTS TO MEMBER
 export const addMemberMeasurement = createAsyncThunk(
     'trainer/addMemberMeasurement',
     async ({ memberPublicId, measurementData }: AddMeasurementArgs, { rejectWithValue }) => {
@@ -99,7 +92,7 @@ export const addMemberMeasurement = createAsyncThunk(
         }
     }
 );
-// FETCH ALL MEASUREMENTS FROM MEMBER
+
 export const fetchMemberMeasurements = createAsyncThunk(
     'trainer/fetchMemberMeasurements',
     async (memberPublicId: string, { rejectWithValue }) => {
@@ -113,13 +106,25 @@ export const fetchMemberMeasurements = createAsyncThunk(
     }
 );
 
-// DELETE MEASUREMENTS FROM MEMBER
 export const deleteMemberMeasurement = createAsyncThunk(
     'trainer/deleteMemberMeasurement',
     async ({ memberPublicId, measurementPublicId }: DeleteMeasurementArgs, { rejectWithValue }) => {
         try {
             await API.delete(`/trainer/my-members/deleteMemberMeasurement/${memberPublicId}/${measurementPublicId}`);
             return measurementPublicId;
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message);
+        }
+    }
+);
+
+export const completeTrainerProfile = createAsyncThunk(
+    'trainer/completeTrainerProfile',
+    async (profileData: CompleteTrainerProfileData, { rejectWithValue }) => {
+        try {
+            const response = await API.put('/trainer/complete-profile', profileData);
+            return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
             return rejectWithValue(err.response?.data?.message);
@@ -227,6 +232,17 @@ const trainerSlice = createSlice({
             .addCase(deleteMemberMeasurement.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
+            .addCase(completeTrainerProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(completeTrainerProfile.fulfilled, (state) => {
+                state.loading = false;
+            })
+            .addCase(completeTrainerProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            });
     },
 });
 

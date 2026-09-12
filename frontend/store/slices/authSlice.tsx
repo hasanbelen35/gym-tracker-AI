@@ -42,9 +42,11 @@ export const loginGym = createAsyncThunk('auth/loginGym', async (data: Record<st
 export const registerMember = createAsyncThunk('auth/registerMember', async (data: Record<string, unknown>, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/member/register', data);
+        console.log(response)
         return response.data;
     } catch (error) {
         const err = error as AxiosError<ApiErrorResponse>;
+        console.log(err)
         return rejectWithValue(err.response?.data?.message || "Üye kaydı sırasında hata oluştu.");
     }
 });
@@ -96,7 +98,11 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         clearError: (state) => { state.error = null; },
-        logout: (state) => { state.user = null; state.role = null; }
+        logout: (state) => { 
+            state.user = null; 
+            state.role = null; 
+            state.loading = false;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -109,14 +115,20 @@ const authSlice = createSlice({
                 state.user = action.payload.gym;
                 state.role = 'gym';
             })
-            .addCase(logoutUser.fulfilled, (state) => {
-                state.user = null;
-                state.role = null;
-            })
             .addCase(loginMember.fulfilled, (state, action: PayloadAction<{ member: Member }>) => {
                 state.loading = false;
                 state.user = action.payload.member;
                 state.role = 'member';
+            })
+            .addCase(logoutUser.fulfilled, (state) => {
+                state.user = null;
+                state.role = null;
+                state.loading = false;
+            })
+            .addCase(logoutUser.rejected, (state) => {
+                state.user = null;
+                state.role = null;
+                state.loading = false;
             })
             .addMatcher((action) => action.type.endsWith('/pending'), (state) => {
                 state.loading = true;

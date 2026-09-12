@@ -182,13 +182,16 @@ export interface SessionState {
 }
 
 // Trainer State
+
 export interface TrainerState {
-  pendingMembers: Member[];
-  approvedMembers: Member[];
-  availableMembers: Member[];
-  selectedMemberDetail?: Member | null;
-  selectedProgramDetail?: Program | null;
-  error: string | null;
+    pendingMembers: Member[];
+    approvedMembers: Member[];
+    availableMembers: Member[];
+    selectedMemberDetail: Member | null;
+    measurements: MemberMeasurement[];
+    measurementsLoading: boolean;
+    loading: boolean;
+    error: string | null;
 }
 
 // Member State
@@ -281,4 +284,14 @@ export interface FetchMembersArgs {
 export interface AddMeasurementArgs {
   memberPublicId: string;
   measurementData: CreateMeasurementPayload;
+}
+
+
+export interface CompleteTrainerProfileData {
+    phone?: string;
+    gender?: string;
+    age?: number;
+    height?: number;
+    weight?: number;
+    avatarUrl?: string;
 }

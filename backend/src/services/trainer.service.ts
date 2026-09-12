@@ -269,7 +269,6 @@ export class TrainerService {
         weight: true,
         avatarUrl: true,
         isProfileCompleted: true,
-        updatedAt: true,
       },
     });
 

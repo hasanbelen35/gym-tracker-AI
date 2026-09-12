@@ -29,7 +29,7 @@ export default function LoginAthlete() {
     if (loginMember.fulfilled.match(result)) {
       
       const memberData = result.payload.member; 
-
+      console.log(memberData)
       if (memberData?.isProfileCompleted === false) {
         router.push("/athlete/complateProfile");
       } else {
