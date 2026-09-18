@@ -1,11 +1,5 @@
-import React from 'react'
-import RegisterAthlete from '@/components/register/RegisterAthlete'
-const page = () => {
-  return (
-    <div>
-      <RegisterAthlete />
-    </div>
-  )
-}
+import { RegisterForm } from "@/features/auth/register/RegisterForm";
 
-export default page
+export default function RegisterAthletePage() {
+  return <RegisterForm role="athlete" />;
+}
