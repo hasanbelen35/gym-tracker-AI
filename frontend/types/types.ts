@@ -28,12 +28,24 @@ export interface PortalDataRegister extends PortalData { }
 // 2. TEMEL MODEL TİPLERİ (MODELS)
 // ==========================================
 
-export interface Gym {
-  length: number;
-  id: number | string;
+export interface Trainer {
+  id: number;
+  publicId: string;
   name: string;
-  publicId?: string;
-  email?: string;
+  surname: string;
+  email: string;
+  phone?: string | null;
+  age?: number | null;
+  height?: number | null;
+  weight?: number | null;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER' | null;
+  avatarUrl?: string | null;
+  isProfileCompleted?: boolean;
+  gymId?: number;
+  gym?: Gym;
+  myMembers?: Member[];
+  programs?: Program[];
+  createdAt?: string;
 }
 
 export interface TrainerInfo {
@@ -55,6 +67,14 @@ export interface Session {
     name: string;
   };
 }
+
+export interface Gym {
+    length: number;
+    id: number | string;
+    name: string;
+    publicId?: string;
+    email?: string;
+};
 
 export interface SetInput {
   setNumber: number;
@@ -124,14 +144,6 @@ export interface Exercise {
 // ==========================================
 // 3. REDUX STATE TİPLERİ (SLICES)
 // ==========================================
-
-// Auth State
-export interface AuthState {
-  user: Gym | Member | null;
-  role: 'gym' | 'member' | 'trainer' | null;
-  loading: boolean;
-  error: string | null;
-}
 
 // Gym State
 export interface GymState {

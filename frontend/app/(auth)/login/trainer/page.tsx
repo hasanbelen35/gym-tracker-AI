@@ -1,12 +1,5 @@
-import LoginTrainer from '@/components/login/LoginTrainer'
-import React from 'react'
+import { LoginForm } from "@/features/auth/login/loginForm";
 
-const page = () => {
-  return (
-    <div>
-      <LoginTrainer />
-    </div>
-  )
+export default function LoginTrainerPage() {
+  return <LoginForm role="trainer" />;
 }
-
-export default page

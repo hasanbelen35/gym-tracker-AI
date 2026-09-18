@@ -1,12 +1,5 @@
-import LoginGym from '@/components/login/LoginGym'
-import React from 'react'
+import { LoginForm } from "@/features/auth/login/loginForm";
 
-const page = () => {
-  return (
-    <div>
-      <LoginGym />
-    </div>
-  )
+export default function LoginGymPage() {
+  return <LoginForm role="gym" />;
 }
-
-export default page

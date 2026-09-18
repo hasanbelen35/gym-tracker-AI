@@ -1,10 +1,40 @@
-import { createSlice, createAsyncThunk, PayloadAction, AnyAction } from '@reduxjs/toolkit';
-import { Gym, Member, AuthState } from '@/types/types';
+import { createSlice, createAsyncThunk, PayloadAction, UnknownAction } from '@reduxjs/toolkit';
+import { Gym, Member, Trainer } from '@/types/types';
+import { AuthState } from '@/types/auth.types'
 import { AxiosError } from "axios";
 import { API } from "@/lib/api";
 
 interface ApiErrorResponse {
     message?: string;
+}
+
+export interface LoginCredentials {
+    email: string;
+    password: string;
+}
+
+interface RegisterGymData {
+    name: string;
+    email: string;
+    password: string;
+    address?: string;
+    phone?: string;
+}
+
+interface RegisterMemberData {
+    name: string;
+    surname: string;
+    email: string;
+    password: string;
+    gymId: number;
+}
+
+interface RegisterTrainerData {
+    name: string;
+    surname: string;
+    email: string;
+    password: string;
+    gymId: number;
 }
 
 const initialState: AuthState = {
@@ -14,20 +44,17 @@ const initialState: AuthState = {
     error: null,
 };
 
-
-// ------------------------------------------------------------------------REGISTER ------------------------------------------------------------------------
-
-export const registerGym = createAsyncThunk('auth/registerGym', async (data: Record<string, unknown>, { rejectWithValue }) => {
+export const registerGym = createAsyncThunk('auth/registerGym', async (data: RegisterGymData, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/gym/register', data);
         return response.data;
     } catch (error) {
         const err = error as AxiosError<ApiErrorResponse>;
-        return rejectWithValue(err.response?.data?.message || "Eğitmen bilgisi alınamadı.");
+        return rejectWithValue(err.response?.data?.message || "Salon kaydı yapılamadı.");
     }
 });
 
-export const loginGym = createAsyncThunk('auth/loginGym', async (data: Record<string, unknown>, { rejectWithValue }) => {
+export const loginGym = createAsyncThunk('auth/loginGym', async (data: LoginCredentials, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/gym/login', data);
         return response.data;
@@ -37,21 +64,17 @@ export const loginGym = createAsyncThunk('auth/loginGym', async (data: Record<st
     }
 });
 
-// ------------------------------------------------------------------------MEMBER ------------------------------------------------------------------------
-
-export const registerMember = createAsyncThunk('auth/registerMember', async (data: Record<string, unknown>, { rejectWithValue }) => {
+export const registerMember = createAsyncThunk('auth/registerMember', async (data: RegisterMemberData, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/member/register', data);
-        console.log(response)
         return response.data;
     } catch (error) {
         const err = error as AxiosError<ApiErrorResponse>;
-        console.log(err)
         return rejectWithValue(err.response?.data?.message || "Üye kaydı sırasında hata oluştu.");
     }
 });
 
-export const loginMember = createAsyncThunk('auth/loginMember', async (data: Record<string, unknown>, { rejectWithValue }) => {
+export const loginMember = createAsyncThunk('auth/loginMember', async (data: LoginCredentials, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/member/login', data);
         return response.data;
@@ -61,9 +84,7 @@ export const loginMember = createAsyncThunk('auth/loginMember', async (data: Rec
     }
 });
 
-// ------------------------------------------------------------------------TRAINER ------------------------------------------------------------------------
-
-export const registerTrainer = createAsyncThunk('auth/registerTrainer', async (data: Record<string, unknown>, { rejectWithValue }) => {
+export const registerTrainer = createAsyncThunk('auth/registerTrainer', async (data: RegisterTrainerData, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/trainer/register', data);
         return response.data;
@@ -73,7 +94,7 @@ export const registerTrainer = createAsyncThunk('auth/registerTrainer', async (d
     }
 });
 
-export const loginTrainer = createAsyncThunk('auth/loginTrainer', async (data: Record<string, unknown>, { rejectWithValue }) => {
+export const loginTrainer = createAsyncThunk('auth/loginTrainer', async (data: LoginCredentials, { rejectWithValue }) => {
     try {
         const response = await API.post('/auth/trainer/login', data);
         return response.data;
@@ -83,7 +104,6 @@ export const loginTrainer = createAsyncThunk('auth/loginTrainer', async (data: R
     }
 });
 
-// LOGOUT USER 
 export const logoutUser = createAsyncThunk('auth/logout', async (_, { rejectWithValue }) => {
     try {
         await API.post('/auth/logout');
@@ -98,9 +118,9 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         clearError: (state) => { state.error = null; },
-        logout: (state) => { 
-            state.user = null; 
-            state.role = null; 
+        logout: (state) => {
+            state.user = null;
+            state.role = null;
             state.loading = false;
         }
     },
@@ -120,6 +140,11 @@ const authSlice = createSlice({
                 state.user = action.payload.member;
                 state.role = 'member';
             })
+            .addCase(loginTrainer.fulfilled, (state, action: PayloadAction<{ trainer: Trainer }>) => {
+                state.loading = false;
+                state.user = action.payload.trainer;
+                state.role = 'trainer';
+            })
             .addCase(logoutUser.fulfilled, (state) => {
                 state.user = null;
                 state.role = null;
@@ -134,9 +159,9 @@ const authSlice = createSlice({
                 state.loading = true;
                 state.error = null;
             })
-            .addMatcher((action) => action.type.endsWith('/rejected'), (state, action: AnyAction) => {
+            .addMatcher((action) => action.type.endsWith('/rejected'), (state, action: UnknownAction) => {
                 state.loading = false;
-                state.error = action.payload as string || 'Beklenmedik bir hata oluştu.';
+                state.error = (action as { payload?: string }).payload || 'Beklenmedik bir hata oluştu.';
             })
             .addMatcher((action) => action.type.endsWith('/fulfilled'), (state) => {
                 state.loading = false;

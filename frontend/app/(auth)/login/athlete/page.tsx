@@ -1,11 +1,5 @@
-import React from 'react'
-import LoginAthlete from '@/components/login/LoginAthlete'
-const page = () => {
-  return (
-    <div>
-      <LoginAthlete / >
-    </div>
-  )
-}
+import { LoginForm } from "@/features/auth/login/loginForm";
 
-export default page
+export default function LoginAthletePage() {
+  return <LoginForm role="athlete" />;
+}
