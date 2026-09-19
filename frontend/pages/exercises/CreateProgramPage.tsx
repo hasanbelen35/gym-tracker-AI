@@ -106,10 +106,10 @@ export default function CreateProgramPage() {
 
       <div className="flex items-center justify-center gap-4 mb-8">
         <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${step === 1 ? "bg-brand-500 text-white border-brand-500" : "bg-nav-bg text-foreground border-nav-border"}`}>
-          <span>1</span> Split & Details
+          <span>1</span> Split & Detay
         </div>
         <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${step === 2 ? "bg-brand-500 text-white border-brand-500" : "bg-nav-bg text-foreground border-nav-border"}`}>
-          <span>2</span> Days & Exercises
+          <span>2</span> Günler & Egzersizler
         </div>
       </div>
 

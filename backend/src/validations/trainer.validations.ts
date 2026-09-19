@@ -4,19 +4,19 @@ import { z } from "zod";
 
 export const requestAssignmentSchema = z.object({
   body: z.object({
-    memberPublicId: z.string(),
+    memberPublicId: z.string().optional(),
   }),
 });
 
 export const getTrainerMembersByStatusQuerySchema = z.object({
   query: z.object({
-    status: z.string(),
+    status: z.string().optional(),
   }),
 });
 
 export const trainerMemberParamSchema = z.object({
   params: z.object({
-    memberPublicId: z.string(),
+    memberPublicId: z.string().optional(),
   }),
 });
 
@@ -24,30 +24,13 @@ export const trainerMemberParamSchema = z.object({
 
 export const createMeasurementSchema = z.object({
   params: z.object({
-    memberId: z.string(),
+    memberId: z.string().optional(),
   }),
-  body: z.object({
-    bodyFatRate: z.number().optional(),
-    muscleMass: z.number().optional(),
-    chest: z.number().optional(),
-    waist: z.number().optional(),
-    arm: z.number().optional(),
-    hip: z.number().optional(),
-    shoulder: z.number().optional(),
-    photos: z.array(z.string()).optional(),
-    notes: z.string().optional(),
-  }),
+  body: z.object({}).passthrough().optional(), 
 });
 
 // ---------------- ANTRENÖR PROFİLİ ----------------
 
 export const completeTrainerProfileSchema = z.object({
-  body: z.object({
-    phone: z.string().optional(),
-    gender: z.string().optional(),
-    age: z.number().optional(),
-    height: z.number().optional(),
-    weight: z.number().optional(),
-    avatarUrl: z.string().optional(),
-  }),
+  body: z.object({}).passthrough().optional(),
 });

@@ -82,9 +82,9 @@ export class TrainerService {
                 weight: true,
                 height: true,
                 age: true,
-                medicalNotes:true,
-                gender:true,
-                avatarUrl:true,
+                medicalNotes: true,
+                gender: true,
+                avatarUrl: true,
                 gym: {
                     select: { name: true }
                 },
@@ -223,56 +223,90 @@ export class TrainerService {
     }
 
     // COMPLETE TRAINER PROFILE SERVICE
-  async completeTrainerProfileService(
-    trainerId: number,
-    data: {
-      phone?: string;
-      gender?: Gender;
-      age?: number;
-      height?: number;
-      weight?: number;
-      avatarUrl?: string;
+    async completeTrainerProfileService(
+        trainerId: number,
+        data: {
+            phone?: string;
+            gender?: Gender;
+            age?: number;
+            height?: number;
+            weight?: number;
+            avatarUrl?: string;
+        }
+    ) {
+        logger.info(`Attempting to complete profile for trainer ID: ${trainerId}`);
+
+        const existingTrainer = await prisma.trainer.findUnique({
+            where: { id: trainerId },
+        });
+
+        if (!existingTrainer) {
+            logger.warn(`Trainer profile completion failed: Trainer not found with ID: ${trainerId}`);
+            throw new Error("Trainer not found");
+        }
+
+        const updatedTrainer = await prisma.trainer.update({
+            where: { id: trainerId },
+            data: {
+                ...(data.phone !== undefined && { phone: data.phone }),
+                ...(data.gender !== undefined && { gender: data.gender }),
+                ...(data.age !== undefined && { age: data.age }),
+                ...(data.height !== undefined && { height: data.height }),
+                ...(data.weight !== undefined && { weight: data.weight }),
+                ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
+
+                isProfileCompleted: true,
+            },
+            select: {
+                id: true,
+                name: true,
+                surname: true,
+                email: true,
+                phone: true,
+                gender: true,
+                age: true,
+                height: true,
+                weight: true,
+                avatarUrl: true,
+                isProfileCompleted: true,
+            },
+        });
+
+        logger.info(`Successfully completed profile for trainer ID: ${trainerId}`);
+        return updatedTrainer;
     }
-  ) {
-    logger.info(`Attempting to complete profile for trainer ID: ${trainerId}`);
 
-    const existingTrainer = await prisma.trainer.findUnique({
-      where: { id: trainerId },
-    });
+    // GET TRAINER'S DETAILED PROFILE DATA BY ID 
+    async getTrainerProfileWithGym(trainerId: number) {
+        const trainer = await prisma.trainer.findUnique({
+            where: { id: trainerId },
+            select: {
+                id: true,
+                name: true,
+                surname: true,
+                email: true,
+                gender: true,
+                age: true,
+                height: true,
+                weight: true,
+                phone: true,
+                avatarUrl: true,
+                createdAt: true,
+                gym: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        });
 
-    if (!existingTrainer) {
-      logger.warn(`Trainer profile completion failed: Trainer not found with ID: ${trainerId}`);
-      throw new Error("Trainer not found");
+        if (!trainer) {
+            throw new Error("Trainer not found.");
+        }
+
+        return trainer;
     }
 
-    const updatedTrainer = await prisma.trainer.update({
-      where: { id: trainerId },
-      data: {
-        ...(data.phone !== undefined && { phone: data.phone }),
-        ...(data.gender !== undefined && { gender: data.gender }),
-        ...(data.age !== undefined && { age: data.age }),
-        ...(data.height !== undefined && { height: data.height }),
-        ...(data.weight !== undefined && { weight: data.weight }),
-        ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
-        
-        isProfileCompleted: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        surname: true,
-        email: true,
-        phone: true,
-        gender: true,
-        age: true,
-        height: true,
-        weight: true,
-        avatarUrl: true,
-        isProfileCompleted: true,
-      },
-    });
 
-    logger.info(`Successfully completed profile for trainer ID: ${trainerId}`);
-    return updatedTrainer;
-  }
+
 }

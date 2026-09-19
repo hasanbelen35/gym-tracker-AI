@@ -227,4 +227,29 @@ export class TrainerController {
             next(error);
         }
     };
+
+    // GET TRAINER'S DETAILED PROFILE DATA BY ID 
+    getTrainerProfileController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user?.id;
+            logger.info(`Trainer ID ${trainerId} attempting to fetch profile`);
+
+            if (!trainerId) {
+                logger.warn("Get trainer profile failed: Unauthorized access, missing trainer ID");
+                return res.status(401).json({ success: false, message: "Unauthorized access." });
+            }
+
+            const profile = await trainerService.getTrainerProfileWithGym(trainerId);
+
+            logger.info(`Successfully fetched profile for trainer ID: ${trainerId}`);
+            return res.status(200).json({
+                success: true,
+                message: "Profile successfully fetched.",
+                data: profile,
+            });
+        } catch (error) {
+            logger.error("Error in getTrainerProfileController", { error: error instanceof Error ? error.message : error });
+            next(error);
+        }
+    };
 }

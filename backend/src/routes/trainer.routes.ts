@@ -3,11 +3,11 @@ import { TrainerController } from "../controllers/trainer.controller";
 import { authenticate, authorizeTrainer } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
 import {
-  requestAssignmentSchema,
-  getTrainerMembersByStatusQuerySchema,
-  trainerMemberParamSchema,
-  createMeasurementSchema,
-  completeTrainerProfileSchema
+    requestAssignmentSchema,
+    getTrainerMembersByStatusQuerySchema,
+    trainerMemberParamSchema,
+    createMeasurementSchema,
+    completeTrainerProfileSchema
 } from "../validations/trainer.validations";
 
 const router = Router();
@@ -44,13 +44,18 @@ router.get("/my-members/getMembersMeasurements/:memberPublicId", authenticate, a
 );
 
 // delete measurement of assigned member
-router.delete("/my-members/deleteMemberMeasurement/:memberPublicId/:measurementPublicId", authenticate, authorizeTrainer,  (req, res, next) =>
+router.delete("/my-members/deleteMemberMeasurement/:memberPublicId/:measurementPublicId", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.deleteMemberMeasurement(req, res, next)
 );
 
 // complete trainer profile
 router.put("/complete-profile", authenticate, authorizeTrainer, validate(completeTrainerProfileSchema), (req, res, next) =>
     trainer.completeTrainerProfileController(req, res, next)
+);
+
+// get trainer profile
+router.get("/profile", authenticate, authorizeTrainer, (req, res, next) =>
+    trainer.getTrainerProfileController(req, res, next)
 );
 
 export default router;

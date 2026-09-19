@@ -127,7 +127,7 @@ export default function TrainerAthletesPage() {
                 <div className="mb-6">
                     <button
                         onClick={() => router.back()}
-                        className="group flex items-center gap-2 px-4 py-2 rounded-xl bg-nav-bg border border-nav-border text-sm font-medium hover:border-brand-500 hover:text-brand-500 transition-all shadow-sm"
+                        className="group flex items-center gap-2 cursor-pointer px-4 py-2 rounded-xl bg-nav-bg border border-nav-border text-sm font-medium hover:border-brand-500 hover:text-brand-500 transition-all shadow-sm"
                     >
                         <span className="transition-transform group-hover:-translate-x-1">&larr;</span> Geri Dön
                     </button>
