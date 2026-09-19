@@ -193,18 +193,7 @@ export interface SessionState {
   history: Session[];
 }
 
-// Trainer State
 
-export interface TrainerState {
-    pendingMembers: Member[];
-    approvedMembers: Member[];
-    availableMembers: Member[];
-    selectedMemberDetail: Member | null;
-    measurements: MemberMeasurement[];
-    measurementsLoading: boolean;
-    loading: boolean;
-    error: string | null;
-}
 
 // Member State
 export interface MemberState {

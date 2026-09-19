@@ -7,8 +7,8 @@ import {
     FetchMembersArgs,
     MemberMeasurement,
     CompleteTrainerProfileData,
-    TrainerState,
 } from '@/types/types';
+import { TrainerProfile, TrainerState } from '@/types/trainer.types';
 import { API } from "@/lib/api";
 
 export type { Member };
@@ -26,7 +26,26 @@ const initialState: TrainerState = {
     measurementsLoading: false,
     loading: false,
     error: null,
+    trainerProfile: null,
 };
+
+
+export const fetchTrainerProfile = createAsyncThunk<
+    TrainerProfile, 
+    void,           
+    { rejectValue: string }
+>(
+    'trainer/fetchTrainerProfile',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await API.get('/trainer/profile');
+            return response.data.data;
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(err.response?.data?.message || 'Bir hata oluştu');
+        }
+    }
+);
 
 export const fetchMembersByStatus = createAsyncThunk(
     'trainer/fetchMembers',
@@ -144,6 +163,18 @@ const trainerSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(fetchTrainerProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchTrainerProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                state.trainerProfile = action.payload;
+            })
+            .addCase(fetchTrainerProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
             .addCase(fetchMembersByStatus.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -247,4 +278,4 @@ const trainerSlice = createSlice({
 });
 
 export const { clearSelectedMember } = trainerSlice.actions;
-export default trainerSlice.reducer;
+export default trainerSlice.reducer; 
