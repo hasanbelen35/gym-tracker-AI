@@ -26,10 +26,17 @@ const initialState: TrainerState = {
     measurementsLoading: false,
     loading: false,
     error: null,
-    trainerProfile: null,
+    trainerProfile: {
+        id: 0,
+        name: '',
+        surname: '',
+        email: '',
+        createdAt: '',
+        gym: {
+            name: '',
+        },
+    },
 };
-
-
 export const fetchTrainerProfile = createAsyncThunk<
     TrainerProfile, 
     void,           
@@ -163,6 +170,7 @@ const trainerSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // 2. Fetch Trainer Profile Reducers
             .addCase(fetchTrainerProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;

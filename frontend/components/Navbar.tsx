@@ -3,9 +3,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/providers/ThemeProvider";
-import { useAppDispatch, useAppSelector } from "@/store/store"; // useAppSelector eklendi
+import { useAppDispatch, useAppSelector } from "@/store/store";
 import { logoutUser } from "@/store/slices/authSlice";
-import { fetchCurrentMember } from "@/store/slices/memberSlice"; // fetchCurrentMember eklendi
+import { fetchCurrentMember } from "@/store/slices/memberSlice";
+import { fetchTrainerProfile } from "@/store/slices/trainerSlice";
 import { useAuth } from "@/hooks/useAuth";
 import { IconSun, IconMoon, IconUser, IconLogout } from "@/icons/icon";
 
@@ -29,6 +30,12 @@ export const Navbar = () => {
   const { user } = useAuth();
 
   const { profile } = useAppSelector((state) => state.member);
+  const { trainerProfile } = useAppSelector((state) => state.trainer);
+
+  const avatarUrl =
+    user?.role === 'trainer' ? trainerProfile.avatarUrl :
+    user?.role === 'member' ? profile?.avatarUrl :
+    undefined;
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -37,7 +44,10 @@ export const Navbar = () => {
     if (user?.role === 'member' && !profile) {
       dispatch(fetchCurrentMember());
     }
-  }, [dispatch, user, profile]);
+    if (user?.role === 'trainer' && !trainerProfile.id) {
+      dispatch(fetchTrainerProfile());
+    }
+  }, [dispatch, user, profile, trainerProfile.id]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -119,9 +129,9 @@ export const Navbar = () => {
             aria-label={CONFIG.profileMenuLabel}
             aria-expanded={isMenuOpen}
           >
-            {profile?.avatarUrl ? (
+            {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+              <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
             ) : (
               <IconUser className="w-4 h-4" />
             )}

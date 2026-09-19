@@ -1,6 +1,7 @@
 // features/trainer/components/TrainerProfileUI.tsx
 import React from "react";
-import { IconUser } from "@/icons/icon";
+import { useRouter } from "next/navigation";
+import { IconUser, ArrowLeftIcon } from "@/icons/icon";
 import Loading from "@/components/Loading";
 import { ErrorBox } from "@/components/ui/ErrorBox";
 import { TrainerProfile } from "@/types/trainer.types";
@@ -16,12 +17,23 @@ export const TrainerProfileUI: React.FC<TrainerProfileUIProps> = ({
     loading,
     error,
 }) => {
+    const router = useRouter();
+
     if (loading && !trainerProfile) {
         return <Loading />;
     }
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-8 space-y-6 animate-in fade-in duration-300">
+            {/* BACK BUTTON */}
+            <button
+                onClick={() => router.back()}
+                className="group cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-xl bg-nav-bg border border-nav-border/80 text-xs font-bold uppercase tracking-wider hover:border-brand-500/60 hover:bg-brand-500/5 transition-all shadow-sm"
+            >
+                <ArrowLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                <span>Geri Dön</span>
+            </button>
+
             {error && <ErrorBox message={error} />}
 
             {/* PROFILE TITLE CARD */}

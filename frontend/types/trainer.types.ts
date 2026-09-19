@@ -29,5 +29,5 @@ export interface TrainerState {
     loading: boolean;
     error: string | null;
 
-    trainerProfile: TrainerProfile ;
+    trainerProfile: TrainerProfile;
 }
