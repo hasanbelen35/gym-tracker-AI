@@ -111,4 +111,65 @@ export class MemberService {
         logger.info(`Successfully fetched current profile data for member ID: ${memberId}`);
         return member;
     }
+
+    // GET MEMBER'S PROGRAM BY MEMBER ID 
+    async getMemberPrograms(memberId: number, onlyActive: boolean = false) {
+    logger.info(`Attempting to fetch programs for member ID: ${memberId}`);
+    const existingMember = await prisma.member.findUnique({
+        where: { id: memberId },
+        select: { id: true },
+    });
+
+    if (!existingMember) {
+        logger.warn(`Fetch programs failed: Member not found with ID: ${memberId}`);
+        throw new Error("Üye bulunamadı.");
+    }
+
+    const programs = await prisma.program.findMany({
+        where: {
+            memberId,
+            ...(onlyActive && { isActive: true }),
+        },
+        orderBy: { createdAt: 'desc' },
+        select: {
+            title: true,
+            type: true,
+            splitType: true,
+            isActive: true,
+            createdAt: true,
+            archivedAt: true,
+            days: {
+                orderBy: { dayOrder: 'asc' },
+                select: {
+                    dayName: true,
+                    dayOrder: true,
+                    isRestDay: true,
+                    exercises: {
+                        orderBy: { orderIndex: 'asc' },
+                        select: {
+                            orderIndex: true,
+                            notes: true,
+                            exercise: {
+                                select: { name: true }, // Exercise modelindeki alanlara göre düzelt
+                            },
+                            sets: {
+                                orderBy: { setNumber: 'asc' },
+                                select: {
+                                    setNumber: true,
+                                    targetReps: true,
+                                    targetWeight: true,
+                                    rir: true,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    });
+
+    logger.info(`Fetched ${programs.length} programs for member ID: ${memberId}`);
+    return programs;
+}
+
 }

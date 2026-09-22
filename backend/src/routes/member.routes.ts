@@ -21,4 +21,7 @@ router.put(
 
 // get current member profile
 router.get("/me", authenticate, authorizeMember, (req, res, next) => member.getCurrentMemberController(req, res, next));
+
+// get current member programs
+router.get("/programs", authenticate, authorizeMember, (req, res, next) => member.getMemberProgramsController(req, res, next));
 export default router;

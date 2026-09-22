@@ -70,7 +70,7 @@ export class MemberController {
             next(error);
         }
     }
-    
+
     // get current member's data controller
     async getCurrentMemberController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
@@ -92,6 +92,33 @@ export class MemberController {
 
         } catch (error: any) {
             logger.error("Error in getCurrentMemberController", { error: error instanceof Error ? error.message : error });
+            next(error);
+        }
+    }
+    // GET MEMBER'S PROGRAM BY MEMBER ID CONTROLLER 
+    async getMemberProgramsController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const userId = req.user?.id;
+            logger.info(`Fetching programs for member ID: ${userId}`);
+
+            if (!userId) {
+                logger.warn("Get member programs failed: Authorization failed, missing user ID");
+                return res.status(401).json({ message: "Authorization failed!" });
+            }
+
+            // ?active=true ile sadece aktif programlar gelir
+            const onlyActive = req.query.active === 'true';
+
+            const programs = await memberService.getMemberPrograms(userId, onlyActive);
+
+            logger.info(`Successfully fetched ${programs.length} programs for member ID: ${userId}`);
+            return res.status(200).json({
+                success: true,
+                data: programs
+            });
+
+        } catch (error: any) {
+            logger.error("Error in getMemberProgramsController", { error: error instanceof Error ? error.message : error });
             next(error);
         }
     }
