@@ -12,6 +12,9 @@ import exercisesRouter from './routes/workout.routes';
 import morgan from 'morgan';
 import nutritionsRouter from './routes/nutrition.routes';
 import { logger } from './config/logger';
+import trainerAIRouter from "./routes/ai/trainer.ai.routes";
+import memberAIRouter from "./routes/ai/member.ai.routes";
+import gymAIRouter from "./routes/ai/gym.ai.routes";
 
 dotenv.config();
 
@@ -45,6 +48,10 @@ app.use("/api/trainer", trainerRouter);
 app.use("/api/member", memberRouter);
 app.use("/api/exercises", exercisesRouter);
 app.use("/api/nutritions", nutritionsRouter);
+// ai
+app.use("/api/trainer/ai", trainerAIRouter);
+app.use("/api/member/ai", memberAIRouter);
+app.use("/api/gym/ai", gymAIRouter);
 
 app.get("/", (req, res) => {
   res.json({ message: "GymTrack API is running 🚀" });
