@@ -95,19 +95,7 @@ export const Navbar = () => {
         )}
       </div>
 
-      <div className="relative w-1/3">
-        <input
-          type="text"
-          placeholder={CONFIG.searchPlaceholder}
-          className="w-full bg-white dark:bg-nav-bg border border-nav-border rounded-xl py-2 pl-4 pr-10
-                     placeholder:text-slate-400 text-sm text-brand-text
-                     focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500
-                     transition-all"
-        />
-        <svg className="absolute right-3 top-2.5 w-4 h-4 text-brand-500/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 10.5a6.5 6.5 0 11-13 0 6.5 6.5 0 0113 0z" />
-        </svg>
-      </div>
+      
 
       <div className="flex items-center gap-3">
         <button

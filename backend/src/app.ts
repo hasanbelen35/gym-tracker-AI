@@ -15,7 +15,8 @@ import { logger } from './config/logger';
 import trainerAIRouter from "./routes/ai/trainer.ai.routes";
 import memberAIRouter from "./routes/ai/member.ai.routes";
 import gymAIRouter from "./routes/ai/gym.ai.routes";
-
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 dotenv.config();
 
 const app = express();
@@ -27,7 +28,14 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   exposedHeaders: ["Set-Cookie"]
 }));
-
+// RATE LIMIT
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 dakika
+    max: 100, 
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: "Too many requests, please try again later." }
+});
 // LOGGING
 const morganStream = {
   write: (message: string) => logger.http(message.trim()),
@@ -36,7 +44,12 @@ const morganFormat = process.env.NODE_ENV === 'production' ? 'combined' : 'dev';
 
 app.use(express.json());
 app.use(cookieParser());
-
+// helmet xss
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+// RATE LIMIT
+app.use("/api/", limiter);
 // LOGGING
 app.use(morgan(morganFormat, { stream: morganStream }));
 
