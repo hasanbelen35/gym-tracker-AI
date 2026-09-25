@@ -10,7 +10,7 @@ export interface DietItem {
     carbs?: number | null;
     fat?: number | null;
     notes?: string | null;
-}
+};
 
 export interface Meal {
     publicId?: string;
@@ -18,14 +18,14 @@ export interface Meal {
     mealTitle?: string | null;
     orderIndex?: number;
     items?: DietItem[];
-}
+};
 
 export interface DietDay {
     publicId?: string;
     dayName: string;
     dayOrder: number;
     meals?: Meal[];
-}
+};
 
 export interface NutritionProgram {
     publicId: string;
@@ -37,13 +37,14 @@ export interface NutritionProgram {
         surname: string;
     };
     days?: DietDay[];
-}
+};
 
 export interface CreateDietProgramPayload {
     memberPublicId: string;
     title: string;
+    trainerId: number,
     days: DietDay[];
-}
+};
 
 export interface NutritionState {
     programs: NutritionProgram[];
@@ -51,7 +52,7 @@ export interface NutritionState {
     loading: boolean;
     error: string | null;
     successMessage: string | null;
-}
+};
 
 export interface AxiosErrorResponse {
     response?: {
@@ -59,4 +60,17 @@ export interface AxiosErrorResponse {
             message?: string;
         };
     };
+};
+
+// nutrition
+
+export interface DietProgramItem {
+    id?: number;
+    publicId: string;
+    title: string;
+    isActive: boolean;
+};
+export interface MemberDietProgramsSectionProps {
+    memberPublicId: string;
+    dietPrograms?: DietProgramItem[];
 }

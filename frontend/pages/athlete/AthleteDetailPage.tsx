@@ -5,7 +5,7 @@ import { fetchMemberDetail } from "@/store/slices/trainerSlice";
 import { useParams, useRouter } from "next/navigation";
 import { Program, Session } from "@/types/types";
 import { IconClock, IconArrowRight, ArrowLeftIcon } from '@/icons/icon';
-import { MemberMeasurementsSection } from "@/components/trainer/MemberMeasurementBox";
+import { MemberMeasurementsSection } from "@/features/measurement/index"
 import Image from "next/image";
 import { MemberDietProgramsSection } from "@/features/nutrition/MemberDietProgramsSection";
 

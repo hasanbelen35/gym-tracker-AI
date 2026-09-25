@@ -3,7 +3,7 @@ import React from 'react'
 const CreateNewNutritionProgramPage = () => {
   return (
     <div>
-      yeni prfram olusutr
+      yeni progrma
     </div>
   )
 }

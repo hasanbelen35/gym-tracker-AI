@@ -87,9 +87,11 @@ export const fetchMemberNutritionPrograms = createAsyncThunk<
             const response = await API.get(
                 `/nutrition/getMembersNutritionPrograms/${memberPublicId}`
             );
+            console.log(response.data.data)
             return response.data.data;
         } catch (error: unknown) {
             const err = error as AxiosErrorResponse;
+            console.log(err)
             return rejectWithValue(
                 err.response?.data?.message || "Failed to fetch member diet programs."
             );

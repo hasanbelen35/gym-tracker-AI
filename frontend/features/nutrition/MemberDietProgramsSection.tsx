@@ -2,18 +2,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { IconArrowRight } from "@/icons/icon";
+import {MemberDietProgramsSectionProps} from '@/types/nutrition.types';
 
-interface DietProgramItem {
-    id?: number;
-    publicId: string;
-    title: string;
-    isActive: boolean;
-}
-
-interface MemberDietProgramsSectionProps {
-    memberPublicId: string;
-    dietPrograms?: DietProgramItem[];
-}
 
 export const MemberDietProgramsSection: React.FC<MemberDietProgramsSectionProps> = ({
     memberPublicId,
