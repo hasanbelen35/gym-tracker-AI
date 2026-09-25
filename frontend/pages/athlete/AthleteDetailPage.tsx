@@ -7,6 +7,8 @@ import { Program, Session } from "@/types/types";
 import { IconClock, IconArrowRight, ArrowLeftIcon } from '@/icons/icon';
 import { MemberMeasurementsSection } from "@/components/trainer/MemberMeasurementBox";
 import Image from "next/image";
+import { MemberDietProgramsSection } from "@/features/nutrition/MemberDietProgramsSection";
+
 export const MemberDetail: React.FC = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
@@ -181,9 +183,12 @@ export const MemberDetail: React.FC = () => {
                     )}
                 </div>
 
+                {/* MEASUREMENT */}
                 <MemberMeasurementsSection
                     memberPublicId={memberPublicId}
                 />
+
+                {/* WORKOUT PROGRAM */}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
@@ -284,6 +289,13 @@ export const MemberDetail: React.FC = () => {
                     </div>
 
                 </div>
+
+
+                {/* NUTRITION PROGRAM */}
+                <MemberDietProgramsSection
+                    memberPublicId={memberPublicId}
+                    dietPrograms={selectedMemberDetail.dietPrograms}
+                />
 
             </div>
         </div>

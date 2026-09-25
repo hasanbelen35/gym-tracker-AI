@@ -1,4 +1,4 @@
-import CreateProgramPage from '@/pages/exercises/CreateProgramPage'
+import CreateProgramPage from '@/pages/trainer/CreateProgramPage'
 import React from 'react'
 
 const page = () => {
