@@ -1,11 +1,5 @@
-import React from 'react'
-import AthleteAssignment from '@/components/trainer/AthleteAssignment'
-const page = () => {
-  return (
-    <div>
-      <AthleteAssignment />
-    </div>
-  )
-}
+import { TrainerAthletesContainer } from "@/features/trainer/athlete-assignment/container/TrainerAthletesAssignmentContainer";
 
-export default page
+export default function TrainerAthletesPage() {
+    return <TrainerAthletesContainer />;
+}

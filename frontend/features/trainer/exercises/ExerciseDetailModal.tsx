@@ -2,7 +2,7 @@
 'use client';
 
 import React from "react";
-import { Exercise } from "@/components/exercises/Exercises";
+import { Exercise } from "@/features/trainer/exercises/Exercises";
 import { IconClose, IconPlus, IconTarget, IconDumbbell } from "@/icons/icon";
 
 interface ExerciseDetailModalProps {

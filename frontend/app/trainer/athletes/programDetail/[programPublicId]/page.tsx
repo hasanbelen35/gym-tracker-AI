@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchProgramDetail, deleteProgram, ProgramDayDetail } from "@/store/slices/exerciseSlice";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeftIcon, IconTrash } from '@/icons/icon';
-import { ExerciseCard } from "@/components/exercises/ExerciseDetailCard";
+import { ExerciseCard } from "@/features/trainer/create-workout-program-to-athlete/ExerciseDetailCard";
 import ConfirmModal from "@/components/ConfirmModel";
 
 export default function ProgramDetail() {

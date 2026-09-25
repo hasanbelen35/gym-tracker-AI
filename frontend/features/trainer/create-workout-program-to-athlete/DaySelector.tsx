@@ -7,8 +7,8 @@ import {
   ProgramExerciseInput as BaseProgramExerciseInput,
   SetInput,
 } from "@/store/slices/exerciseSlice";
-import ExerciseComponent from "@/components/exercises/Exercises";
-import { WorkoutSetInput } from "@/components/exercises/ExerciseConfigModal";
+import ExerciseComponent from "@/features/trainer/exercises/Exercises";
+import { WorkoutSetInput } from "@/features/trainer/exercises/ExerciseConfigModal";
 
 export interface ProgramExerciseInput extends BaseProgramExerciseInput {
   exerciseName?: string;

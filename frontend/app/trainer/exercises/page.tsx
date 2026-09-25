@@ -1,4 +1,4 @@
-import Exercises from '@/components/exercises/Exercises'
+import Exercises from '@/features/trainer/exercises/Exercises'
 import React from 'react'
 
 const ExercisePage = () => {

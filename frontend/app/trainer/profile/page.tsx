@@ -1,5 +1,5 @@
-import TrainerProfilePage from "@/pages/trainer/TrainerProfilePage";
+import TrainerProfileContainer from "@/features/trainer/profile/TrainerProfile";
 
 export default function page() {
-    return <TrainerProfilePage />;
+    return <TrainerProfileContainer />;
 }

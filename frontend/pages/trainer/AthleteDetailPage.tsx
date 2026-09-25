@@ -5,9 +5,8 @@ import { fetchMemberDetail } from "@/store/slices/trainerSlice";
 import { useParams, useRouter } from "next/navigation";
 import { Program, Session } from "@/types/types";
 import { IconClock, IconArrowRight, ArrowLeftIcon } from '@/icons/icon';
-import { MemberMeasurementsSection } from "@/features/measurement/index"
+import { MemberMeasurementsSection } from "@/features/trainer/measurement/index"
 import Image from "next/image";
-import { MemberDietProgramsSection } from "@/features/nutrition/MemberDietProgramsSection";
 
 export const MemberDetail: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -291,11 +290,6 @@ export const MemberDetail: React.FC = () => {
                 </div>
 
 
-                {/* NUTRITION PROGRAM */}
-                <MemberDietProgramsSection
-                    memberPublicId={memberPublicId}
-                    dietPrograms={selectedMemberDetail.dietPrograms}
-                />
 
             </div>
         </div>

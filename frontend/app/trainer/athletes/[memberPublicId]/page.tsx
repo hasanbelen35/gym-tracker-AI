@@ -1,5 +1,5 @@
 import React from 'react';
-import AthleteDetailPage from '@/pages/athlete/AthleteDetailPage';
+import AthleteDetailPage from '@/pages/trainer/AthleteDetailPage';
 
 const page = () => {
   return (

@@ -4,7 +4,7 @@
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchTrainerProfile } from "@/store/slices/trainerSlice"; 
-import { TrainerProfileUI } from "@/components/trainer/TrainerProfileUI";
+import { TrainerProfileUI } from "@/features/trainer/profile/TrainerProfileUI";
 
 const TrainerProfileContainer = () => {
     const dispatch = useAppDispatch();
