@@ -7,17 +7,19 @@ import gymReducer from './slices/gymSlice';
 import trainerReducer from './slices/trainerSlice';
 import memberReducer from './slices/memberSlice';
 import exerciseReducer from "./slices/exerciseSlice";
-export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    session: sessionReducer,
-    gymSession: gymSessionReducer,
-    gym: gymReducer,
-    trainer: trainerReducer,
-    member: memberReducer,
-    exercises: exerciseReducer, 
-  },
+import nutritionReducer from "@/store/slices/nutritionSlice"; 
 
+export const store = configureStore({
+    reducer: {
+        auth: authReducer,
+        session: sessionReducer,
+        gymSession: gymSessionReducer,
+        gym: gymReducer,
+        trainer: trainerReducer,
+        member: memberReducer,
+        exercises: exerciseReducer,
+        nutrition: nutritionReducer, 
+    },
 });
 
 export type RootState = ReturnType<typeof store.getState>;
