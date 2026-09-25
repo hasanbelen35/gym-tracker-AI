@@ -26,7 +26,7 @@ export class DietService {
 
         const newProgram = await prisma.dietProgram.create({
             data: {
-                memberId: member.id,
+                memberPublicId: member.publicId,
                 trainerId,
                 title,
                 isActive: true,
@@ -163,7 +163,7 @@ export class DietService {
         }
 
         const programs = await prisma.dietProgram.findMany({
-            where: { memberId: member.id },
+            where: { memberPublicId: member.publicId },
             orderBy: { createdAt: 'desc' },
             include: {
                 days: {

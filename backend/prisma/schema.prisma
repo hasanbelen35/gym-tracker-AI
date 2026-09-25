@@ -7,17 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// TRAINER ASSINGING TO MEMBER
 enum AssignmentStatus {
   UNASSIGNED
   PENDING
   ASSIGNED
 }
 
-// Gym
 model Gym {
   id        Int      @id @default(autoincrement())
-  publicId  String    @unique @default(uuid())
+  publicId  String   @unique @default(uuid())
   name      String
   address   String?
   phone     String?
@@ -30,88 +28,78 @@ model Gym {
   trainers  Trainer[]
 }
 
-// Trainer
 model Trainer {
-  id        Int      @id @default(autoincrement())
-  publicId  String    @unique @default(uuid())
-  gymId     Int
-  name      String
-  surname   String
-  email     String   @unique
-  password  String
-  gender    Gender?
-  age       Int?
-  height    Float?
-  weight    Float?
-  phone     String?
-  avatarUrl String?
-  isProfileCompleted Boolean @default(false)
-  createdAt DateTime @default(now())
-  gym       Gym      @relation(fields: [gymId], references: [id])
-  myMembers Member[]
-  programs  Program[]
-  dietPrograms DietProgram[]
+  id                 Int       @id @default(autoincrement())
+  publicId           String    @unique @default(uuid())
+  gymId              Int
+  name               String
+  surname            String
+  email              String    @unique
+  password           String
+  gender             Gender?
+  age                Int?
+  height             Float?
+  weight             Float?
+  phone              String?
+  avatarUrl          String?
+  isProfileCompleted Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  gym                Gym       @relation(fields: [gymId], references: [id])
+  myMembers          Member[]
+  programs           Program[]
+  dietPrograms       DietProgram[]
 }
 
-// MEMBER GENDER ENUM 
 enum Gender {
   MALE
   FEMALE
 }
 
-// Member
 model Member {
-  id        Int       @id @default(autoincrement())
-  publicId  String    @unique @default(uuid())
-  gymId     Int
-  name      String 
-  surname   String
-  email     String    @unique
-  password  String
-  age       Int?
-  height    Float?
-  weight    Float?
-  phone     String?
-  medicalNotes String?
-  gender    Gender?
-  avatarUrl String?
-  trainerId Int?
-  assignmentStatus AssignmentStatus @default(UNASSIGNED)
-  isProfileCompleted Boolean @default(false)
-  createdAt DateTime  @default(now())
-  gym       Gym       @relation(fields: [gymId], references: [id])
-  trainer   Trainer?  @relation(fields: [trainerId], references: [id])
-  sessions  Session[]
-  programs  Program[]
+  id                 Int               @id @default(autoincrement())
+  publicId           String            @unique @default(uuid())
+  gymId              Int
+  name               String 
+  surname            String
+  email              String            @unique
+  password           String
+  age                Int?
+  height             Float?
+  weight             Float?
+  phone              String?
+  medicalNotes       String?
+  gender             Gender?
+  avatarUrl          String?
+  trainerId          Int?
+  assignmentStatus   AssignmentStatus  @default(UNASSIGNED)
+  isProfileCompleted Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  gym                Gym               @relation(fields: [gymId], references: [id])
+  trainer            Trainer?          @relation(fields: [trainerId], references: [id])
+  sessions           Session[]
+  programs           Program[]
   measurements       MemberMeasurement[]
-  dietPrograms DietProgram[]
+  dietPrograms       DietProgram[]
 }
 
-// Member Measurements
 model MemberMeasurement {
-  id            Int      @id @default(autoincrement())
-  publicId  String    @unique @default(uuid())
-  
-  memberId      Int
-  member        Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  
-  
-  bodyFatRate   Float?   
-  muscleMass    Float?   
-  chest         Float?   
-  waist         Float?   
-  arm           Float?   
-  hip           Float?   
-  shoulder      Float? 
-
-  photos        Json?  
-  notes         String?  
-
-  measuredAt    DateTime @default(now())
-  createdAt     DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  publicId    String   @unique @default(uuid())
+  memberId    Int
+  member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  bodyFatRate Float?   
+  muscleMass  Float?   
+  chest       Float?   
+  waist       Float?   
+  arm         Float?   
+  hip         Float?   
+  shoulder    Float?   
+  photos      Json?   
+  notes       String?   
+  measuredAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
 }
 
-// Session
 model Session {
   id        Int       @id @default(autoincrement())
   publicId  String    @unique @default(uuid())
@@ -124,30 +112,26 @@ model Session {
   gym       Gym       @relation(fields: [gymId], references: [id])
 }
 
-// EXERCISE
 model Exercise {
-  id               Int      @id @default(autoincrement())
-  publicId         String   @unique @default(uuid())
+  id               Int               @id @default(autoincrement())
+  publicId         String            @unique @default(uuid())
   name             String
   category         String?
   bodyPart         String?
   equipment        String?
   targetMuscle     String?
-  instructions     String?  @db.Text 
+  instructions     String?           @db.Text 
   instruction_steps Json?
   gifUrl           String?
   workoutExercises WorkoutExercise[]
-  createdAt        DateTime @default(now())
+  createdAt        DateTime          @default(now())
 }
 
-
-// Program Type
 enum ProgramType {
   WORKOUT
   DIET
 }
 
-// Split Types
 enum SplitCategory {
   PPL
   UPPER_LOWER
@@ -155,8 +139,6 @@ enum SplitCategory {
   BRO_SPLIT
   CUSTOM
 }
-
-// PROGRAM
 
 model Program {
   id           Int           @id @default(autoincrement())
@@ -168,11 +150,10 @@ model Program {
   splitType    SplitCategory @default(PPL)
   isActive     Boolean       @default(true)
   createdAt    DateTime      @default(now())
-  archivedAt   DateTime?     // set when isActive is flipped to false
+  archivedAt   DateTime?
 
   member       Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
   trainer      Trainer       @relation(fields: [trainerId], references: [id])
-
   days         WorkoutDay[]
 
   @@index([memberId, type, isActive])
@@ -186,7 +167,6 @@ model WorkoutDay {
   dayName     String
   dayOrder    Int
   isRestDay   Boolean           @default(false)
-
   program     Program           @relation(fields: [programId], references: [id], onDelete: Cascade)
   exercises   WorkoutExercise[]
 }
@@ -198,7 +178,6 @@ model WorkoutExercise {
   exerciseId   Int
   orderIndex   Int
   notes        String?        @db.Text
-
   day          WorkoutDay     @relation(fields: [dayId], references: [id], onDelete: Cascade)
   exercise     Exercise       @relation(fields: [exerciseId], references: [id])
   sets         WorkoutSet[]
@@ -212,11 +191,9 @@ model WorkoutSet {
   targetReps        String?
   targetWeight      Float?
   rir               Int?
-
   workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
 }
 
-// NUTRUTION PROGRAM MODELS
 enum MealType {
   BREAKFAST
   LUNCH
@@ -225,58 +202,54 @@ enum MealType {
 }
 
 model DietProgram {
-  id           Int       @id @default(autoincrement())
-  publicId     String    @unique @default(uuid())
-  memberId     Int
-  trainerId    Int
-  title        String
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  archivedAt   DateTime?
+  id             Int       @id @default(autoincrement())
+  publicId       String    @unique @default(uuid())
+  memberPublicId String    
+  trainerId      Int
+  title          String
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  archivedAt     DateTime?
 
-  member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  trainer      Trainer   @relation(fields: [trainerId], references: [id])
+  member         Member    @relation(fields: [memberPublicId], references: [publicId], onDelete: Cascade, map: "DietProgram_member_fkey")
+  trainer        Trainer   @relation(fields: [trainerId], references: [id])
+  days           DietDay[]
 
-  days         DietDay[]
-
-  @@index([memberId, isActive])
+  @@index([memberPublicId, isActive])
 }
 
 model DietDay {
-  id           Int       @id @default(autoincrement())
-  publicId     String    @unique @default(uuid())
+  id            Int         @id @default(autoincrement())
+  publicId      String      @unique @default(uuid())
   dietProgramId Int
-  dayName      String
-  dayOrder     Int
-
-  dietProgram  DietProgram @relation(fields: [dietProgramId], references: [id], onDelete: Cascade)
-  meals        Meal[]
+  dayName       String
+  dayOrder      Int
+  dietProgram   DietProgram @relation(fields: [dietProgramId], references: [id], onDelete: Cascade)
+  meals         Meal[]
 }
 
 model Meal {
-  id           Int       @id @default(autoincrement())
-  publicId     String    @unique @default(uuid())
-  dietDayId    Int
-  mealType     MealType
-  mealTitle    String?
-  orderIndex   Int
-
-  dietDay      DietDay   @relation(fields: [dietDayId], references: [id], onDelete: Cascade)
-  items        MealItem[]
+  id          Int       @id @default(autoincrement())
+  publicId    String    @unique @default(uuid())
+  dietDayId   Int
+  mealType    MealType
+  mealTitle   String?
+  orderIndex  Int
+  dietDay     DietDay   @relation(fields: [dietDayId], references: [id], onDelete: Cascade)
+  items       MealItem[]
 }
 
 model MealItem {
-  id           Int       @id @default(autoincrement())
-  publicId     String    @unique @default(uuid())
-  mealId       Int
-  foodName     String
-  amount       Float
-  unit         String
-  calories     Float?
-  protein      Float?
-  carbs        Float?
-  fat          Float?
-  notes        String?   @db.Text
-
-  meal         Meal      @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  publicId  String    @unique @default(uuid())
+  mealId    Int
+  foodName  String
+  amount    Float
+  unit      String
+  calories  Float?
+  protein   Float?
+  carbs     Float?
+  fat       Float?
+  notes     String?   @db.Text
+  meal      Meal      @relation(fields: [mealId], references: [id], onDelete: Cascade)
 }

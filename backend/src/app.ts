@@ -61,7 +61,7 @@ app.use("/api/gym", gymRouter);
 app.use("/api/trainer", trainerRouter);
 app.use("/api/member", memberRouter);
 app.use("/api/exercises", exercisesRouter);
-app.use("/api/nutritions", nutritionsRouter);
+app.use("/api/nutrition", nutritionsRouter);
 // ai
 app.use("/api/trainer/ai", trainerAIRouter);
 app.use("/api/member/ai", memberAIRouter);
