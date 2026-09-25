@@ -59,6 +59,7 @@ export const fetchMembersByStatus = createAsyncThunk(
     async ({ gymId, status }: FetchMembersArgs, { rejectWithValue }) => {
         try {
             const response = await API.get(`/trainer/getMembers/${gymId}?status=${status}`);
+            console.log(response.data.data)
             return { data: response.data.data, status };
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;

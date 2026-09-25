@@ -1,10 +1,10 @@
 import React from 'react';
-import AthleteDetailPage from '@/pages/trainer/AthleteDetailPage';
+import MemberDetailContainer from '@/features/trainer/athlete-detail/container/MemberDetailContainer';
 
 const page = () => {
   return (
     <div>
-      <AthleteDetailPage />
+      <MemberDetailContainer />
     </div>
   )
 }

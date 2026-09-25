@@ -1,4 +1,4 @@
-import CreateProgramPage from '@/pages/trainer/CreateProgramPage'
+import CreateProgramPage from '@/features/trainer/create-workout-program-to-athlete/container/CreateProgramPage'
 import React from 'react'
 
 const page = () => {

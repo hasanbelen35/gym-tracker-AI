@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand --detectOpenHandles",
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts"
+    "dev": "nodemon --watch src --ext ts,json --exec ts-node src/server.ts"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"

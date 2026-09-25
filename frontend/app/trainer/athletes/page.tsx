@@ -1,9 +1,9 @@
 import React from 'react'
-import Athletes from '@/components/trainer/Athletes';
+import { AthletesContainer } from '@/features/trainer/athletes-list/containers/AthleteContainer';
 const page = () => {
   return (
     <div>
-      <Athletes />
+      <AthletesContainer />
     </div>
   )
 }

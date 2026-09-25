@@ -56,6 +56,7 @@ export class TrainerService {
                 name: true,
                 surname: true,
                 email: true,
+                avatarUrl: true,
                 assignmentStatus: true
             }
         });

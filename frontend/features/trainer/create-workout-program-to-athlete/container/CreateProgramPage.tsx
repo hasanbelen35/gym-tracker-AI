@@ -3,8 +3,8 @@
 
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { SplitSelector, ProgramTypeEnum, SplitCategoryEnum } from "@/features/trainer/create-workout-program-to-athlete/SplitSelector";
-import { ProgramDaysBuilder } from "@/features/trainer/create-workout-program-to-athlete/DaySelector";
+import { SplitSelector, ProgramTypeEnum, SplitCategoryEnum } from "@/features/trainer/create-workout-program-to-athlete/components/SplitSelector";
+import { ProgramDaysBuilder } from "@/features/trainer/create-workout-program-to-athlete/components/DaySelector";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
   createProgram,
