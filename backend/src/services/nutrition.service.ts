@@ -1,16 +1,12 @@
 import { PrismaClient, MealType } from "@prisma/client";
 import { logger } from "../config/logger";
+import { CreateDietProgramInput } from "../types/nutrition.types"; 
 
 const prisma = new PrismaClient();
 
 export class DietService {
     // CREATE DIET PROGRAM
-    async createDietProgram(programData: {
-        trainerId: number;
-        memberPublicId: string;
-        title: string;
-        days: any[];
-    }) {
+    async createDietProgram(programData: CreateDietProgramInput) {
         logger.info(`Trainer ID ${programData.trainerId} attempting to create diet program for member publicId: ${programData.memberPublicId}`);
         const { trainerId, memberPublicId, title, days } = programData;
 
@@ -35,16 +31,16 @@ export class DietService {
                 title,
                 isActive: true,
                 days: {
-                    create: days.map((day: any) => ({
+                    create: days.map((day) => ({
                         dayName: day.dayName,
                         dayOrder: Number(day.dayOrder),
                         meals: {
-                            create: (day.meals || []).map((meal: any, mealIndex: number) => ({
+                            create: (day.meals || []).map((meal, mealIndex) => ({
                                 mealType: meal.mealType as MealType,
                                 mealTitle: meal.mealTitle || null,
                                 orderIndex: Number(meal.orderIndex ?? mealIndex),
                                 items: {
-                                    create: (meal.items || []).map((item: any) => ({
+                                    create: (meal.items || []).map((item) => ({
                                         foodName: item.foodName,
                                         amount: Number(item.amount),
                                         unit: item.unit,

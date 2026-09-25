@@ -9,7 +9,7 @@ export class DietController {
     // CREATE DIET PROGRAM CONTROLLER
     async createDietProgramController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const trainerId = req.user?.id;
+            const trainerId = req.user?.id ? Number(req.user.id) : undefined;
             if (!trainerId) {
                 logger.warn("Unauthorized diet program creation attempt: Missing trainer ID in request");
                 return res.status(401).json({ success: false, message: "Unauthorized." });
@@ -34,14 +34,14 @@ export class DietController {
             });
         } catch (error: any) {
             logger.error(`Error in createDietProgramController: ${error.message}`);
-            return res.status(400).json({ success: false, message: error.message });
+            return next(error);
         }
     }
 
     // DELETE DIET PROGRAM CONTROLLER
     async deleteDietProgramController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const trainerId = req.user?.id;
+            const trainerId = req.user?.id ? Number(req.user.id) : undefined;
             if (!trainerId) {
                 logger.warn("Unauthorized diet program deletion attempt: Missing trainer ID in request");
                 return res.status(401).json({ success: false, message: "Unauthorized." });
@@ -56,14 +56,14 @@ export class DietController {
             return res.status(200).json(result);
         } catch (error: any) {
             logger.error(`Error in deleteDietProgramController: ${error.message}`);
-            return res.status(400).json({ success: false, message: error.message });
+            return next(error);
         }
     }
 
     // GET DIET PROGRAM DETAIL CONTROLLER
     async getDietProgramDetailController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const trainerId = req.user?.id;
+            const trainerId = req.user?.id ? Number(req.user.id) : undefined;
             if (!trainerId) {
                 logger.warn("Unauthorized diet program detail fetch attempt: Missing trainer ID in request");
                 return res.status(401).json({ success: false, message: "Unauthorized." });
@@ -78,14 +78,14 @@ export class DietController {
             return res.status(200).json(result);
         } catch (error: any) {
             logger.error(`Error in getDietProgramDetailController: ${error.message}`);
-            return res.status(404).json({ success: false, message: error.message });
+            return next(error);
         }
     }
 
     // LIST MEMBER DIET PROGRAMS CONTROLLER
     async getMemberDietProgramsController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const trainerId = req.user?.id;
+            const trainerId = req.user?.id ? Number(req.user.id) : undefined;
             if (!trainerId) {
                 logger.warn("Unauthorized member diet programs fetch attempt: Missing trainer ID in request");
                 return res.status(401).json({ success: false, message: "Unauthorized." });
@@ -104,7 +104,7 @@ export class DietController {
             });
         } catch (error: any) {
             logger.error(`Error in getMemberDietProgramsController: ${error.message}`);
-            return res.status(400).json({ success: false, message: error.message });
+            return next(error);
         }
     }
 }

@@ -1,7 +1,3 @@
-// ==========================================
-// 1. GENEL & NAVİGASYON TİPLERİ
-// ==========================================
-
 export interface LeftNavDataType {
   name: string;
   route: string;
@@ -23,10 +19,6 @@ export interface PortalData {
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface PortalDataRegister extends PortalData { }
-
-// ==========================================
-// 2. TEMEL MODEL TİPLERİ (MODELS)
-// ==========================================
 
 export interface Trainer {
   id: number;
@@ -53,6 +45,7 @@ export interface TrainerInfo {
   name: string;
   surname: string;
   email?: string;
+  myMembers?: Member[];
 }
 
 export interface Session {
@@ -69,12 +62,12 @@ export interface Session {
 }
 
 export interface Gym {
-    length: number;
-    id: number | string;
-    name: string;
-    publicId?: string;
-    email?: string;
-};
+  length: number;
+  id: number | string;
+  name: string;
+  publicId?: string;
+  email?: string;
+}
 
 export interface SetInput {
   setNumber: number;
@@ -103,15 +96,15 @@ export interface Program {
   days?: ProgramDayInput[];
   [key: string]: unknown;
 }
+
 export interface Member {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  birthDate(birthDate: any): import("react").ReactNode;
   id: number;
   publicId: string;
   name: string;
   surname: string;
   email: string;
   phone?: string | null;
+  birthDate?: string | null;
   age?: number | null;
   height?: number | null;
   weight?: number | null;
@@ -141,11 +134,6 @@ export interface Exercise {
   gifUrl?: string;
 }
 
-// ==========================================
-// 3. REDUX STATE TİPLERİ (SLICES)
-// ==========================================
-
-// Gym State
 export interface GymState {
   profile: Gym | null;
   loading: boolean;
@@ -177,7 +165,6 @@ export interface GymState {
   statusMembersError: string | null;
 }
 
-// Gym Session State
 export interface GymSessionState {
   allSessions: Session[];
   activeSessions: Session[];
@@ -185,7 +172,6 @@ export interface GymSessionState {
   error: string | null;
 }
 
-// Member Session State
 export interface SessionState {
   isActive: boolean;
   loading: boolean;
@@ -193,9 +179,6 @@ export interface SessionState {
   history: Session[];
 }
 
-
-
-// Member State
 export interface MemberState {
   trainer: TrainerInfo | null;
   assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
@@ -222,7 +205,6 @@ export interface MemberState {
   error: string | null;
 }
 
-// Exercise State
 export interface ExerciseState {
   exercises: Exercise[];
   loading: boolean;
@@ -235,11 +217,6 @@ export interface ExerciseState {
   };
 }
 
-
-// ==========================================
-// MEMBER MEASUREMENT TİPLERİ
-// ==========================================
-
 export interface MemberMeasurement {
   id?: number;
   publicId: string;
@@ -251,7 +228,7 @@ export interface MemberMeasurement {
   arm?: number | null;
   hip?: number | null;
   shoulder?: number | null;
-  photos?: string[]
+  photos?: string[];
   notes?: string | null;
   measuredAt?: string;
   createdAt?: string;
@@ -271,7 +248,6 @@ export interface CreateMeasurementPayload {
 
 export interface DeleteMeasurementArgs {
   trainerId: number;
-
   memberPublicId: string;
   measurementPublicId: string;
 }
@@ -281,18 +257,16 @@ export interface FetchMembersArgs {
   status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED';
 }
 
-
 export interface AddMeasurementArgs {
   memberPublicId: string;
   measurementData: CreateMeasurementPayload;
 }
 
-
 export interface CompleteTrainerProfileData {
-    phone?: string;
-    gender?: string;
-    age?: number;
-    height?: number;
-    weight?: number;
-    avatarUrl?: string;
+  phone?: string;
+  gender?: string;
+  age?: number;
+  height?: number;
+  weight?: number;
+  avatarUrl?: string;
 }

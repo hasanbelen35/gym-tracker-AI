@@ -3,13 +3,14 @@ import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchTrainerDetail, clearTrainerDetail } from "@/store/slices/gymSlice";
-import Loading from '@/components/Loading'
+import Loading from '@/components/Loading';
 
 export default function TrainerDetail() {
   const params = useParams();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const trainerPublicId = params.trainerId as string;
+  
+  const trainerPublicId = params?.trainerId as string;
 
   const { trainerDetail, trainerDetailLoading, trainerDetailError } = useAppSelector((state) => state.gym);
 

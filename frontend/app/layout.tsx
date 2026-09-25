@@ -1,4 +1,5 @@
 // src/app/layout.tsx
+export const fetchCache = "force-no-store";
 import type { Metadata } from "next";
 import { Syne, DM_Sans } from "next/font/google";
 import "./globals.css";

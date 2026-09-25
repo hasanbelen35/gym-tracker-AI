@@ -17,6 +17,7 @@ import memberAIRouter from "./routes/ai/member.ai.routes";
 import gymAIRouter from "./routes/ai/gym.ai.routes";
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+
 dotenv.config();
 
 const app = express();
@@ -30,7 +31,7 @@ app.use(cors({
 }));
 // RATE LIMIT
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 dakika
+    windowMs: 15 * 60 * 1000,
     max: 100, 
     standardHeaders: true,
     legacyHeaders: false,

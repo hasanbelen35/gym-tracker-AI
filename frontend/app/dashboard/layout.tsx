@@ -9,6 +9,7 @@ import { Navbar } from "@/components/Navbar";
 const ROLE_TO_ROUTE: Record<string, string> = {
   gym: "gym",
   member: "athlete",
+  trainer: "trainer",
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -17,7 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
 
   useEffect(() => {
-    if (loading || !user) return;
+    if (loading || !user || !pathname) return;
 
     const expectedSegment = ROLE_TO_ROUTE[user.role];
     const currentSegment = pathname.split("/")[2];
@@ -31,14 +32,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!user) return <p>Lütfen giriş yapın.</p>;
 
   const expectedSegment = ROLE_TO_ROUTE[user.role];
-  const currentSegment = pathname.split("/")[2];
+  const currentSegment = pathname?.split("/")[2]; 
 
   if (expectedSegment && currentSegment && currentSegment !== expectedSegment) {
     return null;
   }
 
-  return <>
-    <Navbar />
-    {children}
-  </>;
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
 }

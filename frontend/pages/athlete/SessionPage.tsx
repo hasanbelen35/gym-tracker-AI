@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { checkIn, checkOut, getSessionsByUser } from "@/store/slices/sessionSlice";
@@ -153,7 +154,7 @@ export default function SessionPage() {
                       </p>
                     </div>
                     <span className="rounded-md bg-brand-50 px-2.5 py-1 text-xs font-bold text-brand-600 dark:bg-brand-100/10">
-                      {session.checkOut ? formatDuration(session.duration) : "Aktif"}
+                      {session.checkOut ? formatDuration(session.duration ?? 0) : "Aktif"}
                     </span>
                   </li>
                 ))}
