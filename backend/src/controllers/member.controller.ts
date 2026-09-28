@@ -125,6 +125,44 @@ export class MemberController {
             return next(error);
         }
     }
+
+    async updateMemberProfile(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const memberId = req.user?.id;
+
+            if (!memberId) {
+                logger.warn("Member profile update failed: Missing user ID in token");
+                return res.status(401).json({ success: false, error: "Yetkilendirme başarısız." });
+            }
+
+            logger.info(`Received profile update request for member ID: ${memberId}`);
+
+            const { name, surname, gender, phone, age, height, weight, medicalNotes } = req.body;
+
+            const updatedProfile = await memberService.updateMemberProfileService(memberId, {
+                name,
+                surname,
+                gender,
+                phone,
+                age,
+                height,
+                weight,
+                medicalNotes,
+            });
+
+            logger.info(`Successfully updated profile response sent for member ID: ${memberId}`);
+            return res.status(200).json({
+                success: true,
+                data: updatedProfile,
+            });
+
+        } catch (error: any) {
+            logger.error("Error in updateMemberProfile controller", {
+                error: error instanceof Error ? error.message : error
+            });
+            return next(error);
+        }
+    }
 }
 
 

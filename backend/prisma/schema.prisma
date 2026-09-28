@@ -75,6 +75,7 @@ model Member {
   assignmentStatus   AssignmentStatus  @default(UNASSIGNED)
   isProfileCompleted Boolean           @default(false)
   createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt 
   gym                Gym               @relation(fields: [gymId], references: [id])
   trainer            Trainer?          @relation(fields: [trainerId], references: [id])
   sessions           Session[]

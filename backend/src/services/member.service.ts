@@ -1,6 +1,7 @@
 import prisma from "../lib/db";
 import { CompleteProfileInput } from '../types/types';
 import { logger } from "../config/logger";
+import { UpdateMemberProfileData } from '../types/member.types';
 
 export class MemberService {
     // wıll delete 
@@ -248,6 +249,56 @@ export class MemberService {
 
         logger.info(`Successfully fetched ${programs.length} programs for member ID: ${memberId}`);
         return programs;
+    }
+
+    // UPDATE MEMBER PROFILE DATA
+   async updateMemberProfileService(
+        memberId: number,
+        data: UpdateMemberProfileData
+    ) {
+        logger.info(`Attempting to update profile for member ID: ${memberId}`);
+
+        const existingMember = await prisma.member.findUnique({
+            where: { id: memberId },
+        });
+
+        if (!existingMember) {
+            logger.warn(`Member profile update failed: Member not found with ID: ${memberId}`);
+            throw new Error("Member not found");
+        }
+
+        const updatedMember = await prisma.member.update({
+            where: { id: memberId },
+            data: {
+                ...(data.name !== undefined && { name: data.name }),
+                ...(data.surname !== undefined && { surname: data.surname }),
+                ...(data.gender !== undefined && { gender: data.gender }),
+                ...(data.phone !== undefined && { phone: data.phone }),
+                ...(data.age !== undefined && { age: data.age }),
+                ...(data.height !== undefined && { height: data.height }),
+                ...(data.weight !== undefined && { weight: data.weight }),
+                ...(data.medicalNotes !== undefined && { medicalNotes: data.medicalNotes }), 
+            },
+            select: {
+                id: true,
+                publicId: true,
+                name: true,
+                surname: true,
+                email: true,
+                phone: true,
+                gender: true,
+                age: true,
+                height: true,
+                weight: true,
+                avatarUrl: true,
+                medicalNotes: true,
+                assignmentStatus: true,
+                updatedAt: true,
+            },
+        });
+
+        logger.info(`Successfully updated profile for member ID: ${memberId}`);
+        return updatedMember;
     }
 }
 
