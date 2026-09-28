@@ -2,6 +2,7 @@ import prisma from "../lib/db";
 import { CreateMeasurementType } from '../types/types';
 import { logger } from "../config/logger";
 import { Gender } from "@prisma/client";
+import { UpdateTrainerProfileData } from "../types/trainer.types";
 export class TrainerService {
     // SEND ASSIGNMENT REQ TO GYM FOR MEMBER
     async requestMemberAssignment(memberPublicId: string, trainerId: number, gymPublicId: string) {
@@ -310,4 +311,50 @@ export class TrainerService {
 
 
 
+    // UPDATE TRAINER PROFILE SERVICE
+    async updateTrainerProfileService(
+        trainerId: number,
+        data: UpdateTrainerProfileData
+    ) {
+        logger.info(`Attempting to update profile for trainer ID: ${trainerId}`);
+
+        const existingTrainer = await prisma.trainer.findUnique({
+            where: { id: trainerId },
+        });
+
+        if (!existingTrainer) {
+            logger.warn(`Trainer profile update failed: Trainer not found with ID: ${trainerId}`);
+            throw new Error("Trainer not found");
+        }
+
+        const updatedTrainer = await prisma.trainer.update({
+            where: { id: trainerId },
+            data: {
+                ...(data.name !== undefined && { name: data.name }),
+                ...(data.surname !== undefined && { surname: data.surname }),
+                ...(data.gender !== undefined && { gender: data.gender }),
+                ...(data.phone !== undefined && { phone: data.phone }),
+                ...(data.age !== undefined && { age: data.age }),
+                ...(data.height !== undefined && { height: data.height }),
+                ...(data.weight !== undefined && { weight: data.weight }),
+            },
+            select: {
+                id: true,
+                name: true,
+                surname: true,
+                email: true, 
+                phone: true,
+                gender: true,
+                age: true,
+                height: true,
+                weight: true,
+                avatarUrl: true,
+                isProfileCompleted: true,
+                updatedAt: true, 
+            },
+        });
+
+        logger.info(`Successfully updated profile for trainer ID: ${trainerId}`);
+        return updatedTrainer;
+    }
 }

@@ -44,6 +44,7 @@ model Trainer {
   avatarUrl          String?
   isProfileCompleted Boolean   @default(false)
   createdAt          DateTime  @default(now())
+  updatedAt          DateTime      @updatedAt 
   gym                Gym       @relation(fields: [gymId], references: [id])
   myMembers          Member[]
   programs           Program[]

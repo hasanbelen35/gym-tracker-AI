@@ -252,4 +252,47 @@ export class TrainerController {
             next(error);
         }
     };
+
+    // UPDATE TRAINER'S DETAILED PROFILE DATA
+    updateTrainerProfileController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user?.id;
+            logger.info(`Trainer ID ${trainerId} attempting to update profile`);
+
+            if (!trainerId) {
+                logger.warn("Update trainer profile failed: Unauthorized access, missing trainer ID");
+                return res.status(401).json({ success: false, message: "Unauthorized access." });
+            }
+
+            const updateData = {
+                name: req.body.name,
+                surname: req.body.surname,
+                gender: req.body.gender,
+                phone: req.body.phone,
+                age: req.body.age,
+                height: req.body.height,
+                weight: req.body.weight,
+            };
+
+            const updatedProfile = await trainerService.updateTrainerProfileService(trainerId, updateData);
+
+            logger.info(`Successfully updated profile for trainer ID: ${trainerId}`);
+            
+            return res.status(200).json({
+                success: true,
+                message: "Profile successfully updated.",
+                data: updatedProfile,
+            });
+        } catch (error) {
+            logger.error("Error in updateTrainerProfileController", { error: error instanceof Error ? error.message : error });
+            
+            if (error instanceof Error && error.message === "Trainer not found") {
+                return res.status(404).json({ success: false, message: "Trainer not found." });
+            }
+            
+            next(error);
+        }
+    };
+
+
 }

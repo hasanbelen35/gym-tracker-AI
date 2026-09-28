@@ -7,7 +7,8 @@ import {
     getTrainerMembersByStatusQuerySchema,
     trainerMemberParamSchema,
     createMeasurementSchema,
-    completeTrainerProfileSchema
+    completeTrainerProfileSchema,
+    updateTrainerProfileSchema
 } from "../validations/trainer.validations";
 
 const router = Router();
@@ -56,6 +57,11 @@ router.put("/complete-profile", authenticate, authorizeTrainer, validate(complet
 // get trainer profile
 router.get("/profile", authenticate, authorizeTrainer, (req, res, next) =>
     trainer.getTrainerProfileController(req, res, next)
+);
+
+// update trainer profile
+router.put("/update-profile", authenticate, authorizeTrainer, validate(updateTrainerProfileSchema), (req, res, next) =>
+    trainer.updateTrainerProfileController(req, res, next)
 );
 
 export default router;

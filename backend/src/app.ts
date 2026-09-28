@@ -34,7 +34,7 @@ app.use(
         exposedHeaders: ["Set-Cookie"],
     })
 );
-
+/*
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
@@ -44,7 +44,7 @@ const limiter = rateLimit({
         success: false,
         message: "Too many requests, please try again later.",
     },
-});
+});*/
 
 const morganStream = {
     write: (message: string) => logger.http(message.trim()),
@@ -64,7 +64,7 @@ app.use(
     })
 );
 
-app.use("/api/", limiter);
+//app.use("/api/", limiter);
 
 app.use(
     morgan(morganFormat, {
