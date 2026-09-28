@@ -22,9 +22,8 @@ export const complateMemberProfileSchema = z.object({
 });
 
 
-// GET MEMBERS PROGRAMS SCHEAMA
-export const updateMemberProfileSchema = z
-  .object({
+export const updateMemberProfileSchema = z.object({
+  body: z.object({
     name: z
       .string()
       .trim()
@@ -80,5 +79,5 @@ export const updateMemberProfileSchema = z
       .trim()
       .max(2000, "Medikal notlar en fazla 2000 karakter olabilir")
       .optional(),
-  })
-  .strict();
+  }),
+});

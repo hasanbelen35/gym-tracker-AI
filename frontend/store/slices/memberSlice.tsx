@@ -87,7 +87,7 @@ export const updateMemberProfileData = createAsyncThunk(
     'member/updateProfile',
     async (data: UpdateMemberProfileData, { rejectWithValue }) => {
         try {
-            const response = await API.put('/members/edit-profile', data);
+            const response = await API.put('/member/edit-profile', data);
             return response.data.data;
         } catch (error) {
             return handleApiError(

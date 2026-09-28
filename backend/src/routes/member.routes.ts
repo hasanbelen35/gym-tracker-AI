@@ -23,7 +23,12 @@ router.get("/me", authenticate, authorizeMember, (req, res, next) => member.getC
 // GET MEMBER WORKOUTS PROGRAMS  
 router.get('/my-programs', authenticate, authorizeMember, (req, res, next) => member.getMyPrograms(req, res, next));
 // UPDATE MEMBER PROFILE DATA
-router.put('/my-programs', authenticate, authorizeMember, validate(updateMemberProfileSchema),
-  (req, res, next) => member.getMyPrograms(req, res, next));
+router.put(
+  '/edit-profile',
+  authenticate,
+  authorizeMember,
+  validate(updateMemberProfileSchema),
+  (req, res, next) => member.updateMemberProfile(req, res, next) 
+);
 
 export default router;
