@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 import { MemberState } from "@/features/member/get-my-programs/types";
-import { API } from "@/lib/api"; 
+import { API } from "@/lib/api";
 import { handleApiError } from "../apiErrorHandler";
+import { UpdateMemberProfileData } from "@/features/member/profile/types";
 
 interface UpdateProfilePayload {
     age?: number;
@@ -27,7 +28,7 @@ export const fetchCurrentMember = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await API.get("/member/me");
-            return response.data.data; 
+            return response.data.data;
         } catch (error) {
             const err = error as AxiosError<{ message?: string }>;
             return rejectWithValue(err.response?.data?.message || "Profile datas can not fetched.");
@@ -40,7 +41,7 @@ export const fetchMyTrainer = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await API.get("/member/getMyTrainerData");
-            return response.data.data; 
+            return response.data.data;
         } catch (error) {
             const err = error as AxiosError<{ message?: string }>;
             return rejectWithValue(err.response?.data?.message || "Trainer data can not fetched.");
@@ -69,13 +70,30 @@ export const fetchMemberPrograms = createAsyncThunk(
     'member/fetchMemberPrograms',
     async (_, { rejectWithValue }) => {
         try {
-            const response = await API.get('/member/my-programs'); 
-            return response.data.data; 
+            const response = await API.get('/member/my-programs');
+            return response.data.data;
         } catch (error) {
             return handleApiError(
-                error, 
-                rejectWithValue, 
+                error,
+                rejectWithValue,
                 "Programlarınız yüklenirken bir hata oluştu."
+            );
+        }
+    }
+);
+
+// UPDATE MEMBER PROFILE
+export const updateMemberProfileData = createAsyncThunk(
+    'member/updateProfile',
+    async (data: UpdateMemberProfileData, { rejectWithValue }) => {
+        try {
+            const response = await API.put('/members/edit-profile', data);
+            return response.data.data;
+        } catch (error) {
+            return handleApiError(
+                error,
+                rejectWithValue,
+                "Profil güncellenirken bir hata oluştu."
             );
         }
     }
@@ -87,6 +105,7 @@ const memberSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            // fetchCurrentMember
             .addCase(fetchCurrentMember.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -99,6 +118,7 @@ const memberSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
+            // fetchMyTrainer
             .addCase(fetchMyTrainer.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -112,20 +132,7 @@ const memberSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-            .addCase(updateMemberProfile.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
-            .addCase(updateMemberProfile.fulfilled, (state, action) => {
-                state.loading = false;
-                if (state.profile) {
-                    state.profile = { ...state.profile, ...action.payload };
-                }
-            })
-            .addCase(updateMemberProfile.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload as string;
-            })
+            // fetchMemberPrograms
             .addCase(fetchMemberPrograms.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -135,6 +142,23 @@ const memberSlice = createSlice({
                 state.programs = action.payload;
             })
             .addCase(fetchMemberPrograms.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+            // updateMemberProfile 
+            .addCase(updateMemberProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(updateMemberProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                if (state.profile) {
+                    state.profile = { ...state.profile, ...action.payload };
+                } else {
+                    state.profile = action.payload;
+                }
+            })
+            .addCase(updateMemberProfile.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             });

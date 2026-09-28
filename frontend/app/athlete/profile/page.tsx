@@ -1,5 +1,5 @@
 
-import ProfilePage from '@/pages/athlete/ProfilePage'
+import ProfilePage from '@/features/member/profile/container/ProfileContainer'
 import React from 'react'
 
 const page = () => {

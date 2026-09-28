@@ -1,6 +1,6 @@
 // --- Yeni Workout Program Hiyerarşi Tipleri ---
 
-import { TrainerInfo } from "@/types/types";
+import { Member, TrainerInfo } from "@/types/types";
 import { Session } from "inspector/promises";
 
 export interface ProgramExerciseDetail {
@@ -56,34 +56,15 @@ export interface DetailedProgram {
   days: WorkoutDayItem[];
 };
 
-
 export interface MemberState {
-  trainer: TrainerInfo | null;
-  assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
-  programs: DetailedProgram[]; 
-  profile: {
-    name?: string;
-    surname?: string;
-    email?: string;
-    age?: number | null;
-    height?: number | null;
-    weight?: number | null;
-    phone?: string | null;
-    medicalNotes?: string | null;
-    gender?: 'MALE' | 'FEMALE' | null;
-    avatarUrl?: string | null;
-    assignmentStatus?: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
-    gym?: {
-      name: string;
-    };
-    trainer?: TrainerInfo | null;
-    sessions?: Session[];
-    [key: string]: unknown;
-  } | null;
-  loading: boolean;
-  error: string | null;
+    trainer: TrainerInfo | null;
+    assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
+    programs: DetailedProgram[]; 
+    profile: Member | null;
+    loading: boolean;
+    error: string | null;
+    successMessage?: string | null;
 }
-
 
 export interface ExerciseItemProps {
     exerciseItem: WorkoutExerciseItem;
