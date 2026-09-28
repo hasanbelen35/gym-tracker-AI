@@ -39,39 +39,39 @@ export const completeTrainerProfileSchema = z.object({
 export const updateTrainerProfileSchema = z.object({
   body: z.object({
     name: z.string()
-      .min(2, "Name must be at least 2 characters long.")
-      .max(50, "Name cannot exceed 50 characters.")
+      .min(2, "Ad en az 2 karakter olmalıdır.")
+      .max(50, "Ad en fazla 50 karakter olabilir.")
       .optional(),
 
     surname: z.string()
-      .min(2, "Surname must be at least 2 characters long.")
-      .max(50, "Surname cannot exceed 50 characters.")
+      .min(2, "Soyad en az 2 karakter olmalıdır.")
+      .max(50, "Soyad en fazla 50 karakter olabilir.")
       .optional(),
 
     gender: z.enum(["MALE", "FEMALE"], {
-      message: "Invalid gender selection."
+      message: "Geçersiz cinsiyet seçimi."
     }).optional(),
 
     phone: z.string()
-      .regex(/^\+?[0-9\s\-()]{10,15}$/, "Invalid phone number format.")
+      .regex(/^\+?[0-9\s\-()]{8,15}$/, "Geçersiz telefon numarası formatı.") 
       .optional(),
 
     age: z.number()
-      .int("Age must be an integer.")
-      .min(18, "Trainer must be at least 18 years old.")
-      .max(100, "Please enter a valid age.")
+      .int("Yaş tam sayı olmalıdır.")
+      .min(18, "Eğitmen en az 18 yaşında olmalıdır.")
+      .max(100, "Lütfen geçerli bir yaş giriniz.")
       .optional(),
 
     height: z.number()
-      .positive("Height must be a positive number.")
-      .min(100, "Height must be at least 100 cm.")
-      .max(250, "Height cannot exceed 250 cm.")
+      .positive("Boy pozitif bir sayı olmalıdır.")
+      .min(100, "Boy en az 100 cm olmalıdır.")
+      .max(250, "Boy 250 cm'den uzun olamaz.")
       .optional(),
 
     weight: z.number()
-      .positive("Weight must be a positive number.")
-      .min(30, "Weight must be at least 30 kg.")
-      .max(250, "Weight cannot exceed 250 kg.")
+      .positive("Kilo pozitif bir sayı olmalıdır.")
+      .min(30, "Kilo en az 30 kg olmalıdır.")
+      .max(250, "Kilo 250 kg'dan fazla olamaz.")
       .optional(),
   }).strict(),
 });

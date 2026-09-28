@@ -1,10 +1,10 @@
-// features/trainer/profile/TrainerProfile.tsx
 'use client';
 
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { fetchTrainerProfile } from "@/store/slices/trainerSlice"; 
+import { fetchTrainerProfile, updateTrainerProfile } from "@/store/slices/trainerSlice";
 import { TrainerProfileUI } from "@/features/trainer/profile/TrainerProfileUI";
+import { UpdateTrainerProfileData } from "@/features/trainer/profile/types";
 
 const TrainerProfileContainer = () => {
     const dispatch = useAppDispatch();
@@ -15,11 +15,16 @@ const TrainerProfileContainer = () => {
         dispatch(fetchTrainerProfile());
     }, [dispatch]);
 
+    const handleUpdate = async (data: UpdateTrainerProfileData) => {
+        await dispatch(updateTrainerProfile(data)).unwrap();
+    };
+
     return (
         <TrainerProfileUI
             trainerProfile={trainerProfile}
             loading={loading}
             error={error}
+            onUpdate={handleUpdate}
         />
     );
 };

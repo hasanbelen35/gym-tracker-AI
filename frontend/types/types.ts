@@ -1,3 +1,17 @@
+
+interface ApiErrorDetail {
+  field: string;
+  message: string;
+}
+
+export interface ApiErrorResponse {
+  success: boolean;
+  error?: string;
+  message?: string;
+  details?: ApiErrorDetail[];
+}
+
+
 export interface LeftNavDataType {
   name: string;
   route: string;
@@ -101,48 +115,48 @@ export interface Program {
 export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 
 export interface MealItem {
-    id?: number;
-    publicId: string;
-    mealId: number;
-    foodName: string;
-    amount: number;
-    unit: string;
-    calories?: number | null;
-    protein?: number | null;
-    carbs?: number | null;
-    fat?: number | null;
-    notes?: string | null;
+  id?: number;
+  publicId: string;
+  mealId: number;
+  foodName: string;
+  amount: number;
+  unit: string;
+  calories?: number | null;
+  protein?: number | null;
+  carbs?: number | null;
+  fat?: number | null;
+  notes?: string | null;
 }
 
 export interface Meal {
-    id?: number;
-    publicId: string;
-    dietDayId: number;
-    mealType: MealType;
-    mealTitle?: string | null;
-    orderIndex: number;
-    items?: MealItem[];
+  id?: number;
+  publicId: string;
+  dietDayId: number;
+  mealType: MealType;
+  mealTitle?: string | null;
+  orderIndex: number;
+  items?: MealItem[];
 }
 
 export interface DietDay {
-    id?: number;
-    publicId: string;
-    dietProgramId: number;
-    dayName: string;
-    dayOrder: number;
-    meals?: Meal[];
+  id?: number;
+  publicId: string;
+  dietProgramId: number;
+  dayName: string;
+  dayOrder: number;
+  meals?: Meal[];
 }
 
 export interface DietProgram {
-    id?: number;
-    publicId: string;
-    memberPublicId: string;
-    trainerId: number;
-    title: string;
-    isActive: boolean;
-    createdAt?: string;
-    archivedAt?: string | null;
-    days?: DietDay[];
+  id?: number;
+  publicId: string;
+  memberPublicId: string;
+  trainerId: number;
+  title: string;
+  isActive: boolean;
+  createdAt?: string;
+  archivedAt?: string | null;
+  days?: DietDay[];
 }
 
 export interface Member {
@@ -165,7 +179,7 @@ export interface Member {
   trainerId?: number | null;
   trainer?: TrainerInfo | null;
   programs?: Program[];
-  dietPrograms?: DietProgram[]; 
+  dietPrograms?: DietProgram[];
   sessions?: Session[];
   measurements?: MemberMeasurement[];
   createdAt?: string;
