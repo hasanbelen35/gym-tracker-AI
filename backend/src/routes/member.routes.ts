@@ -2,7 +2,7 @@ import { Router } from "express";
 import { MemberController } from '../controllers/member.controller';
 import { authenticate, authorizeMember } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
-import { updateMemberProfileSchema } from "../validations/MemberValidations";
+import { updateMemberProfileSchema, getMemberProgramsSchema } from "../validations/MemberValidations";
 
 const router = Router();
 const member = new MemberController();
@@ -22,6 +22,8 @@ router.put(
 // get current member profile
 router.get("/me", authenticate, authorizeMember, (req, res, next) => member.getCurrentMemberController(req, res, next));
 
-// get current member programs
-router.get("/programs", authenticate, authorizeMember, (req, res, next) => member.getMemberProgramsController(req, res, next));
+
+// GET 
+router.get('/my-programs', authenticate, authorizeMember, validate(getMemberProgramsSchema), (req, res, next) => member.getMyPrograms(req, res, next));
+
 export default router;

@@ -60,7 +60,7 @@ export class MemberService {
         logger.info(`Profile successfully updated for member ID: ${memberId}`);
         return updatedData;
     }
-// get current member profile data
+    // get current member profile data
     async getCurrentMember(memberId: number) {
         logger.info(`Fetching current profile data for member ID: ${memberId}`);
         const member = await prisma.member.findUnique({
@@ -114,62 +114,140 @@ export class MemberService {
 
     // GET MEMBER'S PROGRAM BY MEMBER ID 
     async getMemberPrograms(memberId: number, onlyActive: boolean = false) {
-    logger.info(`Attempting to fetch programs for member ID: ${memberId}`);
-    const existingMember = await prisma.member.findUnique({
-        where: { id: memberId },
-        select: { id: true },
-    });
+        logger.info(`Attempting to fetch programs for member ID: ${memberId}`);
+        const existingMember = await prisma.member.findUnique({
+            where: { id: memberId },
+            select: { id: true },
+        });
 
-    if (!existingMember) {
-        logger.warn(`Fetch programs failed: Member not found with ID: ${memberId}`);
-        throw new Error("Üye bulunamadı.");
-    }
+        if (!existingMember) {
+            logger.warn(`Fetch programs failed: Member not found with ID: ${memberId}`);
+            throw new Error("Üye bulunamadı.");
+        }
 
-    const programs = await prisma.program.findMany({
-        where: {
-            memberId,
-            ...(onlyActive && { isActive: true }),
-        },
-        orderBy: { createdAt: 'desc' },
-        select: {
-            title: true,
-            type: true,
-            splitType: true,
-            isActive: true,
-            createdAt: true,
-            archivedAt: true,
-            days: {
-                orderBy: { dayOrder: 'asc' },
-                select: {
-                    dayName: true,
-                    dayOrder: true,
-                    isRestDay: true,
-                    exercises: {
-                        orderBy: { orderIndex: 'asc' },
-                        select: {
-                            orderIndex: true,
-                            notes: true,
-                            exercise: {
-                                select: { name: true }, // Exercise modelindeki alanlara göre düzelt
-                            },
-                            sets: {
-                                orderBy: { setNumber: 'asc' },
-                                select: {
-                                    setNumber: true,
-                                    targetReps: true,
-                                    targetWeight: true,
-                                    rir: true,
+        const programs = await prisma.program.findMany({
+            where: {
+                memberId,
+                ...(onlyActive && { isActive: true }),
+            },
+            orderBy: { createdAt: 'desc' },
+            select: {
+                title: true,
+                type: true,
+                splitType: true,
+                isActive: true,
+                createdAt: true,
+                archivedAt: true,
+                days: {
+                    orderBy: { dayOrder: 'asc' },
+                    select: {
+                        dayName: true,
+                        dayOrder: true,
+                        isRestDay: true,
+                        exercises: {
+                            orderBy: { orderIndex: 'asc' },
+                            select: {
+                                orderIndex: true,
+                                notes: true,
+                                exercise: {
+                                    select: { name: true },
+                                },
+                                sets: {
+                                    orderBy: { setNumber: 'asc' },
+                                    select: {
+                                        setNumber: true,
+                                        targetReps: true,
+                                        targetWeight: true,
+                                        rir: true,
+                                    },
                                 },
                             },
                         },
                     },
                 },
             },
-        },
-    });
+        });
 
-    logger.info(`Fetched ${programs.length} programs for member ID: ${memberId}`);
-    return programs;
+        logger.info(`Fetched ${programs.length} programs for member ID: ${memberId}`);
+        return programs;
+    }
+
+    // GET MEMBER'S WORKOUT PROGRAMS 
+
+
+    async getMyPrograms(memberId: number) {
+        logger.info(`Database query: Fetching programs for member ID: ${memberId}`);
+
+        const programs = await prisma.program.findMany({
+            where: {
+                memberId: memberId,
+            },
+            select: {
+                id: false,
+                publicId: true,
+                title: true,
+                type: true,
+                splitType: true,
+                isActive: true,
+                createdAt: true,
+                trainer: {
+                    select: {
+                        publicId: true,
+                        name: true,
+                        surname: true,
+                        email: true,
+                    }
+                },
+                days: {
+                    orderBy: { dayOrder: 'asc' },
+                    select: {
+                        id: false,
+                        publicId: true,
+                        dayName: true,
+                        dayOrder: true,
+                        isRestDay: true,
+                        exercises: {
+                            orderBy: { orderIndex: 'asc' },
+                            select: {
+                                id: false,
+                                publicId: true,
+                                orderIndex: true,
+                                notes: true,
+                                exercise: {
+                                    select: {
+                                        id: false,
+                                        publicId: true,
+                                        name: true,
+                                        category: true,
+                                        bodyPart: true,
+                                        equipment: true,
+                                        targetMuscle: true,
+                                        instructions: true,
+                                        instruction_steps: true,
+                                        gifUrl: true,
+                                        createdAt: true,
+                                    }
+                                },
+                                sets: {
+                                    orderBy: { setNumber: 'asc' },
+                                    select: {
+                                        id: false,
+                                        publicId: true,
+                                        setNumber: true,
+                                        targetReps: true,
+                                        targetWeight: true,
+                                        rir: true,
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        logger.info(`Successfully fetched ${programs.length} programs for member ID: ${memberId}`);
+        return programs;
+    }
 }
 
-}

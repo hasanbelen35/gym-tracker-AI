@@ -22,3 +22,13 @@ export const updateMemberProfileSchema = z.object({
 });
 
 export type UpdateMemberProfileInput = z.infer<typeof updateMemberProfileSchema>["body"];
+
+// GET MEMBERS PROGRAMS SCHEAMA
+export const getMemberProgramsSchema = z.object({
+  params: z.object({
+    memberPublicId: z.string().uuid("Geçersiz üye ID formatı."), 
+  }),
+  query: z.object({
+    isActive: z.enum(["true", "false"]).optional(),
+  }).strict(),
+});

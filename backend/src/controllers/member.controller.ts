@@ -95,32 +95,36 @@ export class MemberController {
             next(error);
         }
     }
-    // GET MEMBER'S PROGRAM BY MEMBER ID CONTROLLER 
-    async getMemberProgramsController(req: AuthRequest, res: Response, next: NextFunction) {
-        try {
-            const userId = req.user?.id;
-            logger.info(`Fetching programs for member ID: ${userId}`);
 
-            if (!userId) {
-                logger.warn("Get member programs failed: Authorization failed, missing user ID");
-                return res.status(401).json({ message: "Authorization failed!" });
+    // GET MEMBER'S WORKOUT PROGRAM CONTROLLER
+
+
+    async getMyPrograms(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const memberId = req.user?.id;
+
+            logger.info(`Attempting to fetch programs for member ID: ${memberId}`);
+
+            if (!memberId) {
+                logger.warn("Get member programs failed: Authorization failed, missing member ID");
+                return res.status(401).json({ success: false, error: "Authorization failed." });
             }
 
-            // ?active=true ile sadece aktif programlar gelir
-            const onlyActive = req.query.active === 'true';
+            const programs = await memberService.getMyPrograms(memberId);
 
-            const programs = await memberService.getMemberPrograms(userId, onlyActive);
-
-            logger.info(`Successfully fetched ${programs.length} programs for member ID: ${userId}`);
+            logger.info(`Successfully processed programs request for member ID: ${memberId}`);
             return res.status(200).json({
                 success: true,
-                data: programs
+                data: programs,
             });
 
         } catch (error: any) {
-            logger.error("Error in getMemberProgramsController", { error: error instanceof Error ? error.message : error });
-            next(error);
+            logger.error("Error in getMyPrograms controller", {
+                error: error instanceof Error ? error.message : error
+            });
+            return next(error);
         }
     }
-
 }
+
+
