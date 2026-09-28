@@ -194,7 +194,9 @@ export interface Exercise {
   equipment?: string;
   targetMuscle?: string;
   instructions?: string;
+  instruction_steps: string;
   gifUrl?: string;
+  createdAt: string;
 }
 
 export interface GymState {

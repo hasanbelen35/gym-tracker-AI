@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
-import { MemberState } from "@/types/types";
+import { MemberState } from "@/features/member/get-my-programs/types";
 import { API } from "@/lib/api"; 
+import { handleApiError } from "../apiErrorHandler";
 
 interface UpdateProfilePayload {
     age?: number;
@@ -16,6 +17,7 @@ const initialState: MemberState = {
     trainer: null,
     assignmentStatus: null,
     profile: null,
+    programs: [],
     loading: false,
     error: null,
 };
@@ -62,6 +64,23 @@ export const updateMemberProfile = createAsyncThunk(
     }
 );
 
+// GET MEMBER'S PROGRAMS 
+export const fetchMemberPrograms = createAsyncThunk(
+    'member/fetchMemberPrograms',
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await API.get('/member/my-programs'); 
+            return response.data.data; 
+        } catch (error) {
+            return handleApiError(
+                error, 
+                rejectWithValue, 
+                "Programlarınız yüklenirken bir hata oluştu."
+            );
+        }
+    }
+);
+
 const memberSlice = createSlice({
     name: "member",
     initialState,
@@ -104,6 +123,18 @@ const memberSlice = createSlice({
                 }
             })
             .addCase(updateMemberProfile.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+            .addCase(fetchMemberPrograms.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchMemberPrograms.fulfilled, (state, action) => {
+                state.loading = false;
+                state.programs = action.payload;
+            })
+            .addCase(fetchMemberPrograms.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             });

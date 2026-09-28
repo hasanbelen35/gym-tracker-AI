@@ -2,7 +2,7 @@ import { Router } from "express";
 import { MemberController } from '../controllers/member.controller';
 import { authenticate, authorizeMember } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
-import { updateMemberProfileSchema, getMemberProgramsSchema } from "../validations/MemberValidations";
+import { updateMemberProfileSchema } from "../validations/MemberValidations";
 
 const router = Router();
 const member = new MemberController();
@@ -24,6 +24,6 @@ router.get("/me", authenticate, authorizeMember, (req, res, next) => member.getC
 
 
 // GET 
-router.get('/my-programs', authenticate, authorizeMember, validate(getMemberProgramsSchema), (req, res, next) => member.getMyPrograms(req, res, next));
+router.get('/my-programs', authenticate, authorizeMember, (req, res, next) => member.getMyPrograms(req, res, next));
 
 export default router;
