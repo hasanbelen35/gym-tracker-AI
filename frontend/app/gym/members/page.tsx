@@ -1,10 +1,10 @@
-import Members from '@/components/gym/Members'
+import MembersContainer from '@/features/gym/athletes/container/MembersContainer';
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <Members />
+      <MembersContainer />
     </div>
   )
 }
