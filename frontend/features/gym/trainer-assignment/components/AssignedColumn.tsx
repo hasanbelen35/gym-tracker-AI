@@ -3,29 +3,37 @@ import { AssignedColumnProps } from '@/features/gym/trainer-assignment/types';
 
 export const AssignedColumn: React.FC<AssignedColumnProps> = ({ members }) => {
     return (
-        <div className="w-1/3 border p-4 rounded-xl shadow-sm bg-green-50/40">
-
-            {/* COLUMN HEADER */}
-            <h3 className="font-bold text-lg mb-4 text-green-800 border-b border-green-200 pb-2">
-                Onaylı Sporcular
-            </h3>
-
-            {/* COLUMN CONTENT */}
-            <div className="flex flex-col gap-2">
+        <section className="flex h-[65vh] w-1/3 flex-col rounded-xl border border-nav-border bg-nav-bg shadow-sm">
+            <div className="flex items-center justify-between border-b border-nav-border p-4">
+                <div className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full border-2 border-brand-500 text-xs font-black text-brand-500">
+                        03
+                    </span>
+                    <div>
+                        <h2 className="text-sm font-bold uppercase tracking-wide text-white">SPORCULARIM</h2>
+                        <p className="text-[11px] text-gray-500">Atama tamamlandı</p>
+                    </div>
+                </div>
+                <span className="flex h-7 min-w-7 items-center justify-center rounded-full bg-brand-500/15 px-2 text-xs font-black text-brand-500">
+                    {members.length}
+                </span>
+            </div>
+            <div className="flex-1 space-y-2 overflow-y-auto p-3">
                 {members.length === 0 ? (
-                    <p className="text-green-600/60 text-sm italic">Henüz onaylı sporcu yok.</p>
+                    <div className="flex h-32 flex-col items-center justify-center rounded-lg border border-dashed border-nav-border text-center mt-2">
+                        <p className="px-4 text-xs text-gray-500">Henüz onaylı sporcu yok.</p>
+                    </div>
                 ) : (
                     members.map((m) => (
                         <div
                             key={m.publicId}
-                            className="px-4 py-3 border border-green-200 bg-white rounded-xl text-gray-700 font-medium shadow-sm"
+                            className="flex items-center justify-between gap-3 rounded-lg border border-nav-border bg-black/20 p-3 transition-colors hover:border-brand-500/50"
                         >
-                            {m.name} {m.surname}
+                            <p className="text-sm font-semibold text-white">{m.name} {m.surname}</p>
                         </div>
                     ))
                 )}
             </div>
-
-        </div>
+        </section>
     );
 };
