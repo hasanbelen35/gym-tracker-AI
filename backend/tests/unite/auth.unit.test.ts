@@ -1,12 +1,12 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import prisma from "../src/lib/db";
-import { logger } from "../src/config/logger";
-import { AuthService } from "../src/services/auth.service";
+import prisma from "../../src/lib/db";
+import { logger } from "../../src/config/logger";
+import { AuthService } from "../../src/services/auth.service";
 
 jest.mock("bcryptjs");
 jest.mock("jsonwebtoken");
-jest.mock("../src/lib/db", () => ({
+jest.mock("../../src/lib/db", () => ({
   __esModule: true,
   default: {
     gym: { findUnique: jest.fn(), create: jest.fn() },
@@ -14,7 +14,7 @@ jest.mock("../src/lib/db", () => ({
     trainer: { findUnique: jest.fn(), create: jest.fn() },
   },
 }));
-jest.mock("../src/config/logger", () => ({
+jest.mock("../../src/config/logger", () => ({
   logger: { info: jest.fn(), warn: jest.fn() },
 }));
 

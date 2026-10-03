@@ -1,6 +1,6 @@
-import prisma from "../src/lib/db";
-import { logger } from "../src/config/logger";
-import { GymService } from "../src/services/gym.service";
+import prisma from "../../src/lib/db";
+import { logger } from "../../src/config/logger";
+import { GymService } from "../../src/services/gym.service";
 
 // ---------------------------------------------------------------------
 // Mocks

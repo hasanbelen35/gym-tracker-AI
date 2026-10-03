@@ -1,8 +1,8 @@
-import prisma from "../src/lib/db";
-import { logger } from "../src/config/logger";
-import { MemberService } from "../src/services/member.service";
+import prisma from "../../src/lib/db";
+import { logger } from "../../src/config/logger";
+import { MemberService } from "../../src/services/member.service";
 
-jest.mock("../../../src/lib/db", () => ({
+jest.mock("../../src/lib/db", () => ({
   __esModule: true,
   default: {
     member: { findUnique: jest.fn(), update: jest.fn() },
@@ -10,7 +10,7 @@ jest.mock("../../../src/lib/db", () => ({
   },
 }));
 
-jest.mock("../../../src/config/logger", () => ({
+jest.mock("../../src/config/logger", () => ({
   logger: { info: jest.fn(), warn: jest.fn() },
 }));
 
@@ -33,9 +33,6 @@ describe("MemberService", () => {
   describe("getAssignedTrainerForMember", () => {
     it("should return only trainer and assignmentStatus", async () => {
       db.member.findUnique.mockResolvedValue({
-        id: 1,
-        email: "john@test.com",
-        password: "hashed",
         assignmentStatus: "ASSIGNED",
         trainer: { name: "Jane", surname: "Smith", email: "jane@test.com" },
       });
@@ -44,7 +41,8 @@ describe("MemberService", () => {
 
       expect(db.member.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
-        include: {
+        select: {
+          assignmentStatus: true,
           trainer: { select: { name: true, surname: true, email: true } },
         },
       });
@@ -55,9 +53,21 @@ describe("MemberService", () => {
       expect(result).not.toHaveProperty("password");
     });
 
+    it("should not fetch the password from the database", async () => {
+      db.member.findUnique.mockResolvedValue({
+        assignmentStatus: "ASSIGNED",
+        trainer: null,
+      });
+
+      await service.getAssignedTrainerForMember(1);
+
+      const arg = db.member.findUnique.mock.calls[0][0];
+      expect(arg).not.toHaveProperty("include");
+      expect(arg.select).not.toHaveProperty("password");
+    });
+
     it("should return a null trainer when none is assigned", async () => {
       db.member.findUnique.mockResolvedValue({
-        id: 1,
         assignmentStatus: "UNASSIGNED",
         trainer: null,
       });
@@ -71,7 +81,7 @@ describe("MemberService", () => {
       db.member.findUnique.mockResolvedValue(null);
 
       await expect(service.getAssignedTrainerForMember(99)).rejects.toThrow(
-        "Üye kaydı bulunamadı."
+        "Member not found"
       );
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("99"));
     });
@@ -146,7 +156,7 @@ describe("MemberService", () => {
       db.member.findUnique.mockResolvedValue(null);
 
       await expect(service.updateMemberProfile(99, fullData)).rejects.toThrow(
-        "Üye bulunamadı."
+        "Member not found"
       );
       expect(db.member.update).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("99"));
@@ -212,7 +222,7 @@ describe("MemberService", () => {
       db.member.findUnique.mockResolvedValue(null);
 
       await expect(service.getCurrentMember(99)).rejects.toThrow(
-        "Member can not founded."
+        "Member not found"
       );
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("99"));
     });
@@ -325,7 +335,7 @@ describe("MemberService", () => {
       db.member.findUnique.mockResolvedValue(null);
 
       await expect(service.getMemberPrograms(99)).rejects.toThrow(
-        "Üye bulunamadı."
+        "Member not found"
       );
       expect(db.program.findMany).not.toHaveBeenCalled();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining("99"));

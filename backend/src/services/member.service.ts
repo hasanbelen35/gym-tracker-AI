@@ -4,12 +4,12 @@ import { logger } from "../config/logger";
 import { UpdateMemberProfileData } from '../types/member.types';
 
 export class MemberService {
-    // wıll delete 
     async getAssignedTrainerForMember(memberId: number) {
         logger.info(`Fetching assigned trainer for member ID: ${memberId}`);
         const member = await prisma.member.findUnique({
             where: { id: memberId },
-            include: {
+            select: {
+                assignmentStatus: true,
                 trainer: {
                     select: {
                         name: true,
@@ -22,7 +22,7 @@ export class MemberService {
 
         if (!member) {
             logger.warn(`Assigned trainer fetch failed: Member not found with ID: ${memberId}`);
-            throw new Error("Üye kaydı bulunamadı.");
+            throw new Error("Member not found");
         }
 
         logger.info(`Successfully fetched assigned trainer for member ID: ${memberId}`);
@@ -32,7 +32,6 @@ export class MemberService {
         };
     }
 
-    // UPDATE MEMBER PROFILE DATAS
     async updateMemberProfile(memberId: number, data: CompleteProfileInput) {
         logger.info(`Attempting to update profile for member ID: ${memberId}`);
         const existingMember = await prisma.member.findUnique({
@@ -41,9 +40,8 @@ export class MemberService {
 
         if (!existingMember) {
             logger.warn(`Profile update failed: Member not found with ID: ${memberId}`);
-            throw new Error("Üye bulunamadı.");
+            throw new Error("Member not found");
         }
-        // datas
         const updatedData = {
             ...(data.age !== undefined && { age: data.age }),
             ...(data.height !== undefined && { height: data.height }),
@@ -53,7 +51,6 @@ export class MemberService {
             ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
             isProfileCompleted: true,
         };
-        // update data in db
         await prisma.member.update({
             where: { id: memberId },
             data: updatedData,
@@ -61,7 +58,7 @@ export class MemberService {
         logger.info(`Profile successfully updated for member ID: ${memberId}`);
         return updatedData;
     }
-    // get current member profile data
+
     async getCurrentMember(memberId: number) {
         logger.info(`Fetching current profile data for member ID: ${memberId}`);
         const member = await prisma.member.findUnique({
@@ -106,14 +103,13 @@ export class MemberService {
 
         if (!member) {
             logger.warn(`Current member fetch failed: Member not found with ID: ${memberId}`);
-            throw new Error("Member can not founded.");
+            throw new Error("Member not found");
         }
 
         logger.info(`Successfully fetched current profile data for member ID: ${memberId}`);
         return member;
     }
 
-    // GET MEMBER'S PROGRAM BY MEMBER ID 
     async getMemberPrograms(memberId: number, onlyActive: boolean = false) {
         logger.info(`Attempting to fetch programs for member ID: ${memberId}`);
         const existingMember = await prisma.member.findUnique({
@@ -123,7 +119,7 @@ export class MemberService {
 
         if (!existingMember) {
             logger.warn(`Fetch programs failed: Member not found with ID: ${memberId}`);
-            throw new Error("Üye bulunamadı.");
+            throw new Error("Member not found");
         }
 
         const programs = await prisma.program.findMany({
@@ -172,9 +168,6 @@ export class MemberService {
         logger.info(`Fetched ${programs.length} programs for member ID: ${memberId}`);
         return programs;
     }
-
-    // GET MEMBER'S WORKOUT PROGRAMS 
-
 
     async getMyPrograms(memberId: number) {
         logger.info(`Database query: Fetching programs for member ID: ${memberId}`);
@@ -251,8 +244,7 @@ export class MemberService {
         return programs;
     }
 
-    // UPDATE MEMBER PROFILE DATA
-   async updateMemberProfileService(
+    async updateMemberProfileService(
         memberId: number,
         data: UpdateMemberProfileData
     ) {
@@ -277,7 +269,7 @@ export class MemberService {
                 ...(data.age !== undefined && { age: data.age }),
                 ...(data.height !== undefined && { height: data.height }),
                 ...(data.weight !== undefined && { weight: data.weight }),
-                ...(data.medicalNotes !== undefined && { medicalNotes: data.medicalNotes }), 
+                ...(data.medicalNotes !== undefined && { medicalNotes: data.medicalNotes }),
             },
             select: {
                 id: true,
@@ -301,4 +293,3 @@ export class MemberService {
         return updatedMember;
     }
 }
-
