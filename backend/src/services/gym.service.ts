@@ -155,14 +155,14 @@ export class GymService {
             return deletedTrainer;
         });
     }
-
-    async getTrainerDetail(gymId: number, trainerPublicId: string) {
+async getTrainerDetail(gymId: number, trainerPublicId: string) {
         logger.info(`Fetching details for trainer publicId: ${trainerPublicId} in gymId: ${gymId}`);
         const trainer = await prisma.trainer.findFirst({
             where: { publicId: trainerPublicId, gymId },
             select: {
                 id: true,
                 publicId: true,
+                avatarUrl:true,
                 name: true,
                 surname: true,
                 email: true,
@@ -175,8 +175,9 @@ export class GymService {
                     take: 20,
                     select: {
                         id: true,
-                        type: true,
-                        content: true,
+                        title: true,
+                        splitType: true,
+                        isActive: true,
                         createdAt: true,
                         member: {
                             select: { id: true, publicId: true, name: true, surname: true }

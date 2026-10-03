@@ -130,6 +130,7 @@ export const fetchTrainerDetail = createAsyncThunk(
     async (trainerPublicId: string, { rejectWithValue }) => {
         try {
             const response = await API.get(`/gym/getTrainerDetail/${trainerPublicId}`);
+            console.log(response.data.data);
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
