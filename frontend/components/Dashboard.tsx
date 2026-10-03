@@ -1,21 +1,21 @@
+
 "use client";
-import React from 'react'
+import React from 'react';
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "next/navigation";
-import { LeftNavDataAthlete, LeftNavDataGym, LeftNavDataTrainer } from '@/config/dashboardConfig'
-import Loading from '@/components/Loading'
+import { LeftNavDataAthlete, LeftNavDataGym, LeftNavDataTrainer } from '@/config/dashboardConfig';
+import Loading from '@/components/Loading';
 import { NavItem } from '@/types/types';
+
+import { Sidebar } from '@/components/Sidebar'; 
 
 const Dashboard = () => {
     const { user, loading } = useAuth();
-    const router = useRouter();
+
     if (loading) return <Loading />;
-    if (!user) return <p>Lütfen giriş yapın.</p>;
+    if (!user) return <p className="p-6 text-foreground/60 text-sm font-medium">Lütfen giriş yapın.</p>;
 
     const { name, surname, role, gymName } = user;
 
-
-    // cereate left data as role
     let leftNavData: NavItem[];
     switch (role) {
         case "gym":
@@ -32,60 +32,65 @@ const Dashboard = () => {
             break;
     }
 
+    const roleLabel = role === "trainer" ? "Aktif Antrenör" : role === "gym" ? "Salon Yöneticisi" : "Aktif Sporcu";
+
     return (
-        <div>
-            <div className="flex">
-                {/* LEFT SIDEBAR */}
-                <aside className="  w-64 min-h-[calc(100vh-68px)]   bg-white dark:bg-nav-bg  border-nav-border shadow-sm transition-colors">
-                    <div className="flex flex-col p-4 gap-2 ">
-                        {leftNavData.map((item, index) => (
-                            <button
-                                key={index}
-                                onClick={() => router.push(item.route)}
-                                className=" w-full cursor-pointer text-left px-4 py-3 rounded-xl text-brand-text font-medium transition-all hover:bg-brand-50 dark:hover:bg-brand-100 hover:text-brand-600 cursor-pointer"
-                            >
-                                {item.name}
-                            </button>
-                        ))}
+        <div className="min-h-[calc(100vh-68px)] bg-background flex flex-col md:flex-row transition-colors">
+          
+            <Sidebar navItems={leftNavData} />
+
+           
+            <main className="flex-1 p-6 md:p-8 lg:p-10 space-y-8 w-full max-w-7xl mx-auto">
+                
+                {/* 1. WELCOME HEADER CARD */}
+                <section className="bg-nav-bg border border-nav-border rounded-3xl p-6 md:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 transition-colors">
+                    
+                    <div className="space-y-2">
+                        <h2 className="text-sm md:text-base font-bold text-brand-text uppercase tracking-widest flex items-center gap-2">
+                            <span>HOŞ GELDİNİZ</span>
+                            <span className="inline-block animate-bounce origin-bottom">👋</span>
+                        </h2>
+
+                        <p className="text-3xl md:text-4xl font-black text-foreground uppercase tracking-tight">
+                            {name} {surname}
+                        </p>
+
+                        {gymName && (
+                            <div className="pt-2 flex items-center gap-2">
+                                <span className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-brand-50 text-brand-600 border border-brand-400/30">
+                                    {gymName}
+                                </span>
+                            </div>
+                        )}
                     </div>
-                </aside>
 
-                {/* CONTENT */}
-                <main className="flex-1 p-1 space-y-6">
-                    {/* WELCOME HEADER CARD */}
-                    <div className="bg-white dark:bg-nav-bg border border-nav-border rounded-2xl p-6 md:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div className="space-y-1">
-                            <h2 className="text-2xl md:text-3xl font-extrabold text-brand-text tracking-tight flex items-center gap-2">
-                                <span>Hoş geldin,</span>
-                                <span className="inline-block animate-bounce">👋</span>
-                            </h2>
-
-                            <p className="text-xl md:text-2xl font-bold text-brand-600">
-                                {name} {surname}
-                            </p>
-
-                            {gymName && (
-                                <div className="pt-2 flex items-center gap-2">
-                                    <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-brand-50 dark:bg-brand-500/10 text-brand-600 border border-brand-100 dark:border-brand-500/20">
-                                        {gymName}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* İsteğe bağlı sağ taraf için mini bir rozet veya tarih alanı ekleyebilirsin */}
-                        <div className="hidden sm:block text-right">
-                            <span className="text-xs font-medium text-slate-400 uppercase tracking-wider block">Durum</span>
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 mt-1">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Aktif Eğitmen
+                    <div className="hidden sm:flex flex-col items-end text-right">
+                        <span className="text-[10px] font-bold text-foreground/40 uppercase tracking-widest block mb-1">
+                            SİSTEM DURUMU
+                        </span>
+                        <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                             </span>
-                        </div>
+                            {roleLabel}
+                        </span>
                     </div>
-                </main>
-            </div>
+                    
+                </section>
+
+                {/* ==========================================
+                    2. DYNAMIC WIDGETS AREA
+                ========================================== */}
+                {role === "trainer" && (
+                    <div className="space-y-8">
+                        {/* Antrenör dashboard widget'ları buraya gelecek */}
+                    </div>
+                )}
+
+            </main>
         </div>
-    )
+    );
 }
 
-export default Dashboard
+export default Dashboard;
