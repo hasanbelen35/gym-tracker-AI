@@ -8,8 +8,8 @@ import trainerReducer from './slices/trainerSlice';
 import memberReducer from './slices/memberSlice';
 import exerciseReducer from "./slices/exerciseSlice";
 import nutritionReducer from "@/store/slices/nutritionSlice";
-import aiReducer from "@/store/slices/aiSlice"; 
-
+import aiReducer from "@/store/slices/aiSlice";
+import riskReducer from '@/store/slices/riskSlice';
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -21,6 +21,7 @@ export const store = configureStore({
         exercises: exerciseReducer,
         nutrition: nutritionReducer,
         ai: aiReducer,
+        risk: riskReducer,
     },
 });
 

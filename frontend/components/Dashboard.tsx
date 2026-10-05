@@ -7,6 +7,7 @@ import Loading from '@/components/Loading';
 import { NavItem } from '@/types/types';
 
 import { Sidebar } from '@/components/Sidebar'; 
+import GymRiskAnalyticsContainer from '@/features/gym/dashboard/container/GymRiskAnalyticsContainer';
 
 const Dashboard = () => {
     const { user, loading } = useAuth();
@@ -85,6 +86,14 @@ const Dashboard = () => {
                 {role === "trainer" && (
                     <div className="space-y-8">
                         {/* Antrenör dashboard widget'ları buraya gelecek */}
+                    </div>
+                )}
+
+
+                  {role === "gym" && (
+                    <div className="space-y-8">
+                        {/* Antrenör dashboard widget'ları buraya gelecek */}
+                        <GymRiskAnalyticsContainer />
                     </div>
                 )}
 
