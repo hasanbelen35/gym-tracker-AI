@@ -3,10 +3,10 @@ import { GymController } from "../controllers/gym.controller";
 import { authenticate, authorizeGym } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
 import {
-  memberParamSchema,
-  trainerParamSchema,
-  assignmentSchema,
-  getMembersByStatusQuerySchema,
+    memberParamSchema,
+    trainerParamSchema,
+    assignmentSchema,
+    getMembersByStatusQuerySchema,
 } from "../validations/gym.validations";
 
 const router = Router();
@@ -29,5 +29,8 @@ router.get("/getTrainerDetail/:trainerId", authenticate, authorizeGym, validate(
 router.post("/approveAssignment", authenticate, authorizeGym, validate(assignmentSchema), (req, res, next) => gym.approveMemberAssignment(req, res, next));
 router.post("/rejectAssignment", authenticate, authorizeGym, validate(assignmentSchema), (req, res, next) => gym.rejectMemberAssignment(req, res, next));
 router.get("/getMembers", authenticate, authorizeGym, validate(getMembersByStatusQuerySchema), (req, res, next) => gym.getMembersByStatus(req, res, next));
+
+//  AI RISK ANALYTICS ROUTE
+router.get("/risk-analytics", authenticate, authorizeGym, (req, res, next) => gym.getRiskAnalytics(req, res, next));
 
 export default router;

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { GymService } from "../services/gym.service";
 import { AuthRequest } from "../middleware/auth.middleware";
 import { logger } from "../config/logger";
+import { getOrCalculateGymRiskAnalytics } from "../services/ai/GymAIService";
 
 const gymService = new GymService();
 
@@ -215,4 +216,30 @@ export class GymController {
             next(err);
         }
     }
+
+    // GET GYM RISK ANALYTICS
+    async getRiskAnalytics(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const gymId = req.user!.id;
+            const forceRefresh = req.query.refresh === 'true';
+            
+            logger.info(`Gym ID ${gymId} fetching risk analytics (refresh: ${forceRefresh})`);
+
+            const analyticsData = await getOrCalculateGymRiskAnalytics(Number(gymId), forceRefresh);
+
+            logger.info(`Successfully fetched risk analytics for gym ID: ${gymId} (Source: ${analyticsData.source})`);
+            
+            res.status(200).json({ 
+                message: "Risk analytics fetched successfully", 
+                data: analyticsData 
+            });
+        } catch (err) {
+            logger.error("Error in getRiskAnalytics controller", { 
+                error: err instanceof Error ? err.message : err 
+            });
+            next(err);
+        }
+    }
+
+
 }
