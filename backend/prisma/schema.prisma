@@ -23,6 +23,7 @@ model Gym {
   password  String
   qrToken   String   @unique @default(uuid())
   createdAt DateTime @default(now())
+  analyticsCache   GymRiskAnalyticsCache?
   members   Member[]
   sessions  Session[]
   trainers  Trainer[]
@@ -254,4 +255,20 @@ model MealItem {
   fat       Float?
   notes     String?   @db.Text
   meal      Meal      @relation(fields: [mealId], references: [id], onDelete: Cascade)
+}
+
+// GYM-MEMBER RISK ANALYTIC CACHE 
+model GymRiskAnalyticsCache {
+  id               Int      @id @default(autoincrement())
+  gymId            Int      @unique 
+  gym              Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  
+  summary          Json     
+  atRiskMembers    Json     
+  ghostMembers     Json     
+  regularMembers   Json     
+  
+  lastCalculatedAt DateTime @default(now()) 
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }

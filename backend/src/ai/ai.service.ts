@@ -3,6 +3,10 @@ import { generateAIAnalysis } from './ai.client';
 import { TRAINER_ANALYZE_MEMBER_PROFILE_PROMPT } from './trainer.prompts';
 import { aiAnalysisPayloadSchema } from "../validations/ai/trainer.ai.validations";
 
+
+//===============================================================================================1=
+// ====================================== TRAINER ================================================
+//================================================================================================
 export const analyzeMemberPerformanceService = async (memberPublicId: string): Promise<string> => {
     const member = await prisma.member.findUnique({
         where: { publicId: memberPublicId },
@@ -75,3 +79,8 @@ export const analyzeMemberPerformanceService = async (memberPublicId: string): P
 
     return analysisResult;
 };
+
+
+//===============================================================================================1=
+// ====================================== GYM ================================================
+//================================================================================================
