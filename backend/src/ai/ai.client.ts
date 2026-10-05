@@ -11,7 +11,7 @@ const ai = new GoogleGenAI({ apiKey });
 export async function generateAIAnalysis(systemPrompt: string, userContent: string): Promise<string> {
     try {
         const response = await ai.models.generateContent({
-            model: 'gemini-3.6-flash',
+          model: 'gemini-3.8-flash',
             config: {
                 systemInstruction: systemPrompt,
                 temperature: 0.3,
