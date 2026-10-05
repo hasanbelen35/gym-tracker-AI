@@ -1,9 +1,8 @@
 import prisma from "../lib/db";
 import { generateAIAnalysis } from './ai.client';
 import { TRAINER_ANALYZE_MEMBER_PROFILE_PROMPT } from './trainer.prompts';
+import { aiAnalysisPayloadSchema } from "../validations/ai/trainer.ai.validations";
 
-
-// ANALYZE MEMBER'S PERFORMANCE ON MEMBER PROFILE PAGE FOR TRAINER
 export const analyzeMemberPerformanceService = async (memberPublicId: string): Promise<string> => {
     const member = await prisma.member.findUnique({
         where: { publicId: memberPublicId },
@@ -34,7 +33,7 @@ export const analyzeMemberPerformanceService = async (memberPublicId: string): P
         throw new Error("Analiz edilecek üye bulunamadı.");
     }
 
-    const sanitizedDataForAI = {
+    const rawDataForAI = {
         profile: {
             age: member.age || "Belirtilmemiş",
             gender: member.gender || "Belirtilmemiş",
@@ -66,7 +65,11 @@ export const analyzeMemberPerformanceService = async (memberPublicId: string): P
         })),
     };
 
-    const userContentString = JSON.stringify(sanitizedDataForAI);
+    const validationResult = aiAnalysisPayloadSchema.safeParse(rawDataForAI);
+
+    const dataToUse = validationResult.success ? validationResult.data : rawDataForAI;
+
+    const userContentString = JSON.stringify(dataToUse);
 
     const analysisResult = await generateAIAnalysis(TRAINER_ANALYZE_MEMBER_PROFILE_PROMPT, userContentString);
 

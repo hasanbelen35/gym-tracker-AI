@@ -1,56 +1,50 @@
 import { z } from "zod";
 
-// URL SCHEMA
 export const trainerMemberParamSchema = z.object({
-  memberPublicId: z
-    .string({
-      message: "Üye kimlik bilgisi (publicId) metin formatında olmalıdır.",
-    })
-    .min(1, { message: "Üye kimlik bilgisi boş bırakılamaz." }),
+  params: z.object({
+    memberPublicId: z.string({
+      message: "Üye kimlik bilgisi metin formatında olmalıdır.",
+    }).min(1, { message: "Üye kimlik bilgisi boş bırakılamaz." }),
+  }),
 });
-// TRAINER-MEMBER ANALYZE PERFORMANCE SCHEMA 
+
 export const aiAnalysisPayloadSchema = z.object({
   profile: z.object({
-    age: z.union([
-      z.number().int().positive({ message: "Yaş pozitif bir sayı olmalıdır." }), 
-      z.string().min(1, { message: "Yaş bilgisi boş olamaz." })
-    ]),
-    gender: z.string().min(1, { message: "Cinsiyet belirtilmelidir." }),
-    height: z.string().min(1, { message: "Boy bilgisi belirtilmelidir." }),
-    weight: z.string().min(1, { message: "Kilo bilgisi belirtilmelidir." }),
-    medicalNotes: z.string().min(1, { message: "Tıbbi not alanı boş olamaz." }),
+    age: z.any(),
+    gender: z.string().nullable().optional(),
+    height: z.string().nullable().optional(),
+    weight: z.string().nullable().optional(),
+    medicalNotes: z.string().nullable().optional(),
   }),
-  hasMeasurements: z.boolean({
-    message: "Ölçüm durumu (hasMeasurements) boolean formatında olmalıdır.",
-  }),
+  hasMeasurements: z.boolean(),
   recentMeasurements: z.array(
     z.object({
-      date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Geçersiz tarih formatı (YYYY-MM-DD bekleniyor)." }),
-      bodyFatRate: z.number().min(0).max(100).nullable(),
-      muscleMass: z.number().min(0).nullable(),
-      chest: z.number().min(0).nullable(),
-      waist: z.number().min(0).nullable(),
-      arm: z.number().min(0).nullable(),
+      date: z.string(),
+      bodyFatRate: z.number().nullable().optional(),
+      muscleMass: z.number().nullable().optional(),
+      chest: z.number().nullable().optional(),
+      waist: z.number().nullable().optional(),
+      arm: z.number().nullable().optional(),
     })
   ),
   activePrograms: z.array(
     z.object({
-      title: z.string().min(1, { message: "Program başlığı boş olamaz." }),
-      splitType: z.string().nullable(),
+      title: z.string(),
+      splitType: z.string().nullable().optional(),
       days: z.array(
         z.object({
-          dayName: z.string().min(1, { message: "Gün adı boş olamaz." }),
+          dayName: z.string(),
           isRestDay: z.boolean(),
           exercises: z.array(
             z.object({
-              name: z.string().min(1, { message: "Egzersiz adı boş olamaz." }),
-              notes: z.string().nullable(),
+              name: z.string(),
+              notes: z.string().nullable().optional(),
               sets: z.array(
                 z.object({
-                  r: z.number().int().min(0, { message: "Tekrar sayısı negatif olamaz." }).nullable(),
-                  w: z.number().min(0, { message: "Ağırlık negatif olamaz." }).nullable(),
+                  r: z.number().nullable().optional(),
+                  w: z.number().nullable().optional(),
                 })
-              ).min(1, { message: "Her egzersiz en az bir set içermelidir." }),
+              ),
             })
           ),
         })

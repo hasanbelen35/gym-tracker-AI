@@ -7,7 +7,8 @@ import gymReducer from './slices/gymSlice';
 import trainerReducer from './slices/trainerSlice';
 import memberReducer from './slices/memberSlice';
 import exerciseReducer from "./slices/exerciseSlice";
-import nutritionReducer from "@/store/slices/nutritionSlice"; 
+import nutritionReducer from "@/store/slices/nutritionSlice";
+import aiReducer from "@/store/slices/aiSlice"; 
 
 export const store = configureStore({
     reducer: {
@@ -18,7 +19,8 @@ export const store = configureStore({
         trainer: trainerReducer,
         member: memberReducer,
         exercises: exerciseReducer,
-        nutrition: nutritionReducer, 
+        nutrition: nutritionReducer,
+        ai: aiReducer,
     },
 });
 
