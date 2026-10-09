@@ -23,6 +23,7 @@ export const fetchRiskAnalytics = createAsyncThunk(
             const response = await API.get('/gym/risk-analytics', {
                 params: refresh ? { refresh: true } : undefined,
             });
+            console.log(response.data.data)
             return (response.data.data ?? response.data) as RiskAnalyticsData;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;

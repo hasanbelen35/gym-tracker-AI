@@ -27,7 +27,7 @@ export const GymRiskAnalyticsContainer: React.FC = () => {
 
     if (loading && !analytics) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
+            <div className="flex flex-col items-center justify-center min-h-100 gap-3">
                 <Loading />
                 <p className="text-sm text-zinc-500">Risk analitiği yükleniyor...</p>
             </div>

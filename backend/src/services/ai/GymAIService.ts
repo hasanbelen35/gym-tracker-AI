@@ -28,6 +28,7 @@ type MemberRiskDetail = {
     memberId: string;
     name: string;
     email: string | null;
+    avatarUrl: string | null;
     lastVisitDaysAgo: number;
     recentSessionCount: number;
     avgGapDays: number | null;
@@ -36,7 +37,6 @@ type MemberRiskDetail = {
     neverVisited: boolean;
     reason: RiskReason;
 };
-
 
 // GET OR CALCULATE GYM-MEMBER RISK ANALYTICS
 export async function getOrCalculateGymRiskAnalytics(gymId: number, forceRefresh = false) {
@@ -74,6 +74,7 @@ export async function getOrCalculateGymRiskAnalytics(gymId: number, forceRefresh
             name: true,
             surname: true,
             email: true,
+            avatarUrl: true,
             createdAt: true,
             sessions: {
                 orderBy: { checkIn: "desc" },
@@ -121,7 +122,6 @@ export async function getOrCalculateGymRiskAnalytics(gymId: number, forceRefresh
 
         // GROUPING CRITERIAS
         if (neverVisited) {
-            // NEVER CAME: NEW MEMBER GRACE PERIOD, THEN AT RISK, THEN GHOST
             if (daysSinceLast > GHOST_DAYS) {
                 group = "ghost";
                 reason = "NEVER_VISITED";
@@ -132,11 +132,9 @@ export async function getOrCalculateGymRiskAnalytics(gymId: number, forceRefresh
                 reason = "NEW_MEMBER";
             }
         } else if (daysSinceLast > GHOST_DAYS) {
-            // NO COME MORE THAN 30 DAYS
             group = "ghost";
             reason = "NO_VISIT_30_PLUS";
         } else if (daysSinceLast > AT_RISK_DAYS) {
-            // NO COME BETWEEN 10-30 DAYS
             group = "atRisk";
             reason = "NO_VISIT_10_PLUS";
         } else if (
@@ -145,7 +143,6 @@ export async function getOrCalculateGymRiskAnalytics(gymId: number, forceRefresh
             daysSinceLast >= MIN_ABSENCE_DAYS_FOR_PATTERN &&
             daysSinceLast > avgGapDays * ABSENCE_MULTIPLIER
         ) {
-            // CURRENT ABSENCE IS MUCH LONGER THAN MEMBER'S USUAL PATTERN
             group = "atRisk";
             reason = "ABSENCE_ABOVE_USUAL_PATTERN";
         } else if (
@@ -153,7 +150,6 @@ export async function getOrCalculateGymRiskAnalytics(gymId: number, forceRefresh
             visitsPrev14Days >= 4 &&
             visitsLast14Days < visitsPrev14Days * TREND_DROP_RATIO
         ) {
-            // STILL COMING BUT VISIT FREQUENCY DROPPED SHARPLY
             group = "atRisk";
             reason = "VISIT_FREQUENCY_DROPPED";
         }
@@ -163,6 +159,7 @@ export async function getOrCalculateGymRiskAnalytics(gymId: number, forceRefresh
             memberId: member.publicId,
             name: `${member.name} ${member.surname}`,
             email: member.email,
+            avatarUrl: member.avatarUrl,
             lastVisitDaysAgo: daysSinceLast,
             recentSessionCount: checkIns.length,
             avgGapDays,
