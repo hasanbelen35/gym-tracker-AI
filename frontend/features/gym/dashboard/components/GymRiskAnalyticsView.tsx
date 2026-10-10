@@ -5,9 +5,9 @@ import {
     MemberDetailModal,
     MemberAvatar,
     getRiskReason,
-    RiskAnalyticsMember,
-} from './MemberDetailModal';
 
+} from './MemberDetailModal';
+import { RiskAnalyticsMember } from '../types';
 interface Props {
     analytics: RiskAnalyticsData;
     onRefresh: () => void;
@@ -32,37 +32,37 @@ export const GymRiskAnalyticsView: React.FC<Props> = ({ analytics, onRefresh, lo
         iconWrapClass: string;
         hint: React.ReactNode;
     }[] = [
-        {
-            key: 'regulars',
-            label: 'Sadık Üyeler',
-            title: 'Sadık Üyeler',
-            count: summary.regularCount,
-            members: regularMembers,
-            icon: <IconCheck className="w-5 h-5" />,
-            iconWrapClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-            hint: <span className="text-xs text-zinc-500">/ {summary.total} toplam</span>,
-        },
-        {
-            key: 'atRisk',
-            label: 'Risk Altındakiler',
-            title: 'Risk Altındaki Üyeler',
-            count: summary.atRiskCount,
-            members: atRiskMembers,
-            icon: <RobotIcon className="w-5 h-5" />,
-            iconWrapClass: 'bg-orange-500/10 text-brand-500',
-            hint: <span className="text-xs text-orange-500 font-medium">Acil müdahale önerilir</span>,
-        },
-        {
-            key: 'ghosts',
-            label: 'Hayalet Üyeler (Ghost)',
-            title: 'Hayalet Üyeler',
-            count: summary.ghostCount,
-            members: ghostMembers,
-            icon: <IconUserX className="w-5 h-5" />,
-            iconWrapClass: 'bg-red-500/10 text-red-600 dark:text-red-400',
-            hint: <span className="text-xs text-red-500 font-medium">30+ gündür gelmeyen</span>,
-        },
-    ];
+            {
+                key: 'regulars',
+                label: 'Sadık Üyeler',
+                title: 'Sadık Üyeler',
+                count: summary.regularCount,
+                members: regularMembers,
+                icon: <IconCheck className="w-5 h-5" />,
+                iconWrapClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+                hint: <span className="text-xs text-zinc-500">/ {summary.total} toplam</span>,
+            },
+            {
+                key: 'atRisk',
+                label: 'Risk Altındakiler',
+                title: 'Risk Altındaki Üyeler',
+                count: summary.atRiskCount,
+                members: atRiskMembers,
+                icon: <RobotIcon className="w-5 h-5" />,
+                iconWrapClass: 'bg-orange-500/10 text-brand-500',
+                hint: <span className="text-xs text-orange-500 font-medium">Acil müdahale önerilir</span>,
+            },
+            {
+                key: 'ghosts',
+                label: 'Hayalet Üyeler (Ghost)',
+                title: 'Hayalet Üyeler',
+                count: summary.ghostCount,
+                members: ghostMembers,
+                icon: <IconUserX className="w-5 h-5" />,
+                iconWrapClass: 'bg-red-500/10 text-red-600 dark:text-red-400',
+                hint: <span className="text-xs text-red-500 font-medium">30+ gündür gelmeyen</span>,
+            },
+        ];
 
     const currentTab = tabs.find((t) => t.key === activeTab)!;
     const activeList = currentTab.members;
@@ -94,11 +94,10 @@ export const GymRiskAnalyticsView: React.FC<Props> = ({ analytics, onRefresh, lo
                     <div
                         key={tab.key}
                         onClick={() => setActiveTab(tab.key)}
-                        className={`cursor-pointer bg-(--nav-bg) border transition-all p-5 rounded-2xl shadow-(--shadow-nav) ${
-                            activeTab === tab.key
+                        className={`cursor-pointer bg-(--nav-bg) border transition-all p-5 rounded-2xl shadow-(--shadow-nav) ${activeTab === tab.key
                                 ? 'border-brand-500 ring-1 ring-brand-500'
                                 : 'border-(--nav-border) hover:border-zinc-400'
-                        }`}
+                            }`}
                     >
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{tab.label}</span>

@@ -47,7 +47,7 @@ export class SessionService {
     logger.info(`Successfully checked out member ID: ${memberId}, session ID: ${activeSession.id}, duration: ${duration} minutes`);
     return session;
   }
-
+  // get members sessions
   async getMemberSessions(memberId: number) {
     logger.info(`Fetching all sessions for member ID: ${memberId}`);
     const sessions = await prisma.session.findMany({
@@ -59,28 +59,48 @@ export class SessionService {
     return sessions;
   }
 
-  // Get all sessions for a specific gym including member name and surname
-  async getGymSessions(gymId: number) {
-    logger.info(`Fetching all sessions for gymId: ${gymId}`);
-    const sessions = await prisma.session.findMany({
-      where: { gymId },
-      include: {
-        member: { select: { name: true, surname: true } }
-      },
-      orderBy: { checkIn: 'desc' }
-    });
+  // Get all sessions for a specific gym with pagination
+  async getGymSessions(gymId: number, page: number = 1, limit: number = 50) {
+    logger.info(`Fetching sessions for gymId: ${gymId} | Page: ${page} | Limit: ${limit}`);
 
-    logger.info(`Successfully fetched ${sessions.length} sessions for gymId: ${gymId}`);
-    return sessions.map((s) => ({
-      id: s.id,
-      memberId: s.memberId,
-      gymId: s.gymId,
-      memberName: `${s.member.name} ${s.member.surname}`,
-      checkIn: s.checkIn,
-      checkOut: s.checkOut,
-      duration: s.duration,
-    }));
+    const skip = (page - 1) * limit;
+
+    const [totalRecords, sessions] = await prisma.$transaction([
+      prisma.session.count({ where: { gymId } }),
+      prisma.session.findMany({
+        where: { gymId },
+        skip,
+        take: limit,
+        include: {
+          member: { select: { name: true, surname: true } }
+        },
+        orderBy: { checkIn: 'desc' }
+      })
+    ]);
+
+    const totalPages = Math.ceil(totalRecords / limit);
+
+    logger.info(`Successfully fetched ${sessions.length} sessions for gymId: ${gymId}. Total Records: ${totalRecords}`);
+
+    return {
+      data: sessions.map((s) => ({
+        id: s.id,
+        memberId: s.memberId,
+        gymId: s.gymId,
+        memberName: `${s.member.name} ${s.member.surname}`,
+        checkIn: s.checkIn,
+        checkOut: s.checkOut,
+        duration: s.duration,
+      })),
+      meta: {
+        totalRecords,
+        totalPages,
+        currentPage: page,
+        limit
+      }
+    };
   }
+
 
   // Get only currently active (not checked out) sessions for a gym
   async getActiveGymSessions(gymId: number) {

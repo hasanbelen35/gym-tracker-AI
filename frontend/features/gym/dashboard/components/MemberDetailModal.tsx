@@ -1,26 +1,7 @@
 import React, { useEffect } from 'react';
 import { IconClose } from '@/icons/icon';
 import { AIAnalyzeButton } from '@/components/AIAnalyzeButton';
-
-export interface RiskAnalyticsMember {
-    memberId: string;
-    name: string;
-    email: string | null;
-    avatarUrl?: string | null;
-    reason: string;
-    avgGapDays: number | null;
-    neverVisited: boolean;
-    lastVisitDaysAgo: number;
-    visitsLast14Days: number;
-    visitsPrev14Days: number;
-    recentSessionCount: number;
-}
-
-interface ReasonConfig {
-    badgeLabel: string;
-    description: string;
-    badgeClass: string;
-}
+import { ReasonConfig, RiskAnalyticsMember } from '../types';
 
 const REASONS: Record<string, ReasonConfig> = {
     ABSENCE_ABOVE_USUAL_PATTERN: {
