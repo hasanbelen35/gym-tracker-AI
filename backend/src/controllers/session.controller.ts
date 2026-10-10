@@ -55,17 +55,21 @@ export class SessionController {
       next(err);
     }
   }
-
-  // Get all sessions for the authenticated gym (gym owner only)
+// Get all sessions for the authenticated gym (gym owner only)
   async getGymSessions(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const gymId = req.user!.id;
-      logger.info(`Fetching all sessions for authenticated gym ID: ${gymId}`);
+      
+      const page = parseInt(req.query.page as string, 10) || 1;
+      const limit = parseInt(req.query.limit as string, 10) || 50;
 
-      const sessions = await sessionService.getGymSessions(gymId);
-      logger.info(`Successfully fetched ${sessions.length} sessions for gym ID: ${gymId}`);
+      logger.info(`Fetching sessions for authenticated gym ID: ${gymId} | Page: ${page} | Limit: ${limit}`);
 
-      res.json(sessions);
+      const result = await sessionService.getGymSessions(gymId, page, limit);
+      
+      logger.info(`Successfully fetched ${result.data.length} sessions for gym ID: ${gymId} (Total: ${result.meta.totalRecords})`);
+
+      res.json(result);
     } catch (err) {
       logger.error("Error in getGymSessions controller", { error: err instanceof Error ? err.message : err });
       next(err);

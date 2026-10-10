@@ -1,26 +1,8 @@
 import React from 'react';
 import { ErrorBox } from '@/components/ui/ErrorBox';
+import {  GymSessionsViewProps } from '@/features/gym/sessions/types';
 
-export interface GymSession {
-    id?: number;
-    memberId?: number;
-    memberName?: string;
-    gymId?: number;
-    checkIn: string;
-    checkOut?: string | null;
-    duration?: number;
-    gym?: {
-        name: string;
-    };
-}
-
-interface GymSessionsViewProps {
-    allSessions: GymSession[];
-    activeSessions: GymSession[];
-    error: string | null;
-}
 // TEXT CONFIG 
-
 const TEXT = {
     header: {
         title: "Salon Oturum & Giriş Yönetimi",
@@ -43,8 +25,14 @@ const TEXT = {
     status: {
         completed: "Tamamlandı",
         active: "Devam Ediyor",
+    },
+    pagination: {
+        prev: "Önceki",
+        next: "Sonraki",
+        page: "Sayfa"
     }
 } as const;
+
 // TABLE COLUMN CONFIG 
 const TABLE_COLUMNS = [
     { key: 'name', label: 'Üye Adı' },
@@ -62,19 +50,23 @@ const formatDateTime = (dateStr: string) =>
 const getMemberName = (name?: string) => name || TEXT.fallback.memberName;
 const getMemberInitial = (name?: string) => name ? name.charAt(0).toUpperCase() : TEXT.fallback.memberInitial;
 
-// wıev
+// VIEW COMPONENT
 export const GymSessionsView: React.FC<GymSessionsViewProps> = ({
     allSessions,
     activeSessions,
-    error
+    error,
+    loading,
+    currentPage,
+    totalPages,
+    onPageChange
 }) => {
     return (
         <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6">
 
-            {/* ERROR  */}
+            {/* ERROR */}
             {error && <ErrorBox message={error} />}
 
-            {/*  (HEADER) */}
+            {/* HEADER */}
             <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-(--nav-bg) border border-(--nav-border) p-6 rounded-2xl shadow-(--shadow-nav)">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-(--foreground) flex items-center gap-3">
@@ -93,7 +85,7 @@ export const GymSessionsView: React.FC<GymSessionsViewProps> = ({
                 </div>
             </header>
 
-            {/* ACTIVE SESSIONS*/}
+            {/* ACTIVE SESSIONS */}
             <section className="space-y-4">
                 <div className="flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-(--foreground) flex items-center gap-2">
@@ -138,15 +130,15 @@ export const GymSessionsView: React.FC<GymSessionsViewProps> = ({
                 )}
             </section>
 
-            {/* (HISTORY TABLE) */}
+            {/* HISTORY TABLE & PAGINATION */}
             <section className="space-y-4 pt-2">
                 <h2 className="text-lg font-semibold text-(--foreground)">
-                    {TEXT.sections.history} ({allSessions.length})
+                    {TEXT.sections.history}
                 </h2>
 
                 <div className="bg-(--nav-bg) border border-(--nav-border) rounded-2xl shadow-(--shadow-nav) overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left">
+                    <div className="overflow-x-auto relative">
+                        <table className={`w-full text-sm text-left transition-opacity duration-200 ${loading ? 'opacity-50' : 'opacity-100'}`}>
                             <thead className="bg-black/5 dark:bg-white/5 text-zinc-500 dark:text-zinc-400 border-b border-(--nav-border)">
                                 <tr>
                                     {TABLE_COLUMNS.map((col) => (
@@ -166,7 +158,6 @@ export const GymSessionsView: React.FC<GymSessionsViewProps> = ({
                                 ) : (
                                     allSessions.map((session, index) => {
                                         const isCompleted = !!session.checkOut;
-
                                         return (
                                             <tr key={session.id ?? `history-${index}`} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
                                                 <td className="px-5 py-4 font-semibold text-(--foreground) flex items-center gap-3">
@@ -175,15 +166,12 @@ export const GymSessionsView: React.FC<GymSessionsViewProps> = ({
                                                     </div>
                                                     {getMemberName(session.memberName)}
                                                 </td>
-
                                                 <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
                                                     {formatDateTime(session.checkIn)}
                                                 </td>
-
                                                 <td className="px-5 py-4 text-zinc-600 dark:text-zinc-300">
                                                     {isCompleted ? formatDateTime(session.checkOut!) : TEXT.fallback.emptyDate}
                                                 </td>
-
                                                 <td className="px-5 py-4">
                                                     {isCompleted ? (
                                                         <span className="inline-flex px-2.5 py-1 text-xs font-medium rounded-full bg-zinc-500/10 text-zinc-600 dark:text-zinc-400 border border-zinc-500/20">
@@ -202,6 +190,31 @@ export const GymSessionsView: React.FC<GymSessionsViewProps> = ({
                             </tbody>
                         </table>
                     </div>
+
+                    {/* PAGINATION CONTROLS */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between px-5 py-4 border-t border-(--nav-border) bg-black/5 dark:bg-white/5">
+                            <button
+                                onClick={() => onPageChange(currentPage - 1)}
+                                disabled={currentPage === 1 || loading}
+                                className="px-4 py-2 text-sm font-medium rounded-xl border border-(--nav-border) bg-(--nav-bg) text-(--foreground) hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                {TEXT.pagination.prev}
+                            </button>
+
+                            <span className="text-sm text-zinc-500">
+                                {TEXT.pagination.page} <span className="font-semibold text-(--foreground)">{currentPage}</span> / {totalPages}
+                            </span>
+
+                            <button
+                                onClick={() => onPageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages || loading}
+                                className="px-4 py-2 text-sm font-medium rounded-xl border border-(--nav-border) bg-(--nav-bg) text-(--foreground) hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                {TEXT.pagination.next}
+                            </button>
+                        </div>
+                    )}
                 </div>
             </section>
 
