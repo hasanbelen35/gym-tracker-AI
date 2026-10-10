@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/Dumbbell.svg" alt="Gym-Tracker-AI Logo" width="100" />
+  <img src="./assets//logo.svg" alt="Gym-Tracker-AI Logo" width="100" />
 
   # Gym Tracker AI
 

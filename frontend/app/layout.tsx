@@ -12,20 +12,23 @@ const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm" });
 export const metadata: Metadata = {
   title: "Gym Tracker",
   description: "Spor salonu takip uygulaması",
+  icons: {
+    icon: "/assets/logo.svg", 
+  },
 };
 
 const themeInitScript = `
-  (function() {
-    try {
-      const stored = localStorage.getItem('theme');
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const theme = stored ?? (systemPrefersDark ? 'dark' : 'light');
-      if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      }
-    } catch (e) {}
-  })();
-`;
+    (function() {
+      try {
+        const stored = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = stored ?? (systemPrefersDark ? 'dark' : 'light');
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      } catch (e) {}
+    })();
+  `;
 
 export default function RootLayout({
   children,
