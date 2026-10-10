@@ -23,25 +23,24 @@ export const StageColumn: React.FC<StageColumnProps> = ({ stage, loading, onRequ
                 </span>
             </div>
 
-            <div className="flex-1 space-y-2 overflow-y-auto p-3">
-                {loading && stage.members.length === 0 ? (
-                    <p className="py-10 text-center text-sm text-(--foreground)/45">Yükleniyor...</p>
-                ) : stage.members.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-nav-border py-10 text-center">
-                        <StageIcon className="h-6 w-6 text-nav-border" />
-                        <p className="px-4 text-xs text-(--foreground)/45">{stage.emptyText}</p>
-                    </div>
-                ) : (
-                    stage.members.map((member) => (
-                        <MemberCard
-                            key={member.publicId}
-                            member={member}
-                            step={stage.step}
-                            onRequest={onRequest}
-                            onCancel={onCancel}
-                        />
-                    ))
-                )}
+            <div className="flex-1 space-y-2 overflow-y-auto p-3 scrollbar-thin [scrollbar-color:var(--color-brand-500)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-brand-500/50 hover:[&::-webkit-scrollbar-thumb]:bg-brand-500/80">                {loading && stage.members.length === 0 ? (
+                <p className="py-10 text-center text-sm text-(--foreground)/45">Yükleniyor...</p>
+            ) : stage.members.length === 0 ? (
+                <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-nav-border py-10 text-center">
+                    <StageIcon className="h-6 w-6 text-nav-border" />
+                    <p className="px-4 text-xs text-(--foreground)/45">{stage.emptyText}</p>
+                </div>
+            ) : (
+                stage.members.map((member) => (
+                    <MemberCard
+                        key={member.publicId}
+                        member={member}
+                        step={stage.step}
+                        onRequest={onRequest}
+                        onCancel={onCancel}
+                    />
+                ))
+            )}
             </div>
         </section>
     );
