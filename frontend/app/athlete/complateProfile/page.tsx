@@ -1,11 +1,10 @@
-import React from 'react'
-import ComplateProfilePage from '@/pages/athlete/ComplateProfilePage';
-const page = () => {
-  return (
-    <div>
-      <ComplateProfilePage />
-    </div>
-  )
-}
+'use client';
 
-export default page
+import React from 'react';
+import CompleteProfileContainer from '@/features/member/complate-profile/container/CompleteProfileContainer';
+
+export const dynamic = 'force-dynamic';
+
+export default function Page() {
+  return <CompleteProfileContainer />;
+}

@@ -1,9 +1,17 @@
 import { Gym, Member, Program } from "@/types/types";
 
+export interface TrainerInfo {
+    id: number;      
+    publicId: string; 
+    name: string;
+    surname: string;
+    email: string;
+    myMembers?: Member[];
+}
 
-export interface Trainer{
+export interface Trainer {
     id: number;
-    publicId: string;
+    publicId: string; 
     name: string;
     surname: string;
     email: string;

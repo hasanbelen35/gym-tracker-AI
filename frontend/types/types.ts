@@ -53,13 +53,13 @@ export interface Trainer {
   programs?: Program[];
   createdAt?: string;
 }
-
 export interface TrainerInfo {
-  publicId?: string;
-  name: string;
-  surname: string;
-  email?: string;
-  myMembers?: Member[];
+    id: number;       
+    publicId: string; 
+    name: string;
+    surname: string;
+    email: string;
+    myMembers?: Member[];
 }
 
 export interface Session {

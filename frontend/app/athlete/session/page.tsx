@@ -1,12 +1,10 @@
-import SessionPage from '@/pages/athlete/SessionPage'
-import React from 'react'
+'use client';
 
-const page = () => {
-  return (
-    <div>
-      <SessionPage />
-    </div>
-  )
+import React from 'react';
+import SessionContainer from '@/features/member/sessions/container/SessionContainer';
+
+export const dynamic = 'force-dynamic';
+
+export default function Page() {
+  return <SessionContainer />;
 }
-
-export default page
