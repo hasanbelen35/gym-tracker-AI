@@ -7,52 +7,44 @@ const memberService = new MemberService();
 
 export class MemberController {
 
+    // GET MEMBER'S TRAINER DATA BY MEMBER ID CONTROLLER
     async getMyTrainerDataController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const userId = req.user?.id;
             logger.info(`Member ID ${userId} requesting assigned trainer data`);
 
-            if (!userId) {
-                logger.warn("Get trainer data failed: Authorization failed, missing user ID");
-                return res.status(401).json({ message: "Authorization failed!" });
-            }
-
-            const trainer = await memberService.getAssignedTrainerForMember(userId);
-
-            if (!trainer) {
-                logger.warn(`Get trainer data failed: No assigned trainer found for member ID: ${userId}`);
-                return res.status(404).json({ message: "Atanmış bir eğitmeniniz bulunmuyor." });
-            }
+            const trainerData = await memberService.getAssignedTrainerForMember(userId!);
 
             logger.info(`Successfully fetched assigned trainer data for member ID: ${userId}`);
             return res.status(200).json({
                 success: true,
-                data: trainer
+                data: trainerData
             });
-
-        } catch (error: any) {
-            logger.error("Error in getMyTrainerDataController", { error: error instanceof Error ? error.message : error });
-            next(error)
+        } catch (error) {
+            logger.error("Error in getMyTrainerDataController", {
+                error: error instanceof Error ? error.message : error
+            });
+            next(error);
         }
     }
-
     // UPDATE MEMBER PROFILE CONTROLLER
     async updateProfileController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const userId = req.user?.id;
+            const userId = req.user!.id;
             logger.info(`Member ID ${userId} attempting to update profile`);
-
-            if (!userId) {
-                logger.warn("Update profile failed: Authorization failed, missing user ID");
-                return res.status(401).json({ message: "Authorization failed!" });
-            }
 
             const { age, height, weight, gender, medicalNotes, avatarUrl } = req.body;
 
+            const parseNumber = (val: any): number | undefined => {
+                if (val === undefined || val === null || val === "") return undefined;
+                const num = Number(val);
+                return isNaN(num) ? undefined : num;
+            };
+
             const updatedProfile = await memberService.updateMemberProfile(userId, {
-                age: age !== undefined && age !== "" ? Number(age) : undefined,
-                height: height !== undefined && height !== "" ? Number(height) : undefined,
-                weight: weight !== undefined && weight !== "" ? Number(weight) : undefined,
+                age: parseNumber(age),
+                height: parseNumber(height),
+                weight: parseNumber(weight),
                 gender,
                 medicalNotes,
                 avatarUrl,
@@ -61,26 +53,22 @@ export class MemberController {
             logger.info(`Profile successfully updated for member ID: ${userId}`);
             return res.status(200).json({
                 success: true,
-                message: "Profile updated succesfully!",
+                message: "Profile updated successfully!",
                 data: updatedProfile
             });
 
-        } catch (error: any) {
-            logger.error("Error in updateProfileController", { error: error instanceof Error ? error.message : error });
+        } catch (error) {
+            logger.error("Error in updateProfileController", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     }
-
-    // get current member's data controller
+    // GET CURRENT MEMBER'S DATA CONTROLLER
     async getCurrentMemberController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const userId = req.user?.id;
+            const userId = req.user!.id;
             logger.info(`Fetching current data for member ID: ${userId}`);
-
-            if (!userId) {
-                logger.warn("Get current member failed: Authorization failed, missing user ID");
-                return res.status(401).json({ message: "Authorization failed!" });
-            }
 
             const member = await memberService.getCurrentMember(userId);
 
@@ -90,27 +78,22 @@ export class MemberController {
                 data: member
             });
 
-        } catch (error: any) {
-            logger.error("Error in getCurrentMemberController", { error: error instanceof Error ? error.message : error });
+        } catch (error) {
+            logger.error("Error in getCurrentMemberController", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     }
 
     // GET MEMBER'S WORKOUT PROGRAM CONTROLLER
-
-
-    async getMyPrograms(req: AuthRequest, res: Response, next: NextFunction) {
+    async getMyProgramsController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const memberId = req.user?.id;
+            const memberId = req.user!.id;
 
             logger.info(`Attempting to fetch programs for member ID: ${memberId}`);
 
-            if (!memberId) {
-                logger.warn("Get member programs failed: Authorization failed, missing member ID");
-                return res.status(401).json({ success: false, error: "Authorization failed." });
-            }
-
-            const programs = await memberService.getMyPrograms(memberId);
+            const programs = await memberService.getMemberPrograms(memberId);
 
             logger.info(`Successfully processed programs request for member ID: ${memberId}`);
             return res.status(200).json({
@@ -118,35 +101,37 @@ export class MemberController {
                 data: programs,
             });
 
-        } catch (error: any) {
-            logger.error("Error in getMyPrograms controller", {
+        } catch (error) {
+            logger.error("Error in getMyProgramsController", {
                 error: error instanceof Error ? error.message : error
             });
-            return next(error);
+            next(error);
         }
     }
 
-    async updateMemberProfile(req: AuthRequest, res: Response, next: NextFunction) {
+    // UPDATE MEMBER'S PROFILE BY ID  CONTROLLER 
+    async updateMemberProfileController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
-            const memberId = req.user?.id;
-
-            if (!memberId) {
-                logger.warn("Member profile update failed: Missing user ID in token");
-                return res.status(401).json({ success: false, error: "Yetkilendirme başarısız." });
-            }
+            const memberId = req.user!.id;
 
             logger.info(`Received profile update request for member ID: ${memberId}`);
 
             const { name, surname, gender, phone, age, height, weight, medicalNotes } = req.body;
+
+            const parseNumber = (val: any): number | undefined => {
+                if (val === undefined || val === null || val === "") return undefined;
+                const num = Number(val);
+                return isNaN(num) ? undefined : num;
+            };
 
             const updatedProfile = await memberService.updateMemberProfileService(memberId, {
                 name,
                 surname,
                 gender,
                 phone,
-                age,
-                height,
-                weight,
+                age: parseNumber(age),
+                height: parseNumber(height),
+                weight: parseNumber(weight),
                 medicalNotes,
             });
 
@@ -156,13 +141,16 @@ export class MemberController {
                 data: updatedProfile,
             });
 
-        } catch (error: any) {
-            logger.error("Error in updateMemberProfile controller", {
+        } catch (error) {
+            logger.error("Error in updateMemberProfileController", {
                 error: error instanceof Error ? error.message : error
             });
-            return next(error);
+            next(error);
         }
     }
+
+        // TODO : WILL ADD CONTROLLERS FOR WORKOUT LOGS 
+
 }
 
 

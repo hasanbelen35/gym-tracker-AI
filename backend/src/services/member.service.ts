@@ -3,20 +3,29 @@ import { CompleteProfileInput } from '../types/types';
 import { logger } from "../config/logger";
 import { UpdateMemberProfileData } from '../types/member.types';
 import { CompleteWorkoutInput } from "../validations/workout.validations";
+import { AppError } from "../middleware/errorMiddleware";
+import { Prisma } from "@prisma/client";
 
 export class MemberService {
-    // GET ASSIGNED TRAINER TO MEMBER 
+    // GET MEMBER'S TRAINER DATA BY MEMBER ID CONTROLLER
+
     async getAssignedTrainerForMember(memberId: number) {
+        AppError.assertMemberId(memberId);
+
         logger.info(`Fetching assigned trainer for member ID: ${memberId}`);
+
         const member = await prisma.member.findUnique({
             where: { id: memberId },
             select: {
                 assignmentStatus: true,
                 trainer: {
                     select: {
+                        id: true,
+                        publicId: true,
                         name: true,
                         surname: true,
                         email: true,
+                        avatarUrl: true
                     }
                 }
             }
@@ -24,7 +33,7 @@ export class MemberService {
 
         if (!member) {
             logger.warn(`Assigned trainer fetch failed: Member not found with ID: ${memberId}`);
-            throw new Error("Member not found");
+            throw new AppError(404, "Üye sistemde bulunamadı.");
         }
 
         logger.info(`Successfully fetched assigned trainer for member ID: ${memberId}`);
@@ -33,18 +42,23 @@ export class MemberService {
             assignmentStatus: member.assignmentStatus,
         };
     }
+
     // UPDATE PROFILE MEMBER 
     async updateMemberProfile(memberId: number, data: CompleteProfileInput) {
+        AppError.assertMemberId(memberId);
+
         logger.info(`Attempting to update profile for member ID: ${memberId}`);
+
         const existingMember = await prisma.member.findUnique({
             where: { id: memberId },
         });
 
         if (!existingMember) {
             logger.warn(`Profile update failed: Member not found with ID: ${memberId}`);
-            throw new Error("Member not found");
+            throw new AppError(404, "Üye bulunamadı.");
         }
-        const updatedData = {
+
+        const updatedData: Prisma.MemberUpdateInput = {
             ...(data.age !== undefined && { age: data.age }),
             ...(data.height !== undefined && { height: data.height }),
             ...(data.weight !== undefined && { weight: data.weight }),
@@ -53,19 +67,42 @@ export class MemberService {
             ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
             isProfileCompleted: true,
         };
-        await prisma.member.update({
+
+        const updatedMember = await prisma.member.update({
             where: { id: memberId },
             data: updatedData,
+            select: {
+                id: true,
+                publicId: true,
+                name: true,
+                surname: true,
+                email: true,
+                age: true,
+                height: true,
+                weight: true,
+                gender: true,
+                medicalNotes: true,
+                avatarUrl: true,
+                isProfileCompleted: true,
+                updatedAt: true
+            }
         });
+
         logger.info(`Profile successfully updated for member ID: ${memberId}`);
-        return updatedData;
+        return updatedMember;
     }
+
     // GET CURRENT MEMBER's DATA 
     async getCurrentMember(memberId: number) {
+        AppError.assertMemberId(memberId);
+
         logger.info(`Fetching current profile data for member ID: ${memberId}`);
+
         const member = await prisma.member.findUnique({
             where: { id: memberId },
             select: {
+                id: true,
+                publicId: true,
                 name: true,
                 surname: true,
                 email: true,
@@ -80,11 +117,14 @@ export class MemberService {
                 isProfileCompleted: true,
                 gym: {
                     select: {
+                        id: true,
                         name: true,
                     }
                 },
                 trainer: {
                     select: {
+                        id: true,
+                        publicId: true,
                         name: true,
                         surname: true,
                         email: true,
@@ -96,6 +136,7 @@ export class MemberService {
                         checkIn: 'desc',
                     },
                     select: {
+                        id: true,
                         checkIn: true,
                         checkOut: true,
                     },
@@ -105,15 +146,19 @@ export class MemberService {
 
         if (!member) {
             logger.warn(`Current member fetch failed: Member not found with ID: ${memberId}`);
-            throw new Error("Member not found");
+            throw new AppError(404, "Üye profili bulunamadı.");
         }
 
         logger.info(`Successfully fetched current profile data for member ID: ${memberId}`);
         return member;
     }
 
+    // GET MEMBER'S WORKOUT PROGRAMS BY ID SERVICE
     async getMemberPrograms(memberId: number, onlyActive: boolean = false) {
+        AppError.assertMemberId(memberId);
+
         logger.info(`Attempting to fetch programs for member ID: ${memberId}`);
+
         const existingMember = await prisma.member.findUnique({
             where: { id: memberId },
             select: { id: true },
@@ -121,7 +166,7 @@ export class MemberService {
 
         if (!existingMember) {
             logger.warn(`Fetch programs failed: Member not found with ID: ${memberId}`);
-            throw new Error("Member not found");
+            throw new AppError(404, "Üye sistemde bulunamadı.");
         }
 
         const programs = await prisma.program.findMany({
@@ -131,6 +176,7 @@ export class MemberService {
             },
             orderBy: { createdAt: 'desc' },
             select: {
+                id: true,
                 title: true,
                 type: true,
                 splitType: true,
@@ -140,20 +186,28 @@ export class MemberService {
                 days: {
                     orderBy: { dayOrder: 'asc' },
                     select: {
+                        id: true,
                         dayName: true,
                         dayOrder: true,
                         isRestDay: true,
                         exercises: {
                             orderBy: { orderIndex: 'asc' },
                             select: {
+                                id: true,
                                 orderIndex: true,
                                 notes: true,
                                 exercise: {
-                                    select: { name: true },
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        category: true,
+                                        targetMuscle: true
+                                    },
                                 },
                                 sets: {
                                     orderBy: { setNumber: 'asc' },
                                     select: {
+                                        id: true,
                                         setNumber: true,
                                         targetReps: true,
                                         targetWeight: true,
@@ -170,86 +224,13 @@ export class MemberService {
         logger.info(`Fetched ${programs.length} programs for member ID: ${memberId}`);
         return programs;
     }
-    // GET MEMBER'S PROGRAMS 
-    async getMyPrograms(memberId: number) {
-        logger.info(`Database query: Fetching programs for member ID: ${memberId}`);
-
-        const programs = await prisma.program.findMany({
-            where: {
-                memberId: memberId,
-            },
-            select: {
-                id: false,
-                publicId: true,
-                title: true,
-                type: true,
-                splitType: true,
-                isActive: true,
-                createdAt: true,
-                trainer: {
-                    select: {
-                        publicId: true,
-                        name: true,
-                        surname: true,
-                        email: true,
-                    }
-                },
-                days: {
-                    orderBy: { dayOrder: 'asc' },
-                    select: {
-                        id: false,
-                        publicId: true,
-                        dayName: true,
-                        dayOrder: true,
-                        isRestDay: true,
-                        exercises: {
-                            orderBy: { orderIndex: 'asc' },
-                            select: {
-                                id: false,
-                                publicId: true,
-                                orderIndex: true,
-                                notes: true,
-                                exercise: {
-                                    select: {
-                                        id: false,
-                                        publicId: true,
-                                        name: true,
-                                        category: true,
-                                        bodyPart: true,
-                                        equipment: true,
-                                        targetMuscle: true,
-                                        instructions: true,
-                                        instruction_steps: true,
-                                        gifUrl: true,
-                                        createdAt: true,
-                                    }
-                                },
-                                sets: {
-                                    orderBy: { setNumber: 'asc' },
-                                    select: {
-                                        id: false,
-                                        publicId: true,
-                                        setNumber: true,
-                                        targetReps: true,
-                                        targetWeight: true,
-                                        rir: true,
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        logger.info(`Successfully fetched ${programs.length} programs for member ID: ${memberId}`);
-        return programs;
-    }
-    // UPDATE MEMBER'S PROFILE BY ID 
+    // UPDATE MEMBER'S PROFILE BY ID  SERVICE 
     async updateMemberProfileService(
         memberId: number,
         data: UpdateMemberProfileData
     ) {
+        AppError.assertMemberId(memberId);
+
         logger.info(`Attempting to update profile for member ID: ${memberId}`);
 
         const existingMember = await prisma.member.findUnique({
@@ -258,7 +239,7 @@ export class MemberService {
 
         if (!existingMember) {
             logger.warn(`Member profile update failed: Member not found with ID: ${memberId}`);
-            throw new Error("Member not found");
+            throw new AppError(404, "Üye bulunamadı.");
         }
 
         const updatedMember = await prisma.member.update({
@@ -295,6 +276,7 @@ export class MemberService {
         return updatedMember;
     }
 
+    // TODO : WILL ADD CONTROLLERS FOR THEM
     // COMPLATE WORKOUT LOGS 
     async complateWorkoutLogsService(
         memberId: number,

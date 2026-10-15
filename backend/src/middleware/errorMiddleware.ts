@@ -29,6 +29,12 @@ export class AppError extends Error {
       throw new AppError(400, 'Geçersiz istek: Üye kimlik bilgisi sağlanmadı.');
     }
   }
+  // MEMBER  ID CONTROL
+  static assertMemberId(memberId: number | undefined | null): void {
+    if (!memberId) {
+      throw new AppError(400, 'Geçersiz istek: Üye kimlik bilgisi sağlanmadı.');
+    }
+  }
 
   // TRAINER PUBLIC ID CONTROL
   static assertTrainerPublicId(trainerPublicId: string | undefined | null): asserts trainerPublicId is string {
