@@ -10,3 +10,4 @@ export interface UpdateMemberProfileData {
     weight?: number;
     medicalNotes:string;
 };
+

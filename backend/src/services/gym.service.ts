@@ -1,7 +1,12 @@
 import prisma from "../lib/db";
 import { logger } from "../config/logger";
+import { Http } from "winston/lib/winston/transports";
+import { AppError } from "../middleware/errorMiddleware";
 
 export class GymService {
+
+    // TODO : WILL FIX LATER
+
     async getAllGymData() {
         logger.info("Fetching all gyms data");
         const gyms = await prisma.gym.findMany({
@@ -12,9 +17,16 @@ export class GymService {
     }
 
     // ----------------------------------------MEMBER-----------------------------------------
-    async getAllMembers() {
-        logger.info("Fetching all members across gyms");
+    async getAllMembers(gymId: number) {
+        AppError.assertGym(gymId);
+
+
+        logger.info(`Fetching members for  in gym ${gymId}`);
+
         const members = await prisma.member.findMany({
+            where: {
+                gymId: gymId,
+            },
             select: {
                 id: true,
                 publicId: true,
@@ -23,7 +35,6 @@ export class GymService {
                 email: true,
                 gymId: true,
                 assignmentStatus: true,
-                // get trainer's data
                 trainer: {
                     select: {
                         name: true,
@@ -31,14 +42,18 @@ export class GymService {
                     }
                 }
             }
-
         });
-        logger.info(`Successfully fetched ${members.length} members`);
-        return members;
 
+        logger.info(`Successfully fetched ${members.length} members for trainer`);
+        return members;
     }
 
     async removeMemberFromGym(gymId: number, memberPublicId: string) {
+
+        // PARAMETER CHECK
+        AppError.assertGym(gymId);
+        AppError.assertMemberPublicId(memberPublicId);
+
         logger.info(`Attempting to remove member with publicId: ${memberPublicId} from gymId: ${gymId}`);
         return prisma.$transaction(async (tx) => {
             const member = await tx.member.findFirst({
@@ -47,7 +62,7 @@ export class GymService {
 
             if (!member) {
                 logger.warn(`Member removal failed: Member not found with publicId: ${memberPublicId} in gymId: ${gymId}`);
-                throw new Error("Member not found in this gym");
+                throw new AppError(404, 'Aradığınız kullanıcı sistemde bulunamadı.');
             }
 
             await tx.session.deleteMany({ where: { memberId: member.id } });
@@ -58,8 +73,13 @@ export class GymService {
             return deletedMember;
         });
     }
-
+    // GET MEMBER DETAIL SERVICE
     async getMemberDetail(gymId: number, memberPublicId: string) {
+        // PARAMETER CHECK
+        AppError.assertGym(gymId);
+        AppError.assertMemberPublicId(memberPublicId);
+
+
         logger.info(`Fetching details for member publicId: ${memberPublicId} in gymId: ${gymId}`);
         const member = await prisma.member.findFirst({
             where: { publicId: memberPublicId, gymId },
@@ -89,6 +109,7 @@ export class GymService {
                 },
                 programs: {
                     orderBy: { createdAt: "desc" },
+                    take: 10,
                     select: {
                         id: true,
                         type: true,
@@ -101,18 +122,24 @@ export class GymService {
 
         if (!member) {
             logger.warn(`Member detail fetch failed: Member not found with publicId: ${memberPublicId} in gymId: ${gymId}`);
-            throw new Error("Member not found in this gym");
+            throw new AppError(404, 'Aradığınız kullanıcı sistemde bulunamadı.');
         }
 
         logger.info(`Successfully fetched details for member ID: ${member.id}`);
         return member;
     }
 
-    //----------------------------------------TRAINER----------------------------------------
+    // GET ALL TRAINER FROM GYM SERVICE
+    async getAllTrainers(gymId: number) {
+        //  PARAMETER CHECK
+        AppError.assertGym(gymId);
 
-    async getAllTrainers() {
-        logger.info("Fetching all trainers");
+        logger.info(`Fetching all trainers for gymId: ${gymId}`);
+
         const trainers = await prisma.trainer.findMany({
+            where: {
+                gymId: gymId
+            },
             select: {
                 id: true,
                 publicId: true,
@@ -122,12 +149,19 @@ export class GymService {
                 gymId: true,
             }
         });
-        logger.info(`Successfully fetched ${trainers.length} trainers`);
+
+        logger.info(`Successfully fetched ${trainers.length} trainers for gymId: ${gymId}`);
         return trainers;
     }
 
+    // REMOVE TRAINER FROM GYM SERVICE
     async removeTrainerFromGym(gymId: number, trainerPublicId: string) {
+        // PARAMETER CHECK
+        AppError.assertGym(gymId);
+        AppError.assertTrainerPublicId(trainerPublicId);
+
         logger.info(`Attempting to remove trainer with publicId: ${trainerPublicId} from gymId: ${gymId}`);
+
         return prisma.$transaction(async (tx) => {
             const trainer = await tx.trainer.findFirst({
                 where: { publicId: trainerPublicId, gymId }
@@ -135,34 +169,47 @@ export class GymService {
 
             if (!trainer) {
                 logger.warn(`Trainer removal failed: Trainer not found with publicId: ${trainerPublicId} in gymId: ${gymId}`);
-                throw new Error("Trainer not found in this gym");
+                throw new AppError(404, "Eğitmen bu salonda bulunamadı.");
             }
 
-          await tx.member.updateMany({
-            where: {
-                trainer: { publicId: trainerPublicId }
-            },
-            data: {
-                assignmentStatus: 'UNASSIGNED',
-                trainerId: null 
-            }
-        });
+            await tx.member.updateMany({
+                where: {
+                    gymId: gymId,
+                    trainerId: trainer.id
+                },
+                data: {
+                    assignmentStatus: 'UNASSIGNED',
+                    trainerId: null
+                }
+            });
 
-            await tx.program.deleteMany({ where: { trainerId: trainer.id } });
+            await tx.program.deleteMany({
+                where: { trainerId: trainer.id }
+            });
 
-            const deletedTrainer = await tx.trainer.delete({ where: { id: trainer.id } });
+            const deletedTrainer = await tx.trainer.delete({
+                where: { id: trainer.id }
+            });
+
             logger.info(`Trainer successfully removed with ID: ${trainer.id} from gymId: ${gymId}`);
             return deletedTrainer;
         });
     }
-async getTrainerDetail(gymId: number, trainerPublicId: string) {
+
+    // GET TRAINER DETAILED DATA SERVICE
+    async getTrainerDetail(gymId: number, trainerPublicId: string) {
+        // PARAMETER CHECK
+        AppError.assertGym(gymId);
+        AppError.assertTrainerPublicId(trainerPublicId);
+
         logger.info(`Fetching details for trainer publicId: ${trainerPublicId} in gymId: ${gymId}`);
+
         const trainer = await prisma.trainer.findFirst({
             where: { publicId: trainerPublicId, gymId },
             select: {
                 id: true,
                 publicId: true,
-                avatarUrl:true,
+                avatarUrl: true,
                 name: true,
                 surname: true,
                 email: true,
@@ -189,57 +236,123 @@ async getTrainerDetail(gymId: number, trainerPublicId: string) {
 
         if (!trainer) {
             logger.warn(`Trainer detail fetch failed: Trainer not found with publicId: ${trainerPublicId} in gymId: ${gymId}`);
-            throw new Error("Trainer not found in this gym");
+            throw new AppError(404, "Aradığınız eğitmen bu salonda bulunamadı.");
         }
 
         logger.info(`Successfully fetched details for trainer ID: ${trainer.id}`);
         return trainer;
     }
-
-    // TO APPROVE TRAINER'S MEMBER ASSINGMINET
+    // TO APPROVE TRAINER'S MEMBER ASSIGNMENT
     async approveMemberAssignment(memberPublicId: string, gymId: number) {
+        // PARAMETER CHECK
+
+        AppError.assertGym(gymId);
+        AppError.assertMemberPublicId(memberPublicId);
+
         logger.info(`Approving member assignment for member publicId: ${memberPublicId} in gymId: ${gymId}`);
-        const result = await prisma.member.updateMany({
+
+        const member = await prisma.member.findFirst({
             where: {
                 publicId: memberPublicId,
                 gymId: gymId,
-                assignmentStatus: 'PENDING',
-            },
-            data: {
-                assignmentStatus: 'ASSIGNED',
             }
         });
+
+        if (!member) {
+            logger.warn(`Member assignment approval failed: Member not found with publicId: ${memberPublicId} in gymId: ${gymId}`);
+            throw new AppError(404, "Üye bu salonda bulunamadı.");
+        }
+
+        if (member.assignmentStatus !== 'PENDING') {
+            logger.warn(`Member assignment approval failed: Status is not PENDING (${member.assignmentStatus}) for publicId: ${memberPublicId}`);
+            throw new AppError(400, "Sadece onay bekleyen (PENDING) talepler onaylanabilir.");
+        }
+
+        const updatedMember = await prisma.member.update({
+            where: { id: member.id },
+            data: {
+                assignmentStatus: 'ASSIGNED',
+            },
+            select: {
+                id: true,
+                publicId: true,
+                name: true,
+                surname: true,
+                assignmentStatus: true,
+                trainerId: true
+            }
+        });
+
         logger.info(`Member assignment successfully approved for publicId: ${memberPublicId}`);
-        return result;
+        return updatedMember;
     }
 
-    // TO REJECT TRAINER'S MEMBER ASSINGMINET
+    // TO REJECT TRAINER'S MEMBER ASSIGNMENT
     async rejectMemberAssignment(memberPublicId: string, gymId: number) {
+        // PARAMETER CHECK
+
+        AppError.assertGym(gymId);
+        AppError.assertMemberPublicId(memberPublicId);
+
         logger.info(`Rejecting member assignment for member publicId: ${memberPublicId} in gymId: ${gymId}`);
-        const result = await prisma.member.updateMany({
+
+        const member = await prisma.member.findFirst({
             where: {
                 publicId: memberPublicId,
                 gymId: gymId,
-                assignmentStatus: 'PENDING',
-            },
+            }
+        });
+
+        if (!member) {
+            logger.warn(`Member assignment rejection failed: Member not found with publicId: ${memberPublicId} in gymId: ${gymId}`);
+            throw new AppError(404, "Üye bu salonda bulunamadı.");
+        }
+
+        if (member.assignmentStatus !== 'PENDING') {
+            logger.warn(`Member assignment rejection failed: Status is not PENDING (${member.assignmentStatus}) for publicId: ${memberPublicId}`);
+            throw new AppError(400, "Sadece onay bekleyen (PENDING) talepler reddedilebilir.");
+        }
+
+        const updatedMember = await prisma.member.update({
+            where: { id: member.id },
             data: {
                 trainerId: null,
                 assignmentStatus: 'UNASSIGNED',
+            },
+            select: {
+                id: true,
+                publicId: true,
+                name: true,
+                surname: true,
+                assignmentStatus: true,
+                trainerId: true
             }
         });
+
         logger.info(`Member assignment successfully rejected for publicId: ${memberPublicId}`);
-        return result;
+        return updatedMember;
     }
-    // get member by status
+
     // GET MEMBERS BY ASSIGNMENT STATUS 
     async getMembersByStatus(gymId: number, status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED') {
+        // PARAMETER CHECK
+
+        AppError.assertGym(gymId);
+
+        const validStatuses = ['PENDING', 'ASSIGNED', 'UNASSIGNED'];
+        if (!status || !validStatuses.includes(status)) {
+            throw new AppError(400, "Geçersiz atama durumu. (PENDING, ASSIGNED veya UNASSIGNED olmalıdır)");
+        }
+
         logger.info(`Fetching members by status: ${status} for gymId: ${gymId}`);
+
         const members = await prisma.member.findMany({
             where: {
                 gymId: gymId,
                 assignmentStatus: status,
             },
             select: {
+                id: true,
                 publicId: true,
                 name: true,
                 surname: true,
@@ -247,13 +360,17 @@ async getTrainerDetail(gymId: number, trainerPublicId: string) {
                 assignmentStatus: true,
                 trainer: {
                     select: {
+                        id: true,
+                        publicId: true,
                         name: true,
                         surname: true,
                     }
                 }
             }
         });
+
         logger.info(`Successfully fetched ${members.length} members with status ${status}`);
         return members;
     }
+
 }
