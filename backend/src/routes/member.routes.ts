@@ -3,7 +3,7 @@ import { MemberController } from '../controllers/member.controller';
 import { authenticate, authorizeMember } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
 import { complateMemberProfileSchema, updateMemberProfileSchema } from "../validations/MemberValidations";
-
+import { completeWorkoutSchema } from "../validations/workout.validations";
 const router = Router();
 const member = new MemberController();
 
@@ -31,4 +31,11 @@ router.put(
   (req, res, next) => member.updateMemberProfileController(req, res, next) 
 );
 
+router.post(
+    "/workout-logs/complete",
+    authenticate,
+    authorizeMember,
+    validate(completeWorkoutSchema),
+    (req, res, next) => member.completeWorkoutLog(req, res, next)
+);
 export default router;

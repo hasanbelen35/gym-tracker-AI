@@ -276,12 +276,13 @@ export class MemberService {
         return updatedMember;
     }
 
-    // TODO : WILL ADD CONTROLLERS FOR THEM
-    // COMPLATE WORKOUT LOGS 
-    async complateWorkoutLogsService(
+    // COMPLETE WORKOUT LOG SERVICE
+    async completeWorkoutLogsService(
         memberId: number,
         input: CompleteWorkoutInput
     ) {
+        AppError.assertMemberId(memberId);
+
         logger.info(`Attempting to complete workout session for member ID: ${memberId}`);
 
         const existingMember = await prisma.member.findUnique({
@@ -291,7 +292,7 @@ export class MemberService {
 
         if (!existingMember) {
             logger.warn(`Workout session completion failed: Member not found with ID: ${memberId}`);
-            throw new Error("Member not found");
+            throw new AppError(404, "Üye bulunamadı.");
         }
 
         if (input.workoutDayId !== undefined) {
@@ -305,7 +306,7 @@ export class MemberService {
 
             if (!existingDay) {
                 logger.warn(`Workout session completion failed: Invalid workout day ID: ${input.workoutDayId} for member ID: ${memberId}`);
-                throw new Error("Invalid workout day");
+                throw new AppError(400, "Geçersiz antrenman günü seçimi veya bu gün size ait değil.");
             }
         }
 
@@ -328,7 +329,7 @@ export class MemberService {
 
             if (foundSetsCount !== uniqueSetIds.length) {
                 logger.warn(`Workout session completion failed: Invalid or unauthorized workout set references for member ID: ${memberId}`);
-                throw new Error("Invalid workout set references");
+                throw new AppError(403, "Geçersiz veya yetkisiz antrenman seti referansları tespit edildi.");
             }
         }
 
@@ -337,79 +338,81 @@ export class MemberService {
             ? new Date(completedAt.getTime() - input.durationMinutes * 60000)
             : completedAt;
 
-        const workoutLog = await prisma.workoutLog.create({
-            data: {
-                memberId,
-                workoutDayId: input.workoutDayId,
-                durationMinutes: input.durationMinutes,
-                memberNote: input.memberNote,
-                status: "COMPLETED",
-                startedAt,
-                completedAt,
-                exerciseLogs: {
-                    create: input.exercises.map((ex) => ({
-                        exerciseName: ex.exerciseName,
-                        orderIndex: ex.orderIndex,
-                        notes: ex.notes,
-                        setLogs: {
-                            create: ex.sets.map((set) => {
-                                const isSkipped = set.status === "SKIPPED";
-                                return {
-                                    workoutSetId: set.workoutSetId,
-                                    setNumber: set.setNumber,
-                                    targetReps: set.targetReps,
-                                    targetWeight: set.targetWeight,
-                                    targetRir: set.targetRir,
-                                    actualReps: isSkipped ? null : set.actualReps,
-                                    actualWeight: isSkipped ? null : set.actualWeight,
-                                    actualRir: isSkipped ? null : set.actualRir,
-                                    status: set.status,
-                                };
-                            }),
-                        },
-                    })),
+        const workoutLog = await prisma.$transaction(async (tx) => {
+            return await tx.workoutLog.create({
+                data: {
+                    memberId,
+                    workoutDayId: input.workoutDayId,
+                    durationMinutes: input.durationMinutes,
+                    memberNote: input.memberNote,
+                    status: "COMPLETED",
+                    startedAt,
+                    completedAt,
+                    exerciseLogs: {
+                        create: input.exercises.map((ex) => ({
+                            exerciseName: ex.exerciseName,
+                            orderIndex: ex.orderIndex,
+                            notes: ex.notes,
+                            setLogs: {
+                                create: ex.sets.map((set) => {
+                                    const isSkipped = set.status === "SKIPPED";
+                                    return {
+                                        workoutSetId: set.workoutSetId,
+                                        setNumber: set.setNumber,
+                                        targetReps: set.targetReps !== undefined ? String(set.targetReps) : null,
+                                        targetWeight: set.targetWeight,
+                                        targetRir: set.targetRir,
+                                        actualReps: isSkipped ? null : set.actualReps,
+                                        actualWeight: isSkipped ? null : set.actualWeight,
+                                        actualRir: isSkipped ? null : set.actualRir,
+                                        status: set.status || "MATCHED",
+                                    };
+                                }),
+                            },
+                        })),
+                    },
                 },
-            },
-            select: {
-                id: true,
-                publicId: true,
-                memberId: true,
-                workoutDayId: true,
-                startedAt: true,
-                completedAt: true,
-                durationMinutes: true,
-                status: true,
-                memberNote: true,
-                aiFeedback: true,
-                createdAt: true,
-                updatedAt: true,
-                exerciseLogs: {
-                    orderBy: { orderIndex: "asc" },
-                    select: {
-                        id: true,
-                        publicId: true,
-                        exerciseName: true,
-                        orderIndex: true,
-                        notes: true,
-                        setLogs: {
-                            orderBy: { setNumber: "asc" },
-                            select: {
-                                id: true,
-                                publicId: true,
-                                workoutSetId: true,
-                                setNumber: true,
-                                targetReps: true,
-                                targetWeight: true,
-                                targetRir: true,
-                                actualReps: true,
-                                actualWeight: true,
-                                actualRir: true,
-                                status: true,
+                select: {
+                    id: true,
+                    publicId: true,
+                    memberId: true,
+                    workoutDayId: true,
+                    startedAt: true,
+                    completedAt: true,
+                    durationMinutes: true,
+                    status: true,
+                    memberNote: true,
+                    aiFeedback: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    exerciseLogs: {
+                        orderBy: { orderIndex: "asc" },
+                        select: {
+                            id: true,
+                            publicId: true,
+                            exerciseName: true,
+                            orderIndex: true,
+                            notes: true,
+                            setLogs: {
+                                orderBy: { setNumber: "asc" },
+                                select: {
+                                    id: true,
+                                    publicId: true,
+                                    workoutSetId: true,
+                                    setNumber: true,
+                                    targetReps: true,
+                                    targetWeight: true,
+                                    targetRir: true,
+                                    actualReps: true,
+                                    actualWeight: true,
+                                    actualRir: true,
+                                    status: true,
+                                },
                             },
                         },
                     },
                 },
-            },
+            });
         });
 
         logger.info(`Successfully completed workout session with log ID: ${workoutLog.id} for member ID: ${memberId}`);

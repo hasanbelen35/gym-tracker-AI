@@ -1,7 +1,6 @@
-// --- Yeni Workout Program Hiyerarşi Tipleri ---
-
 import { Member, TrainerInfo } from "@/types/types";
-import { Session } from "inspector/promises";
+
+// --- Workout Program Hiyerarşi Tipleri ---
 
 export interface ProgramExerciseDetail {
   publicId: string;
@@ -17,6 +16,7 @@ export interface ProgramExerciseDetail {
 }
 
 export interface WorkoutSetItem {
+  id?: number;
   publicId: string;
   setNumber: number;
   targetReps?: string | null;
@@ -25,6 +25,7 @@ export interface WorkoutSetItem {
 }
 
 export interface WorkoutExerciseItem {
+  id?: number;
   publicId: string;
   orderIndex: number;
   notes?: string | null;
@@ -33,6 +34,7 @@ export interface WorkoutExerciseItem {
 }
 
 export interface WorkoutDayItem {
+  id?: number;
   publicId: string;
   dayName: string;
   dayOrder: number;
@@ -41,6 +43,7 @@ export interface WorkoutDayItem {
 }
 
 export interface DetailedProgram {
+  id?: number;
   publicId: string;
   title: string;
   type: string;
@@ -54,30 +57,34 @@ export interface DetailedProgram {
     email: string;
   } | null;
   days: WorkoutDayItem[];
-};
-
-export interface MemberState {
-    trainer: TrainerInfo | null;
-    assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
-    programs: DetailedProgram[]; 
-    profile: Member | null;
-    loading: boolean;
-    error: string | null;
-    successMessage?: string | null;
 }
 
+export interface MemberState {
+  trainer: TrainerInfo | null;
+  assignmentStatus: "ASSIGNED" | "PENDING" | "UNASSIGNED" | null;
+  programs: DetailedProgram[];
+  profile: Member | null;
+  loading: boolean;
+  workoutLogLoading: boolean;
+  workoutLogSuccess: boolean;
+  error: string | null;
+  successMessage?: string | null;
+}
+
+// --- Component Props Interfaces ---
+
 export interface ExerciseItemProps {
-    exerciseItem: WorkoutExerciseItem;
-};
-export
-interface ProgramCardProps {
-    program: DetailedProgram;
-};
-export 
-interface SetTableProps {
-    sets: WorkoutSetItem[];
-};
+  exerciseItem: WorkoutExerciseItem;
+}
+
+export interface ProgramCardProps {
+  program: DetailedProgram;
+}
+
+export interface SetTableProps {
+  sets: WorkoutSetItem[];
+}
 
 export interface WorkoutDayListProps {
-    days: WorkoutDayItem[];
-};
+  days: WorkoutDayItem[];
+}

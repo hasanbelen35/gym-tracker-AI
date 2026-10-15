@@ -222,7 +222,7 @@ model WorkoutSet {
 model WorkoutLog {
   id              Int              @id @default(autoincrement())
   publicId        String           @unique @default(uuid())
-  memberId        Int
+  memberId        Int 
   workoutDayId    Int?
   startedAt       DateTime         @default(now())
   completedAt     DateTime?
