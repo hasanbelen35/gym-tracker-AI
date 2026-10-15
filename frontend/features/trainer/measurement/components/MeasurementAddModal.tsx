@@ -1,12 +1,14 @@
 import React from "react";
 import { MEASUREMENT_CONFIG } from "../constants/measurement.config";
 import { CreateMeasurementPayload } from "@/types/types";
+import { ErrorBox } from "@/components/ui/ErrorBox";
 
 interface MeasurementAddModalProps {
     isOpen: boolean;
     onClose: () => void;
     formData: CreateMeasurementPayload;
     formLoading: boolean;
+    error?: string | null;
     onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     onSubmit: (e: React.FormEvent) => void;
 }
@@ -16,6 +18,7 @@ export const MeasurementAddModal: React.FC<MeasurementAddModalProps> = ({
     onClose,
     formData,
     formLoading,
+    error,
     onInputChange,
     onSubmit,
 }) => {
@@ -27,6 +30,7 @@ export const MeasurementAddModal: React.FC<MeasurementAddModalProps> = ({
                 <div className="flex items-center justify-between pb-4 border-b border-nav-border mb-4">
                     <h3 className="text-lg font-bold">Yeni Vücut Ölçümü Ekle</h3>
                     <button
+                        type="button"
                         onClick={onClose}
                         className="w-8 h-8 rounded-xl bg-background border border-nav-border flex items-center justify-center text-sm font-bold hover:border-brand-500 transition-all cursor-pointer"
                     >
@@ -35,6 +39,8 @@ export const MeasurementAddModal: React.FC<MeasurementAddModalProps> = ({
                 </div>
 
                 <form onSubmit={onSubmit} className="space-y-4">
+                    <ErrorBox message={error ?? null} />
+
                     <div className="grid grid-cols-2 gap-3">
                         {MEASUREMENT_CONFIG.map((field) => {
                             if (field.key === 'photos') {

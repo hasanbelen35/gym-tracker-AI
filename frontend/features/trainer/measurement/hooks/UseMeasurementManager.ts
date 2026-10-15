@@ -5,7 +5,7 @@ import {
     deleteMemberMeasurement,
     fetchMemberMeasurements
 } from "@/store/slices/trainerSlice";
-import { CreateMeasurementPayload, MemberMeasurement } from "@/types/types";
+import { CreateMeasurementPayload } from "@/types/types";
 import { useAuth } from "@/hooks/useAuth";
 import { INITIAL_FORM_STATE } from "../constants/measurement.config";
 
@@ -21,9 +21,11 @@ export const useMeasurementManager = (memberPublicId: string) => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [formLoading, setFormLoading] = useState(false);
     const [formData, setFormData] = useState<CreateMeasurementPayload>(INITIAL_FORM_STATE);
+    const [formError, setFormError] = useState<string | null>(null);
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
+    const [deleteError, setDeleteError] = useState<string | null>(null);
 
     useEffect(() => {
         if (memberPublicId) {
@@ -37,6 +39,30 @@ export const useMeasurementManager = (memberPublicId: string) => {
         safeMeasurements.find((m) => m.id === selectedId) ||
         safeMeasurements[0] ||
         null;
+
+    const openAddModal = () => {
+        setFormError(null);
+        setIsAddModalOpen(true);
+    };
+
+    const closeAddModal = () => {
+        setFormError(null);
+        setIsAddModalOpen(false);
+    };
+
+    const selectMeasurement = (id: number | string) => {
+        setDeleteError(null);
+        setSelectedId(id);
+    };
+
+    const openDeleteModal = () => {
+        setDeleteError(null);
+        setIsDeleteModalOpen(true);
+    };
+
+    const closeDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+    };
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -66,6 +92,7 @@ export const useMeasurementManager = (memberPublicId: string) => {
         e.preventDefault();
         if (!memberPublicId) return;
 
+        setFormError(null);
         setFormLoading(true);
         try {
             const sanitizedFormData: CreateMeasurementPayload = {
@@ -89,7 +116,12 @@ export const useMeasurementManager = (memberPublicId: string) => {
             if (addMemberMeasurement.fulfilled.match(resultAction)) {
                 setIsAddModalOpen(false);
                 setFormData(INITIAL_FORM_STATE);
+            } else if (addMemberMeasurement.rejected.match(resultAction)) {
+                setFormError((resultAction.payload as string) || "Ölçüm eklenirken bir hata oluştu.");
             }
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Ölçüm eklenirken beklenmeyen bir hata oluştu.";
+            setFormError(message);
         } finally {
             setFormLoading(false);
         }
@@ -98,6 +130,7 @@ export const useMeasurementManager = (memberPublicId: string) => {
     const handleDeleteConfirm = async () => {
         if (!selectedMeasurement || !memberPublicId || !user?.id) return;
 
+        setDeleteError(null);
         const measurementPublicId = String(
             selectedMeasurement.publicId ?? selectedMeasurement.id
         );
@@ -115,7 +148,14 @@ export const useMeasurementManager = (memberPublicId: string) => {
             if (deleteMemberMeasurement.fulfilled.match(resultAction)) {
                 setIsDeleteModalOpen(false);
                 setSelectedId(null);
+            } else if (deleteMemberMeasurement.rejected.match(resultAction)) {
+                setIsDeleteModalOpen(false);
+                setDeleteError((resultAction.payload as string) || "Ölçüm silinirken bir hata oluştu.");
             }
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Ölçüm silinirken beklenmeyen bir hata oluştu.";
+            setIsDeleteModalOpen(false);
+            setDeleteError(message);
         } finally {
             setDeleteLoading(false);
         }
@@ -135,14 +175,18 @@ export const useMeasurementManager = (memberPublicId: string) => {
         measurementsLoading,
         selectedMeasurement,
         selectedId,
-        setSelectedId,
+        selectMeasurement,
         isAddModalOpen,
-        setIsAddModalOpen,
+        openAddModal,
+        closeAddModal,
         formLoading,
         formData,
+        formError,
         isDeleteModalOpen,
-        setIsDeleteModalOpen,
+        openDeleteModal,
+        closeDeleteModal,
         deleteLoading,
+        deleteError,
         handleInputChange,
         handleAddMeasurementSubmit,
         handleDeleteConfirm,

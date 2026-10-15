@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React from "react";
 import ConfirmModal from '@/components/ConfirmModel';
@@ -18,15 +18,18 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
         safeMeasurements,
         measurementsLoading,
         selectedMeasurement,
-        selectedId,
-        setSelectedId,
+        selectMeasurement,
         isAddModalOpen,
-        setIsAddModalOpen,
+        openAddModal,
+        closeAddModal,
         formLoading,
         formData,
+        formError,
         isDeleteModalOpen,
-        setIsDeleteModalOpen,
+        openDeleteModal,
+        closeDeleteModal,
         deleteLoading,
+        deleteError,
         handleInputChange,
         handleAddMeasurementSubmit,
         handleDeleteConfirm,
@@ -46,7 +49,7 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                 </h2>
 
                 <button
-                    onClick={() => setIsAddModalOpen(true)}
+                    onClick={openAddModal}
                     className="px-3 py-1.5 rounded-xl bg-brand-500 text-white text-xs font-semibold hover:opacity-90 transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                 >
                     <span>+ Yeni Ölçüm Ekle</span>
@@ -60,7 +63,6 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Sol Liste */}
                     <div className="flex flex-col space-y-2 max-h-87.5 overflow-y-auto pr-1">
                         <p className="text-xs font-semibold opacity-50 px-1 uppercase tracking-wider mb-1">
                             Ölçüm Tarihleri
@@ -79,7 +81,7 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                                         displayDate={displayDate}
                                         index={idx}
                                         totalCount={safeMeasurements.length}
-                                        onSelect={() => m.id !== undefined && setSelectedId(m.id)}
+                                        onSelect={() => m.id !== undefined && selectMeasurement(m.id)}
                                     />
                                 );
                             })
@@ -87,7 +89,7 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                             <div className="p-6 text-center bg-background border border-nav-border rounded-xl opacity-60 flex flex-col items-center justify-center space-y-2">
                                 <p className="text-xs">Henüz kayıtlı ölçüm bulunmuyor.</p>
                                 <button
-                                    onClick={() => setIsAddModalOpen(true)}
+                                    onClick={openAddModal}
                                     className="text-xs text-brand-500 font-bold underline cursor-pointer"
                                 >
                                     İlk ölçümü hemen ekle
@@ -96,37 +98,36 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                         )}
                     </div>
 
-                    {/* Sağ Detay Alanı */}
                     <div className="md:col-span-2 bg-background border border-nav-border rounded-2xl p-5 flex flex-col justify-between">
                         <MeasurementDetail
                             selectedMeasurement={selectedMeasurement}
                             formatDate={formatDate}
+                            error={deleteError}
                             onDeleteClick={() => {
-                                if (selectedMeasurement) setIsDeleteModalOpen(true);
+                                if (selectedMeasurement) openDeleteModal();
                             }}
                         />
                     </div>
                 </div>
             )}
 
-            {/* Yeni Ekleme Modalı */}
             <MeasurementAddModal
                 isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+                onClose={closeAddModal}
                 formData={formData}
                 formLoading={formLoading}
+                error={formError}
                 onInputChange={handleInputChange}
                 onSubmit={handleAddMeasurementSubmit}
             />
 
-            {/* Silme Onay Modalı */}
             <ConfirmModal
                 isOpen={isDeleteModalOpen}
                 title="Ölçümü Sil"
                 message="Bu ölçüm kaydını silmek istediğinize emin misiniz? Bu işlem geri alınamaz."
                 loading={deleteLoading}
                 onConfirm={handleDeleteConfirm}
-                onCancel={() => setIsDeleteModalOpen(false)}
+                onCancel={closeDeleteModal}
             />
         </div>
     );

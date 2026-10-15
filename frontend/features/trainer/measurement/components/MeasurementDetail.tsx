@@ -1,30 +1,36 @@
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
-import Image from "next/image";
 import { IconTrash } from "@/icons/icon";
 import { MEASUREMENT_CONFIG } from "../constants/measurement.config";
 import { MemberMeasurement } from "@/types/types";
+import { ErrorBox } from "@/components/ui/ErrorBox";
 
 interface MeasurementDetailProps {
     selectedMeasurement: MemberMeasurement | null;
     formatDate: (date?: string) => string;
     onDeleteClick: () => void;
+    error?: string | null;
 }
 
 export const MeasurementDetail: React.FC<MeasurementDetailProps> = ({
     selectedMeasurement,
     formatDate,
     onDeleteClick,
+    error,
 }) => {
     if (!selectedMeasurement) {
         return (
             <div className="h-full flex flex-col items-center justify-center text-center py-12 opacity-60">
-                <p className="text-sm">Görüntülemek için soldan bir ölçüm tarihi seçin.</p>
+                {error && <ErrorBox message={error} />}
+                <p className="text-sm mt-2">Görüntülemek için soldan bir ölçüm tarihi seçin.</p>
             </div>
         );
     }
 
     return (
         <div className="space-y-4">
+            {error && <ErrorBox message={error} />}
+
             <div className="flex items-center justify-between pb-3 border-b border-nav-border">
                 <span className="text-xs font-semibold opacity-60">
                     Ölçüm Tarihi: {formatDate(selectedMeasurement.measuredAt || selectedMeasurement.createdAt)}
@@ -76,12 +82,11 @@ export const MeasurementDetail: React.FC<MeasurementDetailProps> = ({
                                 rel="noopener noreferrer"
                                 className="block w-16 h-16 rounded-lg overflow-hidden border border-nav-border hover:opacity-80 transition-opacity relative"
                             >
-                                <Image
+                                <img
                                     src={photoUrl}
                                     alt="Ölçüm"
-                                    fill
-                                    sizes="64px"
-                                    className="object-cover"
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
                                 />
                             </a>
                         ))}

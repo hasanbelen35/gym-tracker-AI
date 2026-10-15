@@ -42,6 +42,13 @@ export class AppError extends Error {
       throw new AppError(400, "Geçersiz istek: Eğitmen kimlik bilgisi sağlanmadı.");
     }
   }
+
+  // TRAINER  ID CONTROL
+  static assertTrainerId(trainerId: number | undefined | null): void {
+    if (!trainerId) {
+      throw new AppError(400, 'Geçersiz istek: Üye kimlik bilgisi sağlanmadı.');
+    }
+  }
 }
 
 

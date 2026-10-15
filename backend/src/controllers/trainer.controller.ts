@@ -2,60 +2,58 @@ import { Response, NextFunction } from "express";
 import { TrainerService } from "../services/trainer.service";
 import { AuthRequest } from "../middleware/auth.middleware";
 import { logger } from "../config/logger";
+import { CreateMeasurementType } from '../types/types';
 
 const trainerService = new TrainerService();
 
 export class TrainerController {
-
     // SEND REQUEST TO ASSIGN MEMBER 
     requestMemberAssignment = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
-            logger.info(`Trainer ID ${trainerId} attempting to request member assignment`);
+            const trainerId = req.user!.id;
+            const { memberPublicId, gymId, gymPublicId } = req.body;
 
-            if (!trainerId) {
-                logger.warn("Request member assignment failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
+            const targetGym = gymPublicId || gymId;
 
-            const { memberPublicId, gymId } = req.body;
-            logger.info(`Trainer ID ${trainerId} requesting assignment for member publicId: ${memberPublicId} in gym ID: ${gymId}`);
+            logger.info(`Trainer ID ${trainerId} requesting assignment for member publicId: ${memberPublicId}`);
 
-            const result = await trainerService.requestMemberAssignment(memberPublicId, trainerId, gymId);
-
-            if (result.count === 0) {
-                logger.warn(`Request member assignment failed: Member not found or invalid state for member publicId: ${memberPublicId} and trainer ID: ${trainerId}`);
-                return res.status(404).json({ success: false, message: "Member not found or not in a valid state." });
-            }
+            const updatedMember = await trainerService.requestMemberAssignment(memberPublicId, trainerId, targetGym);
 
             logger.info(`Assignment request successfully created for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
-            return res.status(200).json({ success: true, message: "Assignment request created successfully.", data: result });
+            return res.status(200).json({
+                success: true,
+                message: "Assignment request created successfully.",
+                data: updatedMember,
+            });
         } catch (error) {
-            logger.error("Error in requestMemberAssignment controller", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in requestMemberAssignment controller", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
-
     // CANCEL REQUEST TO ASSIGN MEMBER 
     cancelMyAssignmentRequest = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
-            logger.info(`Trainer ID ${trainerId} attempting to cancel assignment request`);
+            const trainerId = req.user!.id;
+            const { memberPublicId, gymId, gymPublicId } = req.body;
 
-            if (!trainerId) {
-                logger.warn("Cancel assignment request failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
+            const targetGym = gymPublicId || gymId;
 
-            const { memberPublicId, gymId } = req.body;
-            logger.info(`Trainer ID ${trainerId} cancelling assignment request for member publicId: ${memberPublicId} in gym ID: ${gymId}`);
+            logger.info(`Trainer ID ${trainerId} cancelling assignment request for member publicId: ${memberPublicId}`);
 
-            await trainerService.cancelMyAssignmentRequest(memberPublicId, trainerId, gymId);
+            const updatedMember = await trainerService.cancelMyAssignmentRequest(memberPublicId, trainerId, targetGym);
 
             logger.info(`Assignment request successfully cancelled for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
-            return res.status(200).json({ success: true, message: "Assignment request cancelled successfully." });
+            return res.status(200).json({
+                success: true,
+                message: "Assignment request cancelled successfully.",
+                data: updatedMember,
+            });
         } catch (error) {
-            logger.error("Error in cancelMyAssignmentRequest controller", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in cancelMyAssignmentRequest controller", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
@@ -63,24 +61,23 @@ export class TrainerController {
     // GET MEMBER'S ASSIGNMENT STATUS 
     getMembersByStatus = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
-            logger.info(`Trainer ID ${trainerId} fetching members by assignment status`);
-
-            if (!trainerId) {
-                logger.warn("Get members by status failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
-
-            const gymId = req.params.gymId as string;
+            const trainerId = req.user!.id;
+            const gymId = req.params.gymId as string | undefined;
             const { status } = req.query as { status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED' };
-            logger.info(`Trainer ID ${trainerId} fetching members with status '${status}' for gym ID: ${gymId}`);
+
+            logger.info(`Trainer ID ${trainerId} fetching members with status '${status}'`);
 
             const members = await trainerService.getMembersByStatus(trainerId, gymId, status);
 
             logger.info(`Successfully fetched ${members.length} members with status '${status}' for trainer ID: ${trainerId}`);
-            return res.status(200).json({ success: true, data: members });
+            return res.status(200).json({
+                success: true,
+                data: members
+            });
         } catch (error) {
-            logger.error("Error in getMembersByStatus controller", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in getMembersByStatus controller", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
@@ -88,53 +85,76 @@ export class TrainerController {
     // GET MEMBER'S DETAIL ASSIGNED
     getAssignedMemberDetailController = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
-            logger.info(`Trainer ID ${trainerId} fetching assigned member details`);
+            const trainerId = req.user!.id;
+            const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
 
-            if (!trainerId) {
-                logger.warn("Get assigned member detail failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
-
-            const memberPublicId = req.params.memberPublicId as string;
             logger.info(`Trainer ID ${trainerId} fetching details for member publicId: ${memberPublicId}`);
 
             const member = await trainerService.getMemberDetail(trainerId, memberPublicId);
 
-            if (!member) {
-                logger.warn(`Get assigned member detail failed: Member not found or unauthorized access for member publicId: ${memberPublicId} and trainer ID: ${trainerId}`);
-                return res.status(404).json({ success: false, message: "Member not found or you do not have permission to access this member." });
-            }
-
             logger.info(`Successfully fetched details for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
-            return res.status(200).json({ success: true, data: member });
+            return res.status(200).json({
+                success: true,
+                data: member
+            });
         } catch (error) {
-            logger.error("Error in getAssignedMemberDetailController controller", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in getAssignedMemberDetailController controller", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
-
     // ADD MEASUREMENT DATAS TO ASSIGNED MEMBERS
     addMemberMeasurement = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
-            logger.info(`Trainer ID ${trainerId} attempting to add measurement for member`);
+            const trainerId = req.user!.id;
 
-            if (!trainerId) {
-                logger.warn("Add member measurement failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
+            const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
 
-            const memberPublicId = req.params.memberPublicId as string;
-            const measurementDto = req.body;
             logger.info(`Trainer ID ${trainerId} adding measurement for member publicId: ${memberPublicId}`);
+
+            const parseNumber = (val: any): number | undefined => {
+                if (val === undefined || val === null || val === "") return undefined;
+                const num = Number(val);
+                return isNaN(num) ? undefined : num;
+            };
+
+            const {
+                bodyFatRate,
+                muscleMass,
+                chest,
+                waist,
+                arm,
+                hip,
+                shoulder,
+                photos,
+                notes
+            } = req.body;
+
+            const measurementDto: CreateMeasurementType = {
+                bodyFatRate: parseNumber(bodyFatRate),
+                muscleMass: parseNumber(muscleMass),
+                chest: parseNumber(chest),
+                waist: parseNumber(waist),
+                arm: parseNumber(arm),
+                hip: parseNumber(hip),
+                shoulder: parseNumber(shoulder),
+                photos: Array.isArray(photos) ? photos : [],
+                notes
+            };
 
             const measurement = await trainerService.addMemberMeasurement(trainerId, memberPublicId, measurementDto);
 
             logger.info(`Measurement successfully added for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
-            return res.status(201).json({ success: true, message: "Measurement added successfully.", data: measurement });
+            return res.status(201).json({
+                success: true,
+                message: "Measurement added successfully.",
+                data: measurement
+            });
         } catch (error) {
-            logger.error("Error in addMemberMeasurement controller", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in addMemberMeasurement controller", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
@@ -277,7 +297,7 @@ export class TrainerController {
             const updatedProfile = await trainerService.updateTrainerProfileService(trainerId, updateData);
 
             logger.info(`Successfully updated profile for trainer ID: ${trainerId}`);
-            
+
             return res.status(200).json({
                 success: true,
                 message: "Profile successfully updated.",
@@ -285,11 +305,11 @@ export class TrainerController {
             });
         } catch (error) {
             logger.error("Error in updateTrainerProfileController", { error: error instanceof Error ? error.message : error });
-            
+
             if (error instanceof Error && error.message === "Trainer not found") {
                 return res.status(404).json({ success: false, message: "Trainer not found." });
             }
-            
+
             next(error);
         }
     };

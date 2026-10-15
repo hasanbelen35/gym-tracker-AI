@@ -1,6 +1,20 @@
-/** @type {import('next').Next.config} */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone', 
-}
+  output: 'standalone',
+
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**', 
+      },
+      {
+        protocol: 'http',
+        hostname: '**',  
+      },
+    ],
+  },
+};
 
 module.exports = nextConfig;
+

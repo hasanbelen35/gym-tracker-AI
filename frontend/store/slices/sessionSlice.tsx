@@ -1,10 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { AxiosError } from 'axios';
 import { API } from "@/lib/api";
+import { handleApiError } from '../apiErrorHandler';
 
-interface ApiErrorResponse {
-    message?: string;
-}
 
 interface SessionHistoryItem {
     id: number;
@@ -38,8 +35,7 @@ export const checkIn = createAsyncThunk('session/checkIn', async (gymId: number,
         const response = await API.post('/session/checkin', { gymId });
         return response.data;
     } catch (error) {
-        const err = error as AxiosError<ApiErrorResponse>;
-        return rejectWithValue(err.response?.data?.message || "Antrenman başlatılamadı.");
+        return handleApiError(error, rejectWithValue, "Oturumlar alınamadı.");
     }
 });
 
@@ -49,8 +45,8 @@ export const checkOut = createAsyncThunk('session/checkOut', async (_, { rejectW
         const response = await API.post('/session/checkout');
         return response.data;
     } catch (error) {
-        const err = error as AxiosError<ApiErrorResponse>;
-        return rejectWithValue(err.response?.data?.message || "Oturum kapatılamadı.");
+        return handleApiError(error, rejectWithValue, "Oturumlar alınamadı.");
+
     }
 });
 
@@ -65,8 +61,8 @@ export const getSessionsByUser = createAsyncThunk(
             });
             return response.data;
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message || "Oturumlar alınamadı.");
+            return handleApiError(error, rejectWithValue, "Oturumlar alınamadı.");
+
         }
     }
 );
@@ -89,7 +85,7 @@ const sessionSlice = createSlice({
             .addCase(checkOut.fulfilled, (state) => { state.loading = false; state.isActive = false; })
             .addCase(checkOut.rejected, (state, action) => { state.loading = false; state.error = action.payload as string; })
 
-            // Get sessions by user — history buraya yazılıyor
+            // Get sessions 
             .addCase(getSessionsByUser.pending, (state) => { state.loading = true; state.error = null; })
             .addCase(getSessionsByUser.fulfilled, (state, action) => {
                 state.loading = false;

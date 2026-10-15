@@ -21,14 +21,14 @@ router.put(
 // GET MEMBER CURRENT PROFILE DATA
 router.get("/me", authenticate, authorizeMember, (req, res, next) => member.getCurrentMemberController(req, res, next));
 // GET MEMBER WORKOUTS PROGRAMS  
-router.get('/my-programs', authenticate, authorizeMember, (req, res, next) => member.getMyPrograms(req, res, next));
+router.get('/my-programs', authenticate, authorizeMember, (req, res, next) => member.getMyProgramsController(req, res, next));
 // UPDATE MEMBER PROFILE DATA
 router.put(
   '/edit-profile',
   authenticate,
   authorizeMember,
   validate(updateMemberProfileSchema),
-  (req, res, next) => member.updateMemberProfile(req, res, next) 
+  (req, res, next) => member.updateMemberProfileController(req, res, next) 
 );
 
 export default router;

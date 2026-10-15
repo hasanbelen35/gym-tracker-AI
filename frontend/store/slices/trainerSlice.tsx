@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { AxiosError } from 'axios';
 import {
     Member,
     AddMeasurementArgs,
@@ -14,19 +13,7 @@ import { API } from "@/lib/api";
 import { handleApiError } from '../apiErrorHandler';
 
 export type { Member };
-// Zod'dan gelen detaylı hatalar için alt tip
-export interface ApiErrorDetail {
-    field: string;
-    message: string;
-}
-
-// Senin mevcut ApiErrorResponse tipini bu şekilde güncelle:
-export interface ApiErrorResponse {
-    success?: boolean;
-    message?: string;
-    error?: string;
-    details?: ApiErrorDetail[]; // <--- EKSİK OLAN KISIM BU
-}
+export type { ApiErrorDetail, ApiErrorResponse } from '../apiErrorHandler';
 
 const initialState: TrainerState = {
     pendingMembers: [],
@@ -48,6 +35,7 @@ const initialState: TrainerState = {
         },
     },
 };
+
 export const fetchTrainerProfile = createAsyncThunk<
     TrainerProfile,
     void,
@@ -59,8 +47,7 @@ export const fetchTrainerProfile = createAsyncThunk<
             const response = await API.get('/trainer/profile');
             return response.data.data;
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message || 'Bir hata oluştu');
+            return handleApiError(error, rejectWithValue, 'Profil bilgileri alınırken bir hata oluştu.');
         }
     }
 );
@@ -72,8 +59,7 @@ export const fetchMembersByStatus = createAsyncThunk(
             const response = await API.get(`/trainer/getMembers/${gymId}?status=${status}`);
             return { data: response.data.data, status };
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message);
+            return handleApiError(error, rejectWithValue, 'Üyeler alınırken bir hata oluştu.');
         }
     }
 );
@@ -85,8 +71,7 @@ export const requestAssignment = createAsyncThunk(
             await API.post('/trainer/requestAssignment', { memberPublicId });
             return memberPublicId;
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message);
+            return handleApiError(error, rejectWithValue, 'Atama talebi gönderilirken bir hata oluştu.');
         }
     }
 );
@@ -98,8 +83,7 @@ export const cancelAssignment = createAsyncThunk(
             await API.delete('/trainer/cancelAssignment', { data: { memberPublicId } });
             return memberPublicId;
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message);
+            return handleApiError(error, rejectWithValue, 'Atama talebi iptal edilirken bir hata oluştu.');
         }
     }
 );
@@ -111,8 +95,7 @@ export const fetchMemberDetail = createAsyncThunk(
             const response = await API.get(`/trainer/my-members/${memberPublicId}`);
             return response.data.data;
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message);
+            return handleApiError(error, rejectWithValue, 'Üye detayı alınırken bir hata oluştu.');
         }
     }
 );
@@ -124,8 +107,7 @@ export const addMemberMeasurement = createAsyncThunk(
             const response = await API.post(`/trainer/my-members/addMeasurement/${memberPublicId}`, measurementData);
             return response.data.data;
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message);
+            return handleApiError(error, rejectWithValue, 'Ölçüm eklenirken bir hata oluştu.');
         }
     }
 );
@@ -137,8 +119,7 @@ export const fetchMemberMeasurements = createAsyncThunk(
             const response = await API.get(`/trainer/my-members/getMembersMeasurements/${memberPublicId}`);
             return response.data.data;
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message);
+            return handleApiError(error, rejectWithValue, 'Ölçümler alınırken bir hata oluştu.');
         }
     }
 );
@@ -150,8 +131,7 @@ export const deleteMemberMeasurement = createAsyncThunk(
             await API.delete(`/trainer/my-members/deleteMemberMeasurement/${memberPublicId}/${measurementPublicId}`);
             return measurementPublicId;
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message);
+            return handleApiError(error, rejectWithValue, 'Ölçüm silinirken bir hata oluştu.');
         }
     }
 );
@@ -163,13 +143,11 @@ export const completeTrainerProfile = createAsyncThunk(
             const response = await API.put('/trainer/complete-profile', profileData);
             return response.data.data;
         } catch (error) {
-            const err = error as AxiosError<ApiErrorResponse>;
-            return rejectWithValue(err.response?.data?.message);
+            return handleApiError(error, rejectWithValue, 'Profil tamamlanırken bir hata oluştu.');
         }
     }
 );
 
-// UPDATE TRAINER PROFILE DATAS
 export const updateTrainerProfile = createAsyncThunk(
     'trainer/updateTrainerProfile',
     async (profileData: UpdateTrainerProfileData, { rejectWithValue }) => {
@@ -177,10 +155,11 @@ export const updateTrainerProfile = createAsyncThunk(
             const response = await API.put('/trainer/update-profile', profileData);
             return response.data.data;
         } catch (error) {
-            return handleApiError(error, rejectWithValue, "Profil güncellenirken bir hata oluştu.");
+            return handleApiError(error, rejectWithValue, 'Profil güncellenirken bir hata oluştu.');
         }
     }
 );
+
 const trainerSlice = createSlice({
     name: 'trainer',
     initialState,
@@ -193,7 +172,6 @@ const trainerSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // --- FETCH TRAINER PROFILE ---
             .addCase(fetchTrainerProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -207,7 +185,6 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // --- FETCH MEMBERS BY STATUS ---
             .addCase(fetchMembersByStatus.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -229,7 +206,6 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // --- REQUEST ASSIGNMENT ---
             .addCase(requestAssignment.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -242,7 +218,6 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // --- CANCEL ASSIGNMENT ---
             .addCase(cancelAssignment.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -255,7 +230,6 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // --- FETCH MEMBER DETAIL ---
             .addCase(fetchMemberDetail.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -269,7 +243,6 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // --- ADD MEMBER MEASUREMENT ---
             .addCase(addMemberMeasurement.pending, (state) => {
                 state.error = null;
             })
@@ -282,7 +255,6 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // --- FETCH MEMBER MEASUREMENTS ---
             .addCase(fetchMemberMeasurements.pending, (state) => {
                 state.measurementsLoading = true;
                 state.error = null;
@@ -296,7 +268,6 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // --- DELETE MEMBER MEASUREMENT ---
             .addCase(deleteMemberMeasurement.pending, (state) => {
                 state.error = null;
             })
@@ -309,7 +280,6 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // --- COMPLETE TRAINER PROFILE ---
             .addCase(completeTrainerProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -322,7 +292,6 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // --- UPDATE TRAINER PROFILE ---
             .addCase(updateTrainerProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -344,4 +313,4 @@ const trainerSlice = createSlice({
 });
 
 export const { clearSelectedMember } = trainerSlice.actions;
-export default trainerSlice.reducer; 
+export default trainerSlice.reducer;
