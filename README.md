@@ -150,6 +150,11 @@ npm run dev
 | :---: | :---: |
 | ![Gym Dashboard](./assets/gym-dashboard.png) | ![Member Profile](./assets/member-profile.png) |
 
+| Member Dashboard | Pages  |
+| :---: | :---: |
+| ![Member Workouts](./assets/member-workouts.png) |
+
+
 | Assignment Center | Trainer Panel |
 | :---: | :---: |
 | ![Assignment Center](./assets/assignment-center.png) | ![Trainer Panel](./assets/trainer-panel.png) |
