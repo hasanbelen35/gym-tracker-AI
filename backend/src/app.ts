@@ -16,6 +16,7 @@ import memberAIRouter from "./routes/ai/member.ai.routes";
 import gymAIRouter from "./routes/ai/gym.ai.routes";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import workoutRouter from "./routes/member.workoutLog.routes";
 
 const app = express();
 
@@ -79,6 +80,7 @@ app.use("/api/trainer", trainerRouter);
 app.use("/api/member", memberRouter);
 app.use("/api/exercises", exercisesRouter);
 app.use("/api/nutrition", nutritionsRouter);
+app.use("/api/member/workoutLog", workoutRouter);
 
 app.use("/api/trainer/ai", trainerAIRouter);
 app.use("/api/member/ai", memberAIRouter);

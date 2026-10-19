@@ -1,7 +1,6 @@
 import prisma from "../lib/db";
 import { AppError } from "../middleware/errorMiddleware";
 
-// SET INPUT INTERFACE
 export interface LogSingleSetInput {
     workoutLogId: number;
     exerciseLogId: number;
@@ -14,10 +13,7 @@ export interface LogSingleSetInput {
 
 export class WorkoutLogService {
 
-
-    // CHECK IS ACTIVE SESSION 
     async getActiveSession(memberId: number) {
-
         AppError.assertMemberId(memberId);
 
         const activeSession = await prisma.workoutLog.findFirst({
@@ -53,9 +49,7 @@ export class WorkoutLogService {
         return activeSession;
     }
 
-    // START ACTIVATED SESSION WORKOOUT
     async startWorkoutSession(memberId: number) {
-
         AppError.assertMemberId(memberId);
 
         const existingActive = await this.getActiveSession(memberId);
@@ -90,7 +84,6 @@ export class WorkoutLogService {
             throw new AppError(404, "Aktif bir antrenman programınız bulunamadı.");
         }
 
-        // TODAY NAME 
         const todayName = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date());
 
         let targetDay = activeProgram.days.find(
@@ -107,62 +100,62 @@ export class WorkoutLogService {
             throw new AppError(400, "Bugün için planlanmış aktif bir antrenman günü bulunamadı veya bugün dinlenme günü.");
         }
 
-        // COPY FOR LOG TABLE ALL DATA
-        const newSession = await prisma.workoutLog.create({
-            data: {
-                memberId,
-                workoutDayId: targetDay.id,
-                status: "IN_PROGRESS",
-                startedAt: new Date(),
-                exerciseLogs: {
-                    create: targetDay.exercises.map((ex, index) => ({
-                        exerciseName: ex.exercise.name,
-                        orderIndex: index,
-                        notes: ex.notes,
-                        setLogs: {
-                            create: ex.sets.map((set) => ({
-                                workoutSetId: set.id,
-                                setNumber: set.setNumber,
-                                targetReps: set.targetReps,
-                                targetWeight: set.targetWeight,
-                                targetRir: set.rir,
-                                actualReps: set.targetReps ? parseInt(set.targetReps) || null : null,
-                                actualWeight: set.targetWeight ?? null,
-                                actualRir: set.rir ?? null,
-                                status: "MATCHED",
-                            })),
-                        },
-                    })),
+        const newSession = await prisma.$transaction(async (tx) => {
+            const createdWorkoutLog = await tx.workoutLog.create({
+                data: {
+                    memberId,
+                    workoutDayId: targetDay.id,
+                    status: "IN_PROGRESS",
+                    startedAt: new Date(),
+                    exerciseLogs: {
+                        create: targetDay.exercises.map((ex, index) => ({
+                            exerciseName: ex.exercise.name,
+                            orderIndex: index,
+                            notes: ex.notes,
+                            setLogs: {
+                                create: ex.sets.map((set) => ({
+                                    workoutSetId: set.id,
+                                    setNumber: set.setNumber,
+                                    targetReps: set.targetReps,
+                                    targetWeight: set.targetWeight,
+                                    targetRir: set.rir,
+                                    actualReps: set.targetReps ? parseInt(set.targetReps) || null : null,
+                                    actualWeight: set.targetWeight ?? null,
+                                    actualRir: set.rir ?? null,
+                                    status: "MATCHED",
+                                })),
+                            },
+                        })),
+                    },
                 },
-            },
-            include: {
-                workoutDay: {
-                    include: {
-                        program: true,
-                        exercises: {
-                            include: {
-                                exercise: true,
-                                sets: true,
+                include: {
+                    workoutDay: {
+                        include: {
+                            program: true,
+                            exercises: {
+                                include: {
+                                    exercise: true,
+                                    sets: true,
+                                },
                             },
                         },
                     },
-                },
-                exerciseLogs: {
-                    include: {
-                        setLogs: true,
+                    exerciseLogs: {
+                        include: {
+                            setLogs: true,
+                        },
                     },
                 },
-            },
+            });
+
+            return createdWorkoutLog;
         });
 
         return newSession;
     }
 
-    // SET BASED REAL-TIME LOGGING
     async logSingleSet(memberId: number, data: LogSingleSetInput) {
-
         AppError.assertMemberId(memberId);
-
 
         const { workoutLogId, exerciseLogId, setNumber, actualReps, actualWeight, actualRir, status } = data;
 
@@ -200,11 +193,7 @@ export class WorkoutLogService {
         return savedSetLog;
     }
 
-    /**
-     * 4. Antrenmanı tamamlama
-     */
     async finishWorkoutSession(memberId: number, workoutLogId: number, memberNote?: string) {
-
         AppError.assertMemberId(memberId);
 
         const session = await prisma.workoutLog.findFirst({

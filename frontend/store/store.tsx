@@ -10,6 +10,8 @@ import exerciseReducer from "./slices/exerciseSlice";
 import nutritionReducer from "@/store/slices/nutritionSlice";
 import aiReducer from "@/store/slices/aiSlice";
 import riskReducer from '@/store/slices/riskSlice';
+import workoutLogReducer from '@/store/slices/member.workoutLog.slice';
+
 export const store = configureStore({
     reducer: {
         auth: authReducer,
@@ -22,6 +24,7 @@ export const store = configureStore({
         nutrition: nutritionReducer,
         ai: aiReducer,
         risk: riskReducer,
+        workoutLog: workoutLogReducer,
     },
 });
 
