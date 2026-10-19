@@ -38,8 +38,7 @@ export class ExerciseService {
         logger.info(`Successfully fetched ${exercises.length} exercises based on query`);
         return exercises;
     }
-
-    // create workout program
+// create workout program
     async createWorkoutProgram(programData: {
         trainerId: number;
         memberPublicId: string;
@@ -49,6 +48,7 @@ export class ExerciseService {
         days: any[];
     }) {
         logger.info(`Trainer ID ${programData.trainerId} attempting to create workout program for member publicId: ${programData.memberPublicId}`);
+        
         const { trainerId, memberPublicId, title, type, splitType, days } = programData;
 
         const member = await prisma.member.findUnique({
@@ -84,48 +84,61 @@ export class ExerciseService {
                 throw new Error(`Egzersiz bulunamadı: ${pid}`);
             }
         }
-        // create
-        const newProgram = await prisma.program.create({
-            data: {
-                memberId: member.id,
-                trainerId,
-                title,
-                type: type ? (type as any) : "WORKOUT",
-                splitType: splitType ? (splitType as any) : "PPL",
-                isActive: true,
-                days: {
-                    create: days.map((day: any) => ({
-                        dayName: day.dayName,
-                        dayOrder: Number(day.dayOrder),
-                        isRestDay: Boolean(day.isRestDay),
-                        exercises: day.isRestDay ? undefined : {
-                            create: (day.exercises || []).map((exercise: any, exIndex: number) => ({
-                                exerciseId: exerciseIdMap.get(exercise.exercisePublicId)!,
-                                orderIndex: Number(exercise.orderIndex ?? exIndex),
-                                notes: exercise.notes || null,
-                                sets: {
-                                    create: (exercise.sets || []).map((set: any, setIndex: number) => ({
-                                        setNumber: Number(set.setNumber ?? setIndex + 1),
-                                        targetReps: set.targetReps || null,
-                                        targetWeight: set.targetWeight ? Number(set.targetWeight) : null,
-                                        rir: set.rir !== undefined && set.rir !== null ? Number(set.rir) : null,
-                                    }))
-                                }
-                            }))
-                        }
-                    }))
-                }
-            },
-            include: {
-                days: {
-                    include: {
-                        exercises: {
-                            include: { exercise: true, sets: true }
-                        }
+
+        const newProgram = await prisma.$transaction(async (tx) => {
+            await tx.program.updateMany({
+                where: {
+                    memberId: member.id,
+                    isActive: true,
+                },
+                data: {
+                    isActive: false,
+                    archivedAt: new Date(),
+                },
+            });
+
+            return await tx.program.create({
+                data: {
+                    memberId: member.id,
+                    trainerId,
+                    title,
+                    type: type ? (type as any) : "WORKOUT",
+                    splitType: splitType ? (splitType as any) : "PPL",
+                    isActive: true, 
+                    days: {
+                        create: days.map((day: any) => ({
+                            dayName: day.dayName,
+                            dayOrder: Number(day.dayOrder),
+                            isRestDay: Boolean(day.isRestDay),
+                            exercises: day.isRestDay ? undefined : {
+                                create: (day.exercises || []).map((exercise: any, exIndex: number) => ({
+                                    exerciseId: exerciseIdMap.get(exercise.exercisePublicId)!,
+                                    orderIndex: Number(exercise.orderIndex ?? exIndex),
+                                    notes: exercise.notes || null,
+                                    sets: {
+                                        create: (exercise.sets || []).map((set: any, setIndex: number) => ({
+                                            setNumber: Number(set.setNumber ?? setIndex + 1),
+                                            targetReps: set.targetReps || null,
+                                            targetWeight: set.targetWeight ? Number(set.targetWeight) : null,
+                                            rir: set.rir !== undefined && set.rir !== null ? Number(set.rir) : null,
+                                        }))
+                                    }
+                                }))
+                            }
+                        }))
                     }
                 },
-                trainer: { select: { name: true, surname: true } }
-            }
+                include: {
+                    days: {
+                        include: {
+                            exercises: {
+                                include: { exercise: true, sets: true }
+                            }
+                        }
+                    },
+                    trainer: { select: { name: true, surname: true } }
+                }
+            });
         });
 
         logger.info(`Workout program successfully created with ID: ${newProgram.id} for member ID: ${member.id}`);

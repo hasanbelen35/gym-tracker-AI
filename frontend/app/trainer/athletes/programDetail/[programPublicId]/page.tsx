@@ -53,6 +53,13 @@ export default function ProgramDetail() {
     const totalDays = currentProgramDetail.days?.length || 0;
     const totalExercises = currentProgramDetail.days?.reduce((acc, day) => acc + (day.exercises?.length || 0), 0) || 0;
 
+    const isActive = currentProgramDetail.isActive;
+    const archivedAt = currentProgramDetail.archivedAt ? new Date(currentProgramDetail.archivedAt).toLocaleDateString("tr-TR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+    }) : null;
+
     return (
         <div className="min-h-screen w-full bg-background text-foreground selection:bg-brand-500 selection:text-white p-4 sm:p-8 lg:p-12">
             <div className="max-w-7xl mx-auto space-y-10">
@@ -78,14 +85,38 @@ export default function ProgramDetail() {
                     <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
                     
                     <div className="relative z-10 space-y-4">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                            <span className="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-brand-500 text-white shadow-sm">
-                                {currentProgramDetail.type}
-                            </span>
-                            <span className="text-foreground/30">•</span>
-                            <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-nav-border/30 text-foreground/80 border border-nav-border/50">
-                                {currentProgramDetail.splitType}
-                            </span>
+                        <div className="flex flex-wrap items-center justify-between gap-4">
+                            <div className="flex flex-wrap items-center gap-2.5">
+                                <span className="px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-brand-500 text-white shadow-sm">
+                                    {currentProgramDetail.type}
+                                </span>
+                                <span className="text-foreground/30">•</span>
+                                <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-nav-border/30 text-foreground/80 border border-nav-border/50">
+                                    {currentProgramDetail.splitType}
+                                </span>
+                            </div>
+
+                            {/* AKTİF / PASİF (ARŞİV) JETONU */}
+                            <div className="flex items-center gap-2">
+                                {isActive ? (
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 shadow-xs">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                        Aktif Program
+                                    </span>
+                                ) : (
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-500 border border-rose-500/30 shadow-xs">
+                                            <span className="w-2 h-2 rounded-full bg-rose-500" />
+                                            Aktif Değil (Arşivde)
+                                        </span>
+                                        {archivedAt && (
+                                            <span className="text-xs text-foreground/50 font-medium">
+                                                ({archivedAt} tarihinde arşive atıldı)
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight">
@@ -140,7 +171,7 @@ export default function ProgramDetail() {
 
             <ConfirmModal
                 isOpen={isDeleteModalOpen}
-                title="Programı Sil"
+                title="Programın Silinmesi"
                 message="Bu antrenman programını kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
                 confirmText="Evet, Sil"
                 cancelText="Vazgeç"

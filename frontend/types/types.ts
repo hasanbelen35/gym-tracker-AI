@@ -54,12 +54,12 @@ export interface Trainer {
   createdAt?: string;
 }
 export interface TrainerInfo {
-    id: number;       
-    publicId: string; 
-    name: string;
-    surname: string;
-    email: string;
-    myMembers?: Member[];
+  id: number;
+  publicId: string;
+  name: string;
+  surname: string;
+  email: string;
+  myMembers?: Member[];
 }
 
 export interface Session {
@@ -88,7 +88,6 @@ export interface SetInput {
   reps: number | string;
   weight: number;
 }
-
 export interface ProgramExerciseInput {
   exercisePublicId: string;
   sets: SetInput[];
@@ -106,6 +105,8 @@ export interface Program {
   publicId?: string;
   title?: string;
   description?: string;
+  isActive?: boolean;         
+  archivedAt?: string | null; 
   exercises?: Exercise[];
   days?: ProgramDayInput[];
   [key: string]: unknown;

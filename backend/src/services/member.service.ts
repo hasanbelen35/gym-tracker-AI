@@ -285,15 +285,6 @@ export class MemberService {
 
         logger.info(`Attempting to complete workout session for member ID: ${memberId}`);
 
-        const existingMember = await prisma.member.findUnique({
-            where: { id: memberId },
-            select: { id: true },
-        });
-
-        if (!existingMember) {
-            logger.warn(`Workout session completion failed: Member not found with ID: ${memberId}`);
-            throw new AppError(404, "Üye bulunamadı.");
-        }
 
         if (input.workoutDayId !== undefined) {
             const existingDay = await prisma.workoutDay.findFirst({

@@ -2,8 +2,6 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { AxiosError } from 'axios';
 import { API } from "@/lib/api";
 
-// --- INTERFACES ---
-
 export interface Exercise {
     id: number;
     publicId: string;
@@ -80,6 +78,7 @@ export interface Program {
     type: string;
     splitType: string;
     isActive: boolean;
+    archivedAt?: string | null;
     createdAt: string;
     days?: ProgramDayDetail[];
 }
@@ -135,10 +134,6 @@ interface ApiErrorResponse {
     message?: string;
 }
 
-
-// --- ASYNC THUNKS ---
-
-// GET ALL EXERCISES
 export const fetchExercises = createAsyncThunk(
     "exercises/fetchExercises",
     async (filters: { category?: string; equipment?: string; targetMuscle?: string }, { rejectWithValue }) => {
@@ -154,7 +149,6 @@ export const fetchExercises = createAsyncThunk(
     }
 );
 
-// CREATE PROGRAM
 export const createProgram = createAsyncThunk(
     "exercises/createProgram",
     async (programData: CreateProgramPayload, { rejectWithValue }) => {
@@ -168,7 +162,6 @@ export const createProgram = createAsyncThunk(
     }
 );
 
-// DELETE PROGRAM
 export const deleteProgram = createAsyncThunk(
     "exercises/deleteProgram",
     async (programPublicId: string, { rejectWithValue }) => {
@@ -182,15 +175,12 @@ export const deleteProgram = createAsyncThunk(
     }
 );
 
-// FETCH PROGRAM DETAIL
 export const fetchProgramDetail = createAsyncThunk(
     "exercises/fetchProgramDetail",
     async (programPublicId: string, { rejectWithValue }) => {
         try {
             const response = await API.get(`/exercises/program-detail/${programPublicId}`);
-            console.log(response.data.data)
             return response.data.data;
-
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
             return rejectWithValue(err.response?.data?.error || err.response?.data?.message || "Program detayı yüklenemedi.");
@@ -198,7 +188,6 @@ export const fetchProgramDetail = createAsyncThunk(
     }
 );
 
-// --- SLICE ---
 const exerciseSlice = createSlice({
     name: "exercises",
     initialState,
@@ -228,7 +217,6 @@ const exerciseSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Fetch Exercises
             .addCase(fetchExercises.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -241,7 +229,6 @@ const exerciseSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-            // Create Program
             .addCase(createProgram.pending, (state) => {
                 state.programCreating = true;
                 state.error = null;
@@ -256,7 +243,6 @@ const exerciseSlice = createSlice({
                 state.programCreating = false;
                 state.error = action.payload as string;
             })
-            // Delete Program
             .addCase(deleteProgram.pending, (state) => {
                 state.error = null;
                 state.successMessage = null;
@@ -273,7 +259,6 @@ const exerciseSlice = createSlice({
             .addCase(deleteProgram.rejected, (state, action) => {
                 state.error = action.payload as string;
             })
-            // Fetch Program Detail
             .addCase(fetchProgramDetail.pending, (state) => {
                 state.programDetailLoading = true;
                 state.error = null;

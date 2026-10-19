@@ -238,6 +238,7 @@ export class TrainerService {
                     take: 5,
                     select: {
                         id: true,
+                        publicId: true,
                         title: true,
                         splitType: true,
                         isActive: true,
