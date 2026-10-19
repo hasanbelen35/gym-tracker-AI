@@ -25,6 +25,7 @@ Gym Tracker AI is a full-stack web application built with **Next.js** and **Expr
 ## Key Features
 
 - **AI-Driven Risk Analytics (Powered by Gemini AI)**
+  - Past training programs are evaluated using training log records on the database, making it easier to measure a person's progress.
   - Analyzes member attendance frequencies, average gap days, and last visit timelines.
   - Automatically identifies at-risk ("Ghost") members who show signs of dropping out.
   - Generates actionable coaching strategies for trainers along with personalized, friendly, and non-intrusive re-engagement message templates (email, SMS, WhatsApp) tailored to member goals.
