@@ -1,13 +1,13 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "../middleware/auth.middleware";
-import { WorkoutLogService, LogSingleSetInput } from "../services/member.workout.log.service";
+import { WorkoutLogService, FinishWorkoutInput } from "../services/member.workout.log.service";
 import { logger } from "../config/logger";
 
 const workoutLogService = new WorkoutLogService();
 
 export class WorkoutLogController {
 
-    // 1. Aktif oturumu sorgula (Dashboard açıldığında kontrol için)
+    // check active session
     async getActiveSession(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const memberId = req.user?.id;
@@ -25,7 +25,7 @@ export class WorkoutLogController {
         }
     }
 
-    // 2. Bugünün gününe göre otomatik oturum başlat
+    //start session to today's day name 
     async startSession(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const memberId = req.user?.id;
@@ -34,10 +34,10 @@ export class WorkoutLogController {
             const session = await workoutLogService.startWorkoutSession(memberId!);
 
             logger.info(`Successfully started workout session for member ID: ${memberId}`);
-            return res.status(201).json({ 
-                success: true, 
-                message: "Antrenman oturumu başarıyla başlatıldı.", 
-                data: session 
+            return res.status(201).json({
+                success: true,
+                message: "Antrenman oturumu başarıyla başlatıldı.",
+                data: session
             });
         } catch (error) {
             logger.error("Error in startSession controller", {
@@ -47,41 +47,21 @@ export class WorkoutLogController {
         }
     }
 
-    // 3. Set bazlı anlık loglama (OK, Skip, Modify durumlarında tetiklenir)
-    async logSet(req: AuthRequest, res: Response, next: NextFunction) {
-        try {
-            const memberId = req.user?.id;
-            const body: LogSingleSetInput = req.body;
-            
-            logger.info(`Member ID ${memberId} logging set ${body.setNumber} for exerciseLog ID ${body.exerciseLogId}`);
-
-            const updatedSet = await workoutLogService.logSingleSet(memberId!, body);
-
-            logger.info(`Successfully logged set ${body.setNumber} for member ID: ${memberId}`);
-            return res.status(200).json({ success: true, data: updatedSet });
-        } catch (error) {
-            logger.error("Error in logSet controller", {
-                error: error instanceof Error ? error.message : error
-            });
-            next(error);
-        }
-    }
-
-    // 4. Antrenmanı tamamlama (Bitir butonu)
+    // collect data from states and wrıte db each of them
     async finishSession(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const memberId = req.user?.id;
-            const { workoutLogId, memberNote } = req.body;
+            const body: FinishWorkoutInput = req.body;
 
-            logger.info(`Member ID ${memberId} attempting to finish workout session ID ${workoutLogId}`);
+            logger.info(`Member ID ${memberId} attempting to finish workout session ID ${body.workoutLogId} with bulk payload`);
 
-            const finishedSession = await workoutLogService.finishWorkoutSession(memberId!, Number(workoutLogId), memberNote);
+            const finishedSession = await workoutLogService.finishWorkoutSession(memberId!, body);
 
-            logger.info(`Successfully completed workout session ID ${workoutLogId} for member ID: ${memberId}`);
-            return res.status(200).json({ 
-                success: true, 
-                message: "Harika iş! Antrenman tamamlandı.", 
-                data: finishedSession 
+            logger.info(`Successfully completed workout session ID ${body.workoutLogId} for member ID: ${memberId}`);
+            return res.status(200).json({
+                success: true,
+                message: "Harika iş! Antrenman tamamlandı.",
+                data: finishedSession
             });
         } catch (error) {
             logger.error("Error in finishSession controller", {

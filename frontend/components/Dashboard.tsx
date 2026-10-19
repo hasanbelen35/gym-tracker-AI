@@ -1,6 +1,5 @@
-
 "use client";
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from "@/hooks/useAuth";
 import { LeftNavDataAthlete, LeftNavDataGym, LeftNavDataTrainer } from '@/config/dashboardConfig';
 import Loading from '@/components/Loading';
@@ -8,9 +7,19 @@ import { NavItem } from '@/types/types';
 
 import { Sidebar } from '@/components/Sidebar'; 
 import GymRiskAnalyticsContainer from '@/features/gym/dashboard/container/GymRiskAnalyticsContainer';
+import MemberDashboardView from '@/components/MemberDashboard'; 
+import { useAppDispatch, useAppSelector } from '@/store/store';
+import { fetchActiveSession } from '@/store/slices/member.workoutLog.slice';
 
 const Dashboard = () => {
     const { user, loading } = useAuth();
+    const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        if (user && user.role === "member") {
+            dispatch(fetchActiveSession());
+        }
+    }, [dispatch, user]);
 
     if (loading) return <Loading />;
     if (!user) return <p className="p-6 text-foreground/60 text-sm font-medium">Lütfen giriş yapın.</p>;
@@ -37,10 +46,9 @@ const Dashboard = () => {
 
     return (
         <div className="min-h-[calc(100vh-68px)] bg-background flex flex-col md:flex-row transition-colors">
-          
+            
             <Sidebar navItems={leftNavData} />
 
-           
             <main className="flex-1 p-6 md:p-8 lg:p-10 space-y-8 w-full max-w-7xl mx-auto">
                 
                 {/* 1. WELCOME HEADER CARD */}
@@ -89,11 +97,15 @@ const Dashboard = () => {
                     </div>
                 )}
 
-
-                  {role === "gym" && (
+                {role === "gym" && (
                     <div className="space-y-8">
-                        {/* Antrenör dashboard widget'ları buraya gelecek */}
                         <GymRiskAnalyticsContainer />
+                    </div>
+                )}
+
+                {role === "member" && (
+                    <div className="space-y-8">
+                        <MemberDashboardView />
                     </div>
                 )}
 

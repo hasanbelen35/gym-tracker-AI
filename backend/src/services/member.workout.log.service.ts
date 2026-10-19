@@ -1,18 +1,24 @@
 import prisma from "../lib/db";
 import { AppError } from "../middleware/errorMiddleware";
 
-export interface LogSingleSetInput {
+export interface FinishWorkoutInput {
     workoutLogId: number;
-    exerciseLogId: number;
-    setNumber: number;
-    actualReps?: number;
-    actualWeight?: number;
-    actualRir?: number;
-    status: "MATCHED" | "MODIFIED" | "SKIPPED";
+    memberNote?: string;
+    exerciseLogs: {
+        exerciseLogId: number;
+        setLogs: {
+            setNumber: number;
+            actualReps?: number;
+            actualWeight?: number;
+            actualRir?: number;
+            status: "MATCHED" | "MODIFIED" | "SKIPPED";
+        }[];
+    }[];
 }
 
 export class WorkoutLogService {
 
+    // 
     async getActiveSession(memberId: number) {
         AppError.assertMemberId(memberId);
 
@@ -49,6 +55,7 @@ export class WorkoutLogService {
         return activeSession;
     }
 
+    // 
     async startWorkoutSession(memberId: number) {
         AppError.assertMemberId(memberId);
 
@@ -154,47 +161,11 @@ export class WorkoutLogService {
         return newSession;
     }
 
-    async logSingleSet(memberId: number, data: LogSingleSetInput) {
+    //
+    async finishWorkoutSession(memberId: number, data: FinishWorkoutInput) {
         AppError.assertMemberId(memberId);
 
-        const { workoutLogId, exerciseLogId, setNumber, actualReps, actualWeight, actualRir, status } = data;
-
-        const session = await prisma.workoutLog.findFirst({
-            where: { id: workoutLogId, memberId, status: "IN_PROGRESS" },
-        });
-
-        if (!session) {
-            throw new AppError(403, "Aktif bir antrenman oturumu bulunamadı.");
-        }
-
-        const savedSetLog = await prisma.exerciseSetLog.upsert({
-            where: {
-                exerciseLogId_setNumber: {
-                    exerciseLogId,
-                    setNumber,
-                },
-            },
-            update: {
-                actualReps,
-                actualWeight,
-                actualRir,
-                status,
-            },
-            create: {
-                exerciseLogId,
-                setNumber,
-                actualReps,
-                actualWeight,
-                actualRir,
-                status,
-            },
-        });
-
-        return savedSetLog;
-    }
-
-    async finishWorkoutSession(memberId: number, workoutLogId: number, memberNote?: string) {
-        AppError.assertMemberId(memberId);
+        const { workoutLogId, memberNote, exerciseLogs } = data;
 
         const session = await prisma.workoutLog.findFirst({
             where: { id: workoutLogId, memberId, status: "IN_PROGRESS" },
@@ -207,14 +178,56 @@ export class WorkoutLogService {
         const completedAt = new Date();
         const durationMinutes = Math.round((completedAt.getTime() - new Date(session.startedAt).getTime()) / 60000);
 
-        const updatedSession = await prisma.workoutLog.update({
-            where: { id: workoutLogId },
-            data: {
-                status: "COMPLETED",
-                completedAt,
-                durationMinutes: durationMinutes > 0 ? durationMinutes : 1,
-                memberNote,
-            },
+        const updatedSession = await prisma.$transaction(async (tx) => {
+            // Frontend'den gelen toplu set loglarını veritabanına işliyoruz
+            if (exerciseLogs && exerciseLogs.length > 0) {
+                for (const exLog of exerciseLogs) {
+                    for (const setLog of exLog.setLogs) {
+                        await tx.exerciseSetLog.updateMany({
+                            where: {
+                                exerciseLogId: exLog.exerciseLogId,
+                                setNumber: setLog.setNumber,
+                            },
+                            data: {
+                                actualReps: setLog.actualReps,
+                                actualWeight: setLog.actualWeight,
+                                actualRir: setLog.actualRir,
+                                status: setLog.status,
+                            },
+                        });
+                    }
+                }
+            }
+
+            const finished = await tx.workoutLog.update({
+                where: { id: workoutLogId },
+                data: {
+                    status: "COMPLETED",
+                    completedAt,
+                    durationMinutes: durationMinutes > 0 ? durationMinutes : 1,
+                    memberNote,
+                },
+                include: {
+                    workoutDay: {
+                        include: {
+                            program: true,
+                            exercises: {
+                                include: {
+                                    exercise: true,
+                                    sets: true,
+                                },
+                            },
+                        },
+                    },
+                    exerciseLogs: {
+                        include: {
+                            setLogs: true,
+                        },
+                    },
+                },
+            });
+
+            return finished;
         });
 
         return updatedSession;

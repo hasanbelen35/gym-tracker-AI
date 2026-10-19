@@ -2,7 +2,6 @@ import { Router } from "express";
 import { WorkoutLogController } from "../controllers/member.workoutLog.controller";
 import { authenticate, authorizeMember } from "../middleware/auth.middleware";
 
-
 const router = Router();
 const workoutLog = new WorkoutLogController();
 
@@ -20,14 +19,6 @@ router.post(
     authenticate,
     authorizeMember,
     (req, res, next) => workoutLog.startSession(req, res, next)
-);
-
-// LOG SINGLE SET 
-router.post(
-    "/set",
-    authenticate,
-    authorizeMember,
-    (req, res, next) => workoutLog.logSet(req, res, next)
 );
 
 // FINISH WORKOUT SESSION 
