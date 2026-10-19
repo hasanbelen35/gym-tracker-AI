@@ -28,14 +28,14 @@ router.put(
   authenticate,
   authorizeMember,
   validate(updateMemberProfileSchema),
-  (req, res, next) => member.updateMemberProfileController(req, res, next) 
+  (req, res, next) => member.updateMemberProfileController(req, res, next)
 );
-
+// create workout log
 router.post(
-    "/workout-logs/complete",
-    authenticate,
-    authorizeMember,
-    validate(completeWorkoutSchema),
-    (req, res, next) => member.completeWorkoutLog(req, res, next)
+  "/workout-logs/complete",
+  authenticate,
+  authorizeMember,
+  validate(completeWorkoutSchema),
+  (req, res, next) => member.completeWorkoutLog(req, res, next)
 );
 export default router;

@@ -150,14 +150,20 @@ export class MemberService {
         }
 
         logger.info(`Successfully fetched current profile data for member ID: ${memberId}`);
+        
         return member;
     }
-
-    // GET MEMBER'S WORKOUT PROGRAMS BY ID SERVICE
-    async getMemberPrograms(memberId: number, onlyActive: boolean = false) {
+    
+    
+    // get member programs paginated 
+    async getMemberPrograms(
+        memberId: number,
+        options: { onlyActive?: boolean; page?: number; limit?: number } = {}
+    ) {
         AppError.assertMemberId(memberId);
 
-        logger.info(`Attempting to fetch programs for member ID: ${memberId}`);
+        const { onlyActive = false, page = 1, limit = 10 } = options;
+        const skip = (page - 1) * limit;
 
         const existingMember = await prisma.member.findUnique({
             where: { id: memberId },
@@ -165,65 +171,85 @@ export class MemberService {
         });
 
         if (!existingMember) {
-            logger.warn(`Fetch programs failed: Member not found with ID: ${memberId}`);
             throw new AppError(404, "Üye sistemde bulunamadı.");
         }
 
-        const programs = await prisma.program.findMany({
-            where: {
-                memberId,
-                ...(onlyActive && { isActive: true }),
-            },
-            orderBy: { createdAt: 'desc' },
-            select: {
-                id: true,
-                title: true,
-                type: true,
-                splitType: true,
-                isActive: true,
-                createdAt: true,
-                archivedAt: true,
-                days: {
-                    orderBy: { dayOrder: 'asc' },
-                    select: {
-                        id: true,
-                        dayName: true,
-                        dayOrder: true,
-                        isRestDay: true,
-                        exercises: {
-                            orderBy: { orderIndex: 'asc' },
-                            select: {
-                                id: true,
-                                orderIndex: true,
-                                notes: true,
-                                exercise: {
-                                    select: {
-                                        id: true,
-                                        name: true,
-                                        category: true,
-                                        targetMuscle: true
+        const whereCondition = {
+            memberId,
+            ...(onlyActive && { isActive: true }),
+        };
+
+        const [programs, totalCount] = await Promise.all([
+            prisma.program.findMany({
+                where: whereCondition,
+                orderBy: { createdAt: 'desc' },
+                ...(!onlyActive && { skip, take: limit }),
+                select: {
+                    id: true,
+                    publicId: true,
+                    title: true,
+                    type: true,
+                    splitType: true,
+                    isActive: true,
+                    createdAt: true,
+                    archivedAt: true,
+                    days: {
+                        orderBy: { dayOrder: 'asc' },
+                        select: {
+                            id: true,
+                            publicId: true,
+                            dayName: true,
+                            dayOrder: true,
+                            isRestDay: true,
+                            exercises: {
+                                orderBy: { orderIndex: 'asc' },
+                                select: {
+                                    id: true,
+                                    publicId: true,
+                                    orderIndex: true,
+                                    notes: true,
+                                    exercise: {
+                                        select: {
+                                            id: true,
+                                            publicId: true,
+                                            name: true,
+                                            category: true,
+                                            targetMuscle: true,
+                                            gifUrl: true,
+                                        },
                                     },
-                                },
-                                sets: {
-                                    orderBy: { setNumber: 'asc' },
-                                    select: {
-                                        id: true,
-                                        setNumber: true,
-                                        targetReps: true,
-                                        targetWeight: true,
-                                        rir: true,
+                                    sets: {
+                                        orderBy: { setNumber: 'asc' },
+                                        select: {
+                                            id: true,
+                                            publicId: true,
+                                            setNumber: true,
+                                            targetReps: true,
+                                            targetWeight: true,
+                                            rir: true,
+                                        },
                                     },
                                 },
                             },
                         },
                     },
                 },
-            },
-        });
+            }),
+            prisma.program.count({ where: whereCondition })
+        ]);
 
-        logger.info(`Fetched ${programs.length} programs for member ID: ${memberId}`);
-        return programs;
+        return {
+            data: programs,
+            pagination: {
+                total: totalCount,
+                page,
+                limit,
+                totalPages: Math.ceil(totalCount / limit),
+            },
+        };
     }
+
+    
     // UPDATE MEMBER'S PROFILE BY ID  SERVICE 
     async updateMemberProfileService(
         memberId: number,

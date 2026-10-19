@@ -105,8 +105,8 @@ export interface Program {
   publicId?: string;
   title?: string;
   description?: string;
-  isActive?: boolean;         
-  archivedAt?: string | null; 
+  isActive?: boolean;
+  archivedAt?: string | null;
   exercises?: Exercise[];
   days?: ProgramDayInput[];
   [key: string]: unknown;
@@ -244,31 +244,38 @@ export interface SessionState {
   error: string | null;
   history: Session[];
 }
-
 export interface MemberState {
-  trainer: TrainerInfo | null;
-  assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
-  profile: {
-    name?: string;
-    surname?: string;
-    email?: string;
-    age?: number | null;
-    height?: number | null;
-    weight?: number | null;
-    phone?: string | null;
-    medicalNotes?: string | null;
-    gender?: 'MALE' | 'FEMALE' | null;
-    avatarUrl?: string | null;
-    assignmentStatus?: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
-    gym?: {
-      name: string;
+    trainer: TrainerInfo | null;
+    assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
+    profile: {
+        name?: string;
+        surname?: string;
+        email?: string;
+        age?: number | null;
+        height?: number | null;
+        weight?: number | null;
+        phone?: string | null;
+        medicalNotes?: string | null;
+        gender?: 'MALE' | 'FEMALE' | null;
+        assignmentStatus?: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
+        gym?: {
+            name: string;
+        };
+        trainer?: TrainerInfo | null;
+        sessions?: Session[];
+        [key: string]: unknown;
+    } | null;
+    programs: Program[]; // 'any[]' yerine gerçek Program tipi
+    pagination: {
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
     };
-    trainer?: TrainerInfo | null;
-    sessions?: Session[];
-    [key: string]: unknown;
-  } | null;
-  loading: boolean;
-  error: string | null;
+    loading: boolean;
+    error: string | null;
+    workoutLogLoading: boolean;      
+    workoutLogSuccess: boolean;
 }
 
 export interface ExerciseState {

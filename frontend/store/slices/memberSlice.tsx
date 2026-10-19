@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
-import { MemberState } from "@/features/member/get-my-programs/types";
+import { DetailedProgram, MemberState } from "@/features/member/get-my-programs/types";
 import { API } from "@/lib/api";
 import { handleApiError } from "../apiErrorHandler";
 import { UpdateMemberProfileData } from "@/features/member/profile/types";
@@ -21,6 +21,14 @@ const initialState: MemberState = {
     programs: [],
     loading: false,
     error: null,
+    workoutLogLoading: false,
+    workoutLogSuccess: false,
+    pagination: {
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+    },
 };
 
 export const fetchCurrentMember = createAsyncThunk(
@@ -49,29 +57,18 @@ export const fetchMyTrainer = createAsyncThunk(
     }
 );
 
-export const updateMemberProfile = createAsyncThunk(
-    "member/updateProfile",
-    async (profileData: UpdateProfilePayload, { rejectWithValue }) => {
-        try {
-            const response = await API.put("/member/profile/complete", profileData);
-            return response.data.data;
-        } catch (error) {
-            const err = error as AxiosError<{ message?: string; details?: Array<{ message: string }> }>;
-            const errorMessage = err.response?.data?.details?.[0]?.message ||
-                err.response?.data?.message ||
-                "Profile can not updated.";
-            return rejectWithValue(errorMessage);
-        }
-    }
-);
-
-// GET MEMBER'S PROGRAMS 
 export const fetchMemberPrograms = createAsyncThunk(
     'member/fetchMemberPrograms',
-    async (_, { rejectWithValue }) => {
+    async (params: { onlyActive?: boolean; page?: number; limit?: number } = {}, { rejectWithValue }) => {
         try {
-            const response = await API.get('/member/my-programs');
-            return response.data.data;
+            const response = await API.get('/member/my-programs', {
+                params: params
+            });
+            return {
+                data: response.data.data,
+                pagination: response.data.pagination,
+                params: params 
+            };
         } catch (error) {
             return handleApiError(
                 error,
@@ -82,10 +79,9 @@ export const fetchMemberPrograms = createAsyncThunk(
     }
 );
 
-// UPDATE MEMBER PROFILE
-export const updateMemberProfileData = createAsyncThunk(
+export const updateMemberProfile = createAsyncThunk(
     'member/updateProfile',
-    async (data: UpdateMemberProfileData, { rejectWithValue }) => {
+    async (data: UpdateMemberProfileData | UpdateProfilePayload, { rejectWithValue }) => {
         try {
             const response = await API.put('/member/edit-profile', data);
             return response.data.data;
@@ -105,7 +101,6 @@ const memberSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
-            // fetchCurrentMember
             .addCase(fetchCurrentMember.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -118,7 +113,6 @@ const memberSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-            // fetchMyTrainer
             .addCase(fetchMyTrainer.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -132,20 +126,36 @@ const memberSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload as string;
             })
-            // fetchMemberPrograms
             .addCase(fetchMemberPrograms.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
             .addCase(fetchMemberPrograms.fulfilled, (state, action) => {
                 state.loading = false;
-                state.programs = action.payload;
+                const { data, pagination, params } = action.payload;
+
+                if (params?.onlyActive) {
+                    const archivedOnly = state.programs.filter((p) => !p.isActive);
+                    state.programs = [...data, ...archivedOnly];
+                } else {
+                    const currentPage = params?.page || 1;
+
+                    if (currentPage === 1) {
+                        const activeOnly = state.programs.filter((p) => p.isActive);
+                        state.programs = [...activeOnly, ...data];
+                    } else {
+                        const existingIds = new Set(state.programs.map((p) => p.id));
+                        const newItems = data.filter((p: DetailedProgram) => !existingIds.has(p.id));
+                         state.programs = [...state.programs, ...newItems];
+                    }
+
+                    state.pagination = pagination;
+                }
             })
             .addCase(fetchMemberPrograms.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             })
-            // updateMemberProfile 
             .addCase(updateMemberProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;

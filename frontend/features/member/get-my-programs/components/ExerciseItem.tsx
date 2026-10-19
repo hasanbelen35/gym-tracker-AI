@@ -2,82 +2,105 @@ import React, { useState } from 'react';
 import { ExerciseItemProps } from '../types';
 import { SetTable } from './SetTable';
 
-
-export const ExerciseItem: React.FC<ExerciseItemProps> = ({ exerciseItem }) => {
+export const ExerciseItem: React.FC<ExerciseItemProps> = ({ exerciseItem, position }) => {
     const { exercise, sets, notes, orderIndex } = exerciseItem;
     const [isModalOpen, setIsModalOpen] = useState(false);
 
+    const number = position ?? orderIndex ?? 1;
+
     return (
         <>
-            <div className="bg-white dark:bg-nav-bg border border-nav-border rounded-2xl p-4 shadow-xs space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-nav-border pb-3">
-                    <div className="flex items-center gap-3">
-                        <span className="w-7 h-7 rounded-lg bg-brand-50 dark:bg-brand-500/10 text-brand-600 font-bold text-xs flex items-center justify-center shrink-0">
-                            #{orderIndex}
-                        </span>
-                        <div>
-                            <h4 className="font-bold text-brand-text text-sm sm:text-base">{exercise.name}</h4>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                                {exercise.targetMuscle && (
-                                    <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-brand-500/10 text-brand-600">
-                                        {exercise.targetMuscle}
-                                    </span>
-                                )}
-                                {exercise.equipment && (
-                                    <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500">
-                                        {exercise.equipment}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {exercise.gifUrl && (
-                        <div
+            <div className="h-full space-y-4 rounded-xl border border-nav-border bg-background p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-400/60 hover:shadow-lg hover:shadow-brand-500/5">
+                <div className="flex items-start gap-3.5">
+                    {exercise?.gifUrl ? (
+                        <button
+                            type="button"
                             onClick={() => setIsModalOpen(true)}
-                            className="w-16 h-16 rounded-xl overflow-hidden border border-nav-border shrink-0 bg-slate-100 cursor-pointer group relative hover:opacity-95 transition-opacity"
-                            title="Büyütmek için tıklayın"
+                            aria-label={`${exercise.name} hareketini büyüt`}
+                            className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-nav-border bg-foreground/5 cursor-pointer"
                         >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={exercise.gifUrl} alt={exercise.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <span className="text-[10px] text-white font-bold bg-black/60 px-1.5 py-0.5 rounded">Büyüt</span>
-                            </div>
+                            <img
+                                src={exercise.gifUrl}
+                                alt={exercise.name}
+                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                            <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-[11px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                Büyüt
+                            </span>
+                            <span className="absolute left-1 top-1 flex h-5 w-5 items-center justify-center rounded-md bg-brand-500 text-[11px] font-bold text-white tabular-nums">
+                                {number}
+                            </span>
+                        </button>
+                    ) : (
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-500 text-lg font-bold text-white shadow-md shadow-brand-500/25 tabular-nums">
+                            {number}
                         </div>
                     )}
+
+                    <div className="min-w-0 flex-1 space-y-2">
+                        <h5 className="text-base font-bold leading-snug">{exercise?.name}</h5>
+
+                        <div className="flex flex-wrap gap-1.5">
+                            {exercise?.targetMuscle && (
+                                <span className="rounded-md border border-brand-100 bg-brand-50 px-2 py-0.5 text-xs font-semibold text-brand-text">
+                                    {exercise.targetMuscle}
+                                </span>
+                            )}
+                            {exercise?.equipment && (
+                                <span className="rounded-md bg-foreground/5 px-2 py-0.5 text-xs font-medium text-foreground/70">
+                                    {exercise.equipment}
+                                </span>
+                            )}
+                            {exercise?.bodyPart && (
+                                <span className="rounded-md bg-foreground/5 px-2 py-0.5 text-xs font-medium text-foreground/70">
+                                    {exercise.bodyPart}
+                                </span>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {notes && (
-                    <p className="text-xs italic text-slate-500 bg-amber-50 dark:bg-amber-500/5 border border-amber-200/50 p-2.5 rounded-xl">
-                        <span className="font-semibold not-italic">Not:</span> {notes}
+                    <p className="rounded-lg border border-brand-100 bg-brand-50 px-3 py-2.5 text-sm leading-relaxed text-foreground/85">
+                        <span className="font-bold text-brand-text">Eğitmen notu: </span>
+                        {notes}
                     </p>
                 )}
 
                 <SetTable sets={sets} />
             </div>
 
-            {isModalOpen && exercise.gifUrl && (
+            {isModalOpen && exercise?.gifUrl && (
                 <div
                     onClick={() => setIsModalOpen(false)}
-                    className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200"
+                    className="ui-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
-                        className="relative bg-white dark:bg-nav-bg border border-nav-border rounded-3xl p-4 max-w-md w-full shadow-2xl space-y-4"
+                        role="dialog"
+                        aria-label={exercise.name}
+                        className="ui-pop-in w-full max-w-lg space-y-3 rounded-2xl border border-nav-border bg-nav-bg p-4 shadow-2xl"
                     >
-                        <div className="flex items-center justify-between border-b border-nav-border pb-3">
-                            <h3 className="font-bold text-brand-text text-sm sm:text-base">{exercise.name}</h3>
+                        <div className="flex items-center justify-between gap-3">
+                            <h3 className="font-bold">{exercise.name}</h3>
                             <button
+                                type="button"
                                 onClick={() => setIsModalOpen(false)}
-                                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-brand-text flex items-center justify-center font-bold text-xs cursor-pointer"
+                                aria-label="Kapat"
+                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-foreground/5 text-sm transition-colors hover:bg-brand-500 hover:text-white cursor-pointer"
                             >
                                 ✕
                             </button>
                         </div>
 
-                        <div className="rounded-2xl overflow-hidden border border-nav-border bg-slate-100 dark:bg-slate-900 flex items-center justify-center max-h-[70vh]">
+                        <div className="overflow-hidden rounded-xl border border-nav-border bg-foreground/5">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={exercise.gifUrl} alt={exercise.name} className="w-full h-auto object-contain max-h-[60vh]" />
+                            <img
+                                src={exercise.gifUrl}
+                                alt={exercise.name}
+                                className="mx-auto max-h-[60vh] w-full object-contain"
+                            />
                         </div>
                     </div>
                 </div>

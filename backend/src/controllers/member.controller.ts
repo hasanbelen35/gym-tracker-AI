@@ -86,20 +86,28 @@ export class MemberController {
             next(error);
         }
     }
-
-    // GET MEMBER'S WORKOUT PROGRAM CONTROLLER
-    async getMyProgramsController(req: AuthRequest, res: Response, next: NextFunction) {
+// GET MEMBER'S WORKOUT PROGRAM CONTROLLER
+   async getMyProgramsController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const memberId = req.user!.id;
 
-            logger.info(`Attempting to fetch programs for member ID: ${memberId}`);
+            const onlyActive = req.query.onlyActive === 'true';
+            const page = req.query.page ? Number(req.query.page) : 1;
+            const limit = req.query.limit ? Number(req.query.limit) : 10;
 
-            const programs = await memberService.getMemberPrograms(memberId);
+            logger.info(`Attempting to fetch programs for member ID: ${memberId} (onlyActive: ${onlyActive}, page: ${page}, limit: ${limit})`);
+
+            const result = await memberService.getMemberPrograms(memberId, {
+                onlyActive,
+                page,
+                limit,
+            });
 
             logger.info(`Successfully processed programs request for member ID: ${memberId}`);
             return res.status(200).json({
                 success: true,
-                data: programs,
+                data: result.data,
+                pagination: result.pagination,
             });
 
         } catch (error) {
@@ -109,7 +117,7 @@ export class MemberController {
             next(error);
         }
     }
-
+    
     // UPDATE MEMBER'S PROFILE BY ID  CONTROLLER 
     async updateMemberProfileController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
