@@ -238,6 +238,7 @@ model WorkoutLog {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([memberId, status])
   @@index([memberId, completedAt])
 }
 
@@ -252,7 +253,6 @@ model ExerciseLog {
   workoutLog WorkoutLog       @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
   setLogs    ExerciseSetLog[]
 }
-
 model ExerciseSetLog {
   id            Int          @id @default(autoincrement())
   publicId      String       @unique @default(uuid())
@@ -270,8 +270,10 @@ model ExerciseSetLog {
 
   status        SetLogStatus @default(MATCHED)
 
-  exerciseLog ExerciseLog @relation(fields: [exerciseLogId], references: [id], onDelete: Cascade)
+  exerciseLog ExerciseLog  @relation(fields: [exerciseLogId], references: [id], onDelete: Cascade)
   workoutSet  WorkoutSet?  @relation(fields: [workoutSetId], references: [id], onDelete: SetNull)
+
+  @@unique([exerciseLogId, setNumber])
 }
 
 model DietProgram {

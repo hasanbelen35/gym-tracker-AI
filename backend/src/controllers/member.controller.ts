@@ -158,31 +158,6 @@ export class MemberController {
         }
     }
 
-    // COMPLETE WORKOUT LOG CONTROLLER
-    completeWorkoutLog = async (req: AuthRequest, res: Response, next: NextFunction) => {
-        try {
-            const memberId = req.user!.id;
-
-            logger.info(`Member ID ${memberId} attempting to complete a workout log session`);
-
-            const input: CompleteWorkoutInput = req.body;
-
-            const workoutLog = await memberService.completeWorkoutLogsService(memberId, input);
-
-            logger.info(`Successfully created workout log ID: ${workoutLog.id} for member ID: ${memberId}`);
-
-            return res.status(201).json({
-                success: true,
-                message: "Antrenman kaydı başarıyla tamamlandı.",
-                data: workoutLog,
-            });
-        } catch (error) {
-            logger.error("Error in completeWorkoutLog controller", {
-                error: error instanceof Error ? error.message : error,
-            });
-            next(error);
-        }
-    };
 
 }
 
