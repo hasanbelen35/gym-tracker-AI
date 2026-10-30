@@ -150,6 +150,7 @@ npm run dev
 | :---: | :---: |
 | ![Gym Dashboard](./assets/gym-dashboard.png) | ![Member Profile](./assets/member-profile.png) |
 
+
 | Member Dashboard | Pages  |
 | :---: | :---: |
 | ![Member Workouts](./assets/member-workouts.png) |

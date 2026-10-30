@@ -3,6 +3,7 @@ import { TrainerService } from "../services/trainer.service";
 import { AuthRequest } from "../middleware/auth.middleware";
 import { logger } from "../config/logger";
 import { CreateMeasurementType } from '../types/types';
+import { AppError } from "../middleware/errorMiddleware";
 
 const trainerService = new TrainerService();
 
@@ -314,5 +315,26 @@ export class TrainerController {
         }
     };
 
+    // TODO : ALLL BACKEND RERENDER AFTER LIKE THIS ARCH
+    // ACTIVATE ARCHIVED MEMBER PROGRAM CONTROLLER
+    activateProgramController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user?.id;
+            const { programPublicId } = req.params;
+
+            AppError.assertTrainerId(trainerId);
+            AppError.assertProgramPublicId(programPublicId);
+
+            const activatedProgram = await trainerService.activateProgramService(trainerId, programPublicId);
+
+            return res.status(200).json({
+                success: true,
+                message: "Program successfully activated.",
+                data: activatedProgram,
+            });
+        } catch (error) {
+            next(error);
+        }
+    };
 
 }

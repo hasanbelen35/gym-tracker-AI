@@ -22,7 +22,6 @@ export const trainerMemberParamSchema = z.object({
 
 // ---------------- ÖLÇÜM (MEASUREMENT) ----------------
 
-// String veya Number gelen girdileri güvenle sayıya dönüştüren yardımcı metot
 const numericField = (label: string, maxVal?: number) => {
   let schema = z.preprocess(
     (val) => {
@@ -127,4 +126,13 @@ export const updateTrainerProfileSchema = z.object({
       .max(250, "Kilo 250 kg'dan fazla olamaz.")
       .optional(),
   }).strict(),
+});
+
+
+
+// ACTIVATE PROGRAM SCHEMA 
+export const activateProgramSchema = z.object({
+    params: z.object({
+        programPublicId: z.string().uuid("Geçersiz program kimliği formatı."),
+    }),
 });

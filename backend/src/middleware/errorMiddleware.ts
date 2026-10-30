@@ -1,14 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { logger } from '../config/logger';
 
-
 export class AppError extends Error {
   public statusCode: number;
 
   constructor(statusCode: number, message: string) {
     super(message);
     this.statusCode = statusCode;
-
     this.name = this.constructor.name;
 
     if (Error.captureStackTrace) {
@@ -16,44 +14,52 @@ export class AppError extends Error {
     }
   }
 
-  // GYM ID CONTROL
-  static assertGym(gymId: number | undefined | null): void {
-    if (!gymId) {
+  private static isValidString(value: unknown): value is string {
+    return typeof value === 'string' && value.trim() !== '' && value !== 'undefined';
+  }
+
+  // GYM ID CONTROL (JWT'den gelir)
+  static assertGym(gymId: unknown): asserts gymId is number {
+    if (!gymId || typeof gymId !== 'number') {
       throw new AppError(401, 'Kimlik doğrulama hatası: Geçerli bir salon oturumu bulunamadı.');
     }
   }
 
-  // MEMBER PUBLIC ID CONTROL
-  static assertMemberPublicId(memberPublicId: string | undefined | null): void {
-    if (!memberPublicId) {
+  // TRAINER ID CONTROL (JWT'den gelir)
+  static assertTrainerId(trainerId: unknown): asserts trainerId is number {
+    if (!trainerId || typeof trainerId !== 'number') {
+      throw new AppError(401, 'Kimlik doğrulama hatası: Geçerli bir eğitmen oturumu bulunamadı.');
+    }
+  }
+
+  // MEMBER ID CONTROL
+  static assertMemberId(memberId: unknown): asserts memberId is number {
+    if (!memberId || typeof memberId !== 'number') {
       throw new AppError(400, 'Geçersiz istek: Üye kimlik bilgisi sağlanmadı.');
     }
   }
-  // MEMBER  ID CONTROL
-  static assertMemberId(memberId: number | undefined | null): void {
-    if (!memberId) {
+
+  // MEMBER PUBLIC ID CONTROL
+  static assertMemberPublicId(memberPublicId: unknown): asserts memberPublicId is string {
+    if (!AppError.isValidString(memberPublicId)) {
       throw new AppError(400, 'Geçersiz istek: Üye kimlik bilgisi sağlanmadı.');
     }
   }
 
   // TRAINER PUBLIC ID CONTROL
-  static assertTrainerPublicId(trainerPublicId: string | undefined | null): asserts trainerPublicId is string {
-    if (!trainerPublicId || typeof trainerPublicId !== "string" || trainerPublicId.trim() === "" || trainerPublicId === "undefined") {
-      throw new AppError(400, "Geçersiz istek: Eğitmen kimlik bilgisi sağlanmadı.");
+  static assertTrainerPublicId(trainerPublicId: unknown): asserts trainerPublicId is string {
+    if (!AppError.isValidString(trainerPublicId)) {
+      throw new AppError(400, 'Geçersiz istek: Eğitmen kimlik bilgisi sağlanmadı.');
     }
   }
 
-  // TRAINER  ID CONTROL
-  static assertTrainerId(trainerId: number | undefined | null): void {
-    if (!trainerId) {
-      throw new AppError(400, 'Geçersiz istek: Üye kimlik bilgisi sağlanmadı.');
+  // PROGRAM PUBLIC ID CONTROL
+  static assertProgramPublicId(programPublicId: unknown): asserts programPublicId is string {
+    if (!AppError.isValidString(programPublicId)) {
+      throw new AppError(400, 'Geçersiz istek: Program kimlik bilgisi sağlanmadı.');
     }
   }
 }
-
-
-
-
 
 export const errorHandler = (
   err: Error,
@@ -61,18 +67,31 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
+  if (res.headersSent) {
+    return next(err);
+  }
 
-  logger.error(`${err.message} - ${req.method} ${req.originalUrl} - IP: ${req.ip}`, {
+  const isAppError = err instanceof AppError;
+  const statusCode = isAppError ? err.statusCode : 500;
+
+  const logMessage = `${err.message} - ${req.method} ${req.originalUrl} - IP: ${req.ip}`;
+  const logMeta = {
     stack: err.stack,
-    body: req.body,
     params: req.params,
     query: req.query,
-  });
+  };
+
+  if (statusCode >= 500) {
+    logger.error(logMessage, logMeta);
+  } else {
+    logger.warn(logMessage, logMeta);
+  }
 
   res.status(statusCode).json({
     success: false,
-    message: err.message || 'Sunucu tarafında beklenmeyen bir hata oluştu.',
+    message: isAppError
+      ? err.message
+      : 'Sunucu tarafında beklenmeyen bir hata oluştu.',
     ...(process.env.NODE_ENV !== 'production' && { stack: err.stack }),
   });
 };

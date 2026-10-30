@@ -3,10 +3,13 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { fetchProgramDetail, deleteProgram, ProgramDayDetail } from "@/store/slices/exerciseSlice";
+import { activateMemberProgram } from "@/store/slices/trainerSlice";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeftIcon, IconTrash } from '@/icons/icon';
 import { ExerciseCard } from "@/features/trainer/create-workout-program-to-athlete/components/ExerciseDetailCard";
 import ConfirmModal from "@/components/ConfirmModel";
+import { SuccessBox } from "@/components/ui/SuccessBox";
+import { ErrorBox } from "@/components/ui/ErrorBox";
 
 export default function ProgramDetail() {
     const dispatch = useAppDispatch();
@@ -18,6 +21,10 @@ export default function ProgramDetail() {
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isActivating, setIsActivating] = useState(false);
+    
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
         if (programPublicId) {
@@ -27,13 +34,32 @@ export default function ProgramDetail() {
 
     const handleDeleteProgram = async () => {
         setIsDeleting(true);
+        setErrorMessage(null);
         try {
             await dispatch(deleteProgram(programPublicId)).unwrap();
             router.push('/trainer/athletes');
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (error) {
+            setErrorMessage("Program silinirken bir hata oluştu.");
         } finally {
             setIsDeleting(false);
             setIsDeleteModalOpen(false);
+        }
+    };
+
+    const handleActivateProgram = async () => {
+        setIsActivating(true);
+        setSuccessMessage(null);
+        setErrorMessage(null);
+        try {
+            await dispatch(activateMemberProgram(programPublicId)).unwrap();
+            dispatch(fetchProgramDetail(programPublicId));
+            setSuccessMessage("Program başarıyla aktifleştirildi!");
+        } catch (error: unknown) {
+            const errText = typeof error === 'string' ? error : "Program aktifleştirilirken bir hata oluştu.";
+            setErrorMessage(errText);
+        } finally {
+            setIsActivating(false);
         }
     };
 
@@ -50,8 +76,12 @@ export default function ProgramDetail() {
 
     if (!currentProgramDetail) return null;
 
-    const totalDays = currentProgramDetail.days?.length || 0;
-    const totalExercises = currentProgramDetail.days?.reduce((acc, day) => acc + (day.exercises?.length || 0), 0) || 0;
+    const daysList: ProgramDayDetail[] = Array.isArray(currentProgramDetail.days) 
+        ? currentProgramDetail.days 
+        : ((currentProgramDetail.days as unknown as { days?: ProgramDayDetail[] })?.days ?? []);
+
+    const totalDays = daysList.length;
+    const totalExercises = daysList.reduce((acc, day) => acc + (day.exercises?.length || 0), 0);
 
     const isActive = currentProgramDetail.isActive;
     const archivedAt = currentProgramDetail.archivedAt ? new Date(currentProgramDetail.archivedAt).toLocaleDateString("tr-TR", {
@@ -63,12 +93,15 @@ export default function ProgramDetail() {
     return (
         <div className="min-h-screen w-full bg-background text-foreground selection:bg-brand-500 selection:text-white p-4 sm:p-8 lg:p-12">
             <div className="max-w-7xl mx-auto space-y-10">
+                <SuccessBox message={successMessage} />
+                <ErrorBox message={errorMessage} />
+
                 <div className="flex items-center justify-between">
                     <button
                         onClick={() => router.back()}
                         className="group cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-xl bg-nav-bg border border-nav-border/80 text-xs font-bold uppercase tracking-wider hover:border-brand-500/60 hover:bg-brand-500/5 transition-all shadow-sm"
                     >
-                        <ArrowLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1 " /> 
+                        <ArrowLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1 " />
                         <span>Geri Dön</span>
                     </button>
 
@@ -83,7 +116,7 @@ export default function ProgramDetail() {
 
                 <div className="relative bg-linear-to-br from-nav-bg via-nav-bg to-brand-500/5 border border-nav-border/80 rounded-3xl p-6 sm:p-10 shadow-xl overflow-hidden max-w-4xl">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-brand-500/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-                    
+
                     <div className="relative z-10 space-y-4">
                         <div className="flex flex-wrap items-center justify-between gap-4">
                             <div className="flex flex-wrap items-center gap-2.5">
@@ -96,24 +129,33 @@ export default function ProgramDetail() {
                                 </span>
                             </div>
 
-                            {/* AKTİF / PASİF (ARŞİV) JETONU */}
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3">
                                 {isActive ? (
                                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/30 shadow-xs">
                                         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                                         Aktif Program
                                     </span>
                                 ) : (
-                                    <div className="flex items-center gap-2">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-500 border border-rose-500/30 shadow-xs">
-                                            <span className="w-2 h-2 rounded-full bg-rose-500" />
-                                            Aktif Değil (Arşivde)
-                                        </span>
-                                        {archivedAt && (
-                                            <span className="text-xs text-foreground/50 font-medium">
-                                                ({archivedAt} tarihinde arşive atıldı)
+                                    <div className="flex flex-wrap items-center gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-500 border border-rose-500/30 shadow-xs">
+                                                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                                                Aktif Değil (Arşivde)
                                             </span>
-                                        )}
+                                            {archivedAt && (
+                                                <span className="text-xs text-foreground/50 font-medium">
+                                                    ({archivedAt})
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <button
+                                            onClick={handleActivateProgram}
+                                            disabled={isActivating}
+                                            className="px-4 py-1.5 rounded-xl cursor-pointer bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold uppercase tracking-wider transition shadow-sm disabled:opacity-50"
+                                        >
+                                            {isActivating ? "Aktifleştiriliyor..." : "Programı Aktifleştir"}
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -137,8 +179,8 @@ export default function ProgramDetail() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                    {currentProgramDetail.days?.map((day: ProgramDayDetail) => (
-                        <div key={day.publicId || day.dayOrder} className="bg-nav-bg/40 border border-nav-border/60 rounded-3xl p-6 space-y-6 shadow-sm backdrop-blur-sm">
+                    {daysList.map((day: ProgramDayDetail, index: number) => (
+                        <div key={day.publicId || index} className="bg-nav-bg/40 border border-nav-border/60 rounded-3xl p-6 space-y-6 shadow-sm backdrop-blur-sm">
                             <div className="flex items-center justify-between border-b border-nav-border/50 pb-4">
                                 <div className="flex items-center gap-3">
                                     <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-brand-500/10 text-brand-500 text-xs font-extrabold border border-brand-500/20 shadow-sm">
@@ -152,14 +194,14 @@ export default function ProgramDetail() {
                                     {day.isRestDay ? "Dinlenme" : `${day.exercises?.length || 0} Egzersiz`}
                                 </span>
                             </div>
-                            
+
                             {day.isRestDay ? (
                                 <div className="p-10 rounded-2xl border border-dashed border-nav-border/80 text-center text-xs font-bold uppercase tracking-widest text-foreground/40 bg-nav-bg/30">
                                     Dinlenme Günü — Kasların Gelişim Zamanı 🚀
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {day.exercises.map((ex, idx) => (
+                                    {day.exercises?.map((ex, idx) => (
                                         <ExerciseCard key={ex.publicId || idx} exerciseItem={ex} index={idx} />
                                     ))}
                                 </div>

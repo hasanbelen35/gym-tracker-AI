@@ -13,7 +13,7 @@ import { ActiveWorkoutView } from '../components/ActiveWorkoutView';
 
 export default function MemberWorkoutContainer() {
     const dispatch = useAppDispatch();
-    const { activeSession, loading, actionLoading } = useAppSelector((state) => state.workoutLog);
+    const { activeSession, loading, actionLoading, error } = useAppSelector((state) => state.workoutLog);
 
     useEffect(() => {
         dispatch(fetchActiveSession());
@@ -59,9 +59,14 @@ export default function MemberWorkoutContainer() {
                     onUpdateSet={handleUpdateSet}
                     onFinishSession={handleFinish}
                     actionLoading={actionLoading}
+                    errorMessage={error}
                 />
             ) : (
-                <StartWorkoutCard onStart={handleStart} loading={actionLoading} />
+                <StartWorkoutCard 
+                    onStart={handleStart} 
+                    loading={actionLoading} 
+                    error={error}
+                />
             )}
         </div>
     );

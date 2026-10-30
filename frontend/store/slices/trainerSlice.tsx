@@ -159,6 +159,18 @@ export const updateTrainerProfile = createAsyncThunk(
         }
     }
 );
+export const activateMemberProgram = createAsyncThunk(
+    'trainer/activateMemberProgram',
+    async (programPublicId: string, { rejectWithValue }) => {
+        try {
+            const response = await API.put(`/trainer/programs/${programPublicId}/activate`);
+            return response.data.data;
+        } catch (error) {
+            console.log(error)
+            return handleApiError(error, rejectWithValue, 'Program aktifleştirilirken bir hata oluştu.');
+        }
+    }
+);
 
 const trainerSlice = createSlice({
     name: 'trainer',
@@ -308,7 +320,7 @@ const trainerSlice = createSlice({
             .addCase(updateTrainerProfile.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
-            });
+            })
     },
 });
 

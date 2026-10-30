@@ -11,7 +11,8 @@ import { ExerciseDetailModal } from "./ExerciseDetailModal";
 import { WorkoutSetRow } from "./WorkoutSetRow";
 import { EditSetModal } from "./EditSetModal";
 import { useWorkoutTimer } from "../hook/useWorkoutTimer";
-import ConfirmModal from "../../../../components/ConfirmModel";
+import ConfirmModal from "@/components/ConfirmModel";
+import { ErrorBox } from "@/components/ui/ErrorBox"; 
 
 export interface ExerciseDetail {
     id: number;
@@ -60,6 +61,7 @@ interface ActiveWorkoutViewProps {
     onUpdateSet: UpdateSetHandler;
     onFinishSession: () => void;
     actionLoading: boolean;
+    errorMessage?: string | null;
 }
 
 export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
@@ -67,6 +69,7 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
     onUpdateSet,
     onFinishSession,
     actionLoading,
+    errorMessage,
 }) => {
     const [selectedExercise, setSelectedExercise] =
         useState<SelectedExerciseState | null>(null);
@@ -76,6 +79,8 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
 
     const [isConfirmModalOpen, setIsConfirmModalOpen] =
         useState(false);
+
+    const [showSuccessBox, setShowSuccessBox] = useState(false);
 
     const [localSetUpdates, setLocalSetUpdates] = useState<
         Record<string, Partial<SetLog>>
@@ -138,13 +143,35 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
     };
 
     const handleFinishSession = () => {
-        onFinishSession();
         setIsConfirmModalOpen(false);
+        setShowSuccessBox(true); 
+
+        setTimeout(() => {
+            onFinishSession();
+        }, 1200);
     };
 
     return (
-        <div className="bg-nav-bg border border-brand-400/30 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-            {/* Header ve süre */}
+        <div className="relative bg-nav-bg border border-brand-400/30 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+            
+            {showSuccessBox && (
+                <div className="absolute inset-0 z-50 bg-background/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-300">
+                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-500 text-3xl mb-4 animate-bounce">
+                        🎉
+                    </div>
+                    <h3 className="text-2xl font-black text-foreground">Tebrikler Harika İş Çıkardın!</h3>
+                    <p className="text-sm text-foreground/70 mt-1 max-w-sm">
+                        Antrenman başarıyla tamamlandı ve verilerin kaydediliyor...
+                    </p>
+                    <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        Kayıt İşlemi Tamamlanıyor
+                    </div>
+                </div>
+            )}
+
+            <ErrorBox message={errorMessage ?? null} />
+
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-nav-border">
                 <div>
                     <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-wider">
@@ -177,14 +204,13 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
                 <button
                     type="button"
                     onClick={() => setIsConfirmModalOpen(true)}
-                    disabled={actionLoading}
+                    disabled={actionLoading || showSuccessBox}
                     className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow transition-all disabled:opacity-50 cursor-pointer"
                 >
-                    Antrenmanı Bitir ve Kaydet 🎉
+                    Antrenmanı Bitir ve Kaydet 
                 </button>
             </div>
 
-            {/* Egzersiz listesi */}
             <div className="space-y-6">
                 {session.exerciseLogs.map((exLog: ExerciseLog) => {
                     const originalExerciseData = workoutExercises.find(
@@ -284,7 +310,6 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
                 />
             )}
 
-            {/* Antrenman bitirme onayı */}
             <ConfirmModal
                 isOpen={isConfirmModalOpen}
                 title="Antrenmanı Tamamla"

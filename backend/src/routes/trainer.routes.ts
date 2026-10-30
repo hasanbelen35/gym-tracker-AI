@@ -8,7 +8,8 @@ import {
     trainerMemberParamSchema,
     createMeasurementSchema,
     completeTrainerProfileSchema,
-    updateTrainerProfileSchema
+    updateTrainerProfileSchema,
+    activateProgramSchema
 } from "../validations/trainer.validations";
 
 const router = Router();
@@ -62,6 +63,11 @@ router.get("/profile", authenticate, authorizeTrainer, (req, res, next) =>
 // update trainer profile
 router.put("/update-profile", authenticate, authorizeTrainer, validate(updateTrainerProfileSchema), (req, res, next) =>
     trainer.updateTrainerProfileController(req, res, next)
+);
+
+// activate archived member program
+router.put("/programs/:programPublicId/activate", authenticate, authorizeTrainer, validate(activateProgramSchema), (req, res, next) =>
+    trainer.activateProgramController(req, res, next)
 );
 
 export default router;

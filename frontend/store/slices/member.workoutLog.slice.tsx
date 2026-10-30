@@ -1,4 +1,3 @@
-
 import {
     createSlice,
     createAsyncThunk,
@@ -88,10 +87,6 @@ const initialState: WorkoutLogState = {
     error: null,
 };
 
-/**
- * Yeni başlayan aktif oturumdaki setleri bekliyor durumuna getirir.
- * Henüz kullanıcı tarafından girilmemiş gerçekleşen değerleri temizler.
- */
 const prepareNewSession = (
     session: WorkoutSession
 ): WorkoutSession => ({
@@ -186,7 +181,6 @@ export const finishWorkoutSession = createAsyncThunk<
                     (exerciseLog) => ({
                         exerciseLogId: exerciseLog.id,
                         setLogs: exerciseLog.setLogs
-                            // Bekleyen setleri tamamlanmış gibi göndermiyoruz.
                             .filter((set) => set.status !== "PENDING")
                             .map((set) => ({
                                 setNumber: set.setNumber,
@@ -279,7 +273,7 @@ const workoutLogSlice = createSlice({
 
     extraReducers: (builder) => {
         builder
-            .addCase(fetchActiveSession.pending, (state) => {   
+            .addCase(fetchActiveSession.pending, (state) => {  
                 state.loading = true;
                 state.error = null;
             })

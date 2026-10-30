@@ -79,7 +79,6 @@ export class TrainerService {
         AppError.assertTrainerId(trainerId);
         AppError.assertMemberPublicId(memberPublicId);
 
-        // 1. Dışarıdan salon bilgisi gelmediyse eğitmenin kendi bağlı olduğu salonu veritabanından alıyoruz
         let targetGymPublicId = gymPublicId;
 
         if (!targetGymPublicId || typeof targetGymPublicId !== "string" || targetGymPublicId.trim() === "") {
@@ -338,6 +337,7 @@ export class TrainerService {
     // GET MEASUREMENTS FROM MEMBERS
     async getMemberMeasurements(trainerId: number, memberPublicId: string) {
         logger.info(`Fetching measurements for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
+
         const member = await prisma.member.findFirst({
             where: {
                 publicId: memberPublicId,
@@ -363,6 +363,7 @@ export class TrainerService {
     // DELETE MEMBER'S MEASUREMENT BY PUBLIC ID
     async deleteMemberMeasurement(trainerId: number, memberPublicId: string, measurementPublicId: string) {
         logger.info(`Trainer ID ${trainerId} attempting to delete measurement publicId: ${measurementPublicId} for member publicId: ${memberPublicId}`);
+
         const member = await prisma.member.findFirst({
             where: {
                 publicId: memberPublicId,
@@ -531,5 +532,47 @@ export class TrainerService {
 
         logger.info(`Successfully updated profile for trainer ID: ${trainerId}`);
         return updatedTrainer;
+    }
+
+    // ACTIVATE ARCHIVED MEMBER PROGRAM
+    async activateProgramService(trainerId: number, programPublicId: string) {
+        AppError.assertTrainerId(trainerId);
+        AppError.assertProgramPublicId(programPublicId);
+
+        logger.info(`Trainer ID: ${trainerId} attempting to activate program ${programPublicId}`);
+
+        const targetProgram = await prisma.program.findFirst({
+            where: {
+                publicId: programPublicId,
+                member: {
+                    trainerId,
+                    assignmentStatus: 'ASSIGNED',
+                },
+            },
+            select: { id: true },
+        });
+
+        if (!targetProgram) {
+            throw new AppError(404, "Program bulunamadı.");
+        }
+
+        const activatedProgram = await prisma.program.update({
+            where: { id: targetProgram.id },
+            data: {
+                isActive: true,
+                archivedAt: null,
+            },
+            select: {
+                id: true,
+                publicId: true,
+                title: true,
+                isActive: true,
+                archivedAt: true,
+
+            },
+        });
+
+        logger.info(`Successfully activated program ${programPublicId} by trainer ID: ${trainerId}`);
+        return activatedProgram;
     }
 }
