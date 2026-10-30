@@ -200,12 +200,20 @@ export interface Exercise {
   createdAt: string;
 }
 
+export interface PaginationInfo {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+}
+
 export interface GymState {
   profile: Gym | null;
   loading: boolean;
   error: string | null;
 
   members: Member[];
+  pagination: PaginationInfo | null; // <-- Buraya eklendi
   membersLoading: boolean;
   membersError: string | null;
 
