@@ -1,4 +1,4 @@
-
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { MembersTableProps } from "@/features/gym/athletes/types";
 import { Member } from "@/types/types";
@@ -20,6 +20,7 @@ export const MembersTable: React.FC<ExtendedMembersTableProps> = ({
     onScroll,
     isLoadingMore,
 }) => {
+
     const renderStatusBadge = (status: string) => {
         switch (status) {
             case "ASSIGNED":
@@ -92,9 +93,23 @@ export const MembersTable: React.FC<ExtendedMembersTableProps> = ({
                                         onClick={() => onRowClick(member.publicId)}
                                         className="group cursor-pointer bg-transparent transition-colors hover:bg-brand-500/5"
                                     >
+                                        {/* NAME, SURNAME & AVATAR */}
                                         <td className="px-6 py-4">
-                                            <div className="font-semibold text-white transition-colors group-hover:text-brand-500">
-                                                {member.name} {member.surname}
+                                            <div className="flex items-center gap-3">
+                                                {member.avatarUrl ? (
+                                                    <img
+                                                        src={member.avatarUrl}
+                                                        alt={`${member.name} ${member.surname}`}
+                                                        className="h-8 w-8 rounded-full object-cover border border-nav-border flex-none"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-brand-500/20 text-xs font-bold text-brand-500">
+                                                        {member.name.charAt(0)}{member.surname.charAt(0)}
+                                                    </div>
+                                                )}
+                                                <div className="font-semibold text-white transition-colors group-hover:text-brand-500">
+                                                    {member.name} {member.surname}
+                                                </div>
                                             </div>
                                         </td>
 
@@ -105,7 +120,7 @@ export const MembersTable: React.FC<ExtendedMembersTableProps> = ({
                                         <td className="px-6 py-4">
                                             {(member.assignmentStatus === "ASSIGNED" ||
                                                 member.assignmentStatus === "PENDING") &&
-                                            member.trainer ? (
+                                                member.trainer ? (
                                                 <div className="flex items-center gap-2">
                                                     <span className="flex h-6 w-6 flex-none items-center justify-center rounded-full bg-brand-500/20 text-[10px] font-bold uppercase text-brand-500">
                                                         {member.trainer.name.charAt(0)}

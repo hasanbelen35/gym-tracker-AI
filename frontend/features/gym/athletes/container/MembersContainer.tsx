@@ -12,12 +12,13 @@ import { Member } from "@/types/types";
 import ConfirmModal from "@/components/ConfirmModel";
 import Loading from "@/components/Loading";
 import { MembersTable } from "@/features/gym/athletes/components/MembersTable";
+import { ArrowLeftIcon } from "@/icons/icon";
+
 
 const PAGE_SIZE = 15;
 
 export default function MembersContainer() {
     const dispatch = useAppDispatch();
-    const router = useRouter();
 
     const {
         members,
@@ -25,6 +26,8 @@ export default function MembersContainer() {
         membersLoading,
         membersError,
     } = useAppSelector((state) => state.gym);
+
+    const router = useRouter();
 
     const [page, setPage] = useState(1);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -83,8 +86,8 @@ export default function MembersContainer() {
 
             const isNearBottom =
                 element.scrollHeight -
-                    element.scrollTop -
-                    element.clientHeight <=
+                element.scrollTop -
+                element.clientHeight <=
                 50;
 
             if (!isScrollable || !isNearBottom) return;
@@ -143,6 +146,15 @@ export default function MembersContainer() {
 
     return (
         <div className="mx-auto max-w-7xl p-6 animate-in fade-in duration-300 md:p-8">
+
+            <button
+                onClick={() => router.back()}
+                className="group cursor-pointer flex items-center mb-4 gap-2 px-4 py-2.5 rounded-xl bg-nav-bg border border-nav-border/80 text-xs font-bold uppercase tracking-wider hover:border-brand-500/60 hover:bg-brand-500/5 transition-all shadow-sm"
+            >
+                <ArrowLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1 " />
+                <span>Geri Dön</span>
+            </button>
+            
             {/* PAGE HEADER */}
             <div className="mb-8">
                 <span className="text-xs font-bold uppercase tracking-widest text-brand-500">
@@ -188,9 +200,8 @@ export default function MembersContainer() {
                 title="Üyeyi Sil"
                 message={
                     memberToDelete
-                        ? `${memberToDelete.name} ${memberToDelete.surname} adlı üyeyi salondan silmek üzeresiniz. Bu işlem geri alınamaz.${
-                              deleteError ? `\n\nHata: ${deleteError}` : ""
-                          }`
+                        ? `${memberToDelete.name} ${memberToDelete.surname} adlı üyeyi salondan silmek üzeresiniz. Bu işlem geri alınamaz.${deleteError ? `\n\nHata: ${deleteError}` : ""
+                        }`
                         : ""
                 }
                 confirmText="Evet, Sil"

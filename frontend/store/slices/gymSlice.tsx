@@ -156,6 +156,7 @@ export const fetchMemberDetail = createAsyncThunk(
             const response = await API.get(
                 `/gym/getMemberDetail/${memberPublicId}`
             );
+            console.log(response.data.data)
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
