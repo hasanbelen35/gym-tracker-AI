@@ -55,7 +55,6 @@ export const memberListRepo = {
     }
 };
 
-
 export const memberDetailRepo = {
     async findByPublicId(gymId: number, memberPublicId: string) {
         return await prisma.member.findFirst({
@@ -79,10 +78,32 @@ export const memberDetailRepo = {
                 avatarUrl: true,
                 assignmentStatus: true,
                 isProfileCompleted: true,
+                medicalNotes: true,
                 createdAt: true,
                 updatedAt: true,
                 trainer: { select: { publicId: true, name: true, surname: true } },
                 gym: { select: { publicId: true, name: true } },
+
+                measurements: {
+                    orderBy: {
+                        measuredAt: "desc"
+                    },
+                    take: 20,
+                    select: {
+                        bodyFatRate: true,
+                        muscleMass: true,
+                        chest: true,
+                        waist: true,
+                        arm: true,
+                        hip: true,
+                        shoulder: true,
+                        photos: true,
+                        notes: true,
+                        measuredAt: true,
+                        createdAt: true,
+                    }
+                },
+
                 sessions: {
                     orderBy: { checkIn: "desc" },
                     take: 20,
