@@ -17,35 +17,59 @@ export class GymService {
     }
 
     // ----------------------------------------MEMBER-----------------------------------------
-    async getAllMembers(gymId: number) {
+
+    // GET ALL MEMBETS FROM GYM BY GYM ID  PAGINATED
+    async getAllMembers(gymId: number, page: number = 1, limit: number = 10) {
         AppError.assertGym(gymId);
 
+        logger.info(`Fetching members for gym ${gymId} (Page: ${page}, Limit: ${limit})`);
 
-        logger.info(`Fetching members for  in gym ${gymId}`);
+        const skip = (page - 1) * limit;
 
-        const members = await prisma.member.findMany({
-            where: {
-                gymId: gymId,
-            },
-            select: {
-                id: true,
-                publicId: true,
-                name: true,
-                surname: true,
-                email: true,
-                gymId: true,
-                assignmentStatus: true,
-                trainer: {
-                    select: {
-                        name: true,
-                        surname: true,
+        const [members, totalCount] = await Promise.all([
+            prisma.member.findMany({
+                where: {
+                    gymId: gymId,
+                },
+                skip: skip,
+                take: limit,
+                select: {
+                    id: true,
+                    publicId: true,
+                    name: true,
+                    surname: true,
+                    email: true,
+                    gymId: true,
+                    assignmentStatus: true,
+                    trainer: {
+                        select: {
+                            name: true,
+                            surname: true,
+                        }
                     }
+                },
+                orderBy: {
+                    id: 'desc'
                 }
-            }
-        });
+            }),
+            prisma.member.count({
+                where: {
+                    gymId: gymId,
+                }
+            })
+        ]);
 
-        logger.info(`Successfully fetched ${members.length} members for trainer`);
-        return members;
+        logger.info(`Successfully fetched ${members.length} members for gym ${gymId}`);
+
+        return {
+            data: members,
+            pagination: {
+                total: totalCount,
+                page: page,
+                limit: limit,
+                totalPages: Math.ceil(totalCount / limit),
+            }
+        };
     }
 
     async removeMemberFromGym(gymId: number, memberPublicId: string) {

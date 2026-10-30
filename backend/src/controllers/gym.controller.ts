@@ -23,23 +23,33 @@ export class GymController {
             next(error);
         }
     }
-    // GET ALL MEMBETS FROM GYM BY GYM ID 
+    
+    // GET ALL MEMBETS FROM GYM BY GYM ID  pagınated
     async getAllMembersController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const gymId = req.user!.id;
 
-            logger.info("Fetching all members data via controller");
-            const data = await gymService.getAllMembers(gymId);
-            logger.info("Successfully fetched all members data");
+            const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+            const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 10;
+
+            logger.info("Fetching all members data via controller with pagination");
+
+            const result = await gymService.getAllMembers(gymId, page, limit);
+
+            logger.info("Successfully fetched paginated members data");
+
             res.status(200).json({
                 message: "success",
-                data: data
+                data: result.data,
+                pagination: result.pagination
             });
         } catch (error) {
             logger.error("Error in getAllMembersController", { error: error instanceof Error ? error.message : error });
             next(error);
         }
     }
+
+
     // REMOVE MEMBER FROM GYM BY GYM ID
     async removeMemberFromGymController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
