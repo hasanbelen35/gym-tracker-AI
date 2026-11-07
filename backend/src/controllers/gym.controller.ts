@@ -23,7 +23,7 @@ export class GymController {
             next(error);
         }
     }
-    
+
     // GET ALL MEMBETS FROM GYM BY GYM ID  pagınated
     async getAllMembersController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
@@ -75,31 +75,144 @@ export class GymController {
             next(error);
         }
     }
-    // GET MEMBER DETAIL CONTROLLER
-    async getMemberDetailController(req: AuthRequest, res: Response, next: NextFunction) {
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    // GET MEMBER'S PROFLE DATA  CONTROLLER
+    async getMemberProfileController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const gymId = req.user!.id;
             const memberPublicId: string = String(req.params.memberId);
-            logger.info(`Gym ID ${gymId} fetching details for member publicId: ${memberPublicId}`);
+            logger.info(`Gym ID ${gymId} fetching profile for member publicId: ${memberPublicId}`);
 
             if (!memberPublicId || memberPublicId === "undefined") {
-                logger.warn(`Get member detail failed: Invalid member id provided (${memberPublicId}) for gym ID: ${gymId}`);
+                logger.warn(`Get member profile failed: Invalid member id provided (${memberPublicId}) for gym ID: ${gymId}`);
                 res.status(400).json({ message: "Invalid member id" });
                 return;
             }
 
-            const data = await gymService.getMemberDetail(gymId, memberPublicId);
+            const data = await gymService.getMemberProfile(gymId, memberPublicId);
 
-            logger.info(`Successfully fetched detail for member publicId: ${memberPublicId} by gym ID: ${gymId}`);
+            logger.info(`Successfully fetched profile for member publicId: ${memberPublicId} by gym ID: ${gymId}`);
             res.status(200).json({
                 message: "success",
                 data: data
             });
         } catch (error) {
-            logger.error("Error in getMemberDetailController", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in getMemberProfileController", { error: error instanceof Error ? error.message : error });
             next(error);
         }
     }
+
+    // GET MEMBER'S MEASUREMENT  DATAS PAGINATED CONTROLLER 
+    async getMemberMeasurementsController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const gymId = req.user!.id;
+            const memberPublicId: string = String(req.params.memberId);
+            const page = Number(req.query.page) || 1;
+            const limit = Number(req.query.limit) || 10;
+
+            logger.info(`Gym ID ${gymId} fetching measurements for member publicId: ${memberPublicId} (Page: ${page}, Limit: ${limit})`);
+
+            if (!memberPublicId || memberPublicId === "undefined") {
+                res.status(400).json({ message: "Invalid member id" });
+                return;
+            }
+
+            const data = await gymService.getMemberMeasurements(gymId, memberPublicId, page, limit);
+
+            res.status(200).json({
+                message: "success",
+                data: data
+            });
+        } catch (error) {
+            logger.error("Error in getMemberMeasurementsController", { error: error instanceof Error ? error.message : error });
+            next(error);
+        }
+    }
+
+    // GET MEMBER'S SESSION  DATAS PAGINATED CONTROLLER 
+    async getMemberSessionsController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const gymId = req.user!.id;
+            const memberPublicId: string = String(req.params.memberId);
+            const page = Number(req.query.page) || 1;
+            const limit = Number(req.query.limit) || 10;
+
+            logger.info(`Gym ID ${gymId} fetching sessions for member publicId: ${memberPublicId} (Page: ${page}, Limit: ${limit})`);
+
+            if (!memberPublicId || memberPublicId === "undefined") {
+                res.status(400).json({ message: "Invalid member id" });
+                return;
+            }
+
+            const data = await gymService.getMemberSessions(gymId, memberPublicId, page, limit);
+
+            res.status(200).json({
+                message: "success",
+                data: data
+            });
+        } catch (error) {
+            logger.error("Error in getMemberSessionsController", { error: error instanceof Error ? error.message : error });
+            next(error);
+        }
+    }
+
+    // GET MEMBER'S PROGRAMS  DATAS PAGINATED CONTROLLER 
+    async getMemberProgramsController(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const gymId = req.user!.id;
+            const memberPublicId: string = String(req.params.memberId);
+            const page = Number(req.query.page) || 1;
+            const limit = Number(req.query.limit) || 10;
+
+            logger.info(`Gym ID ${gymId} fetching programs for member publicId: ${memberPublicId} (Page: ${page}, Limit: ${limit})`);
+
+            if (!memberPublicId || memberPublicId === "undefined") {
+                res.status(400).json({ message: "Invalid member id" });
+                return;
+            }
+
+            const data = await gymService.getMemberPrograms(gymId, memberPublicId, page, limit);
+
+            res.status(200).json({
+                message: "success",
+                data: data
+            });
+        } catch (error) {
+            logger.error("Error in getMemberProgramsController", { error: error instanceof Error ? error.message : error });
+            next(error);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // ----------------------------------------------------------------------------------------------------------------
+
     // GET ALL TRAINER FROM GYM CONTROLLER
     async getAllTrainersController(req: AuthRequest, res: Response, next: NextFunction) {
         try {

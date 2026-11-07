@@ -54,7 +54,6 @@ export const memberListRepo = {
         });
     }
 };
-
 export const memberDetailRepo = {
     async findByPublicId(gymId: number, memberPublicId: string) {
         return await prisma.member.findFirst({
@@ -62,6 +61,7 @@ export const memberDetailRepo = {
         });
     },
 
+    // GET MEMBER'S DETAILED PROFILE DATAS 
     async findWithRelations(gymId: number, memberPublicId: string) {
         return await prisma.member.findFirst({
             where: { publicId: memberPublicId, gymId },
@@ -83,39 +83,93 @@ export const memberDetailRepo = {
                 updatedAt: true,
                 trainer: { select: { publicId: true, name: true, surname: true } },
                 gym: { select: { publicId: true, name: true } },
-
-                measurements: {
-                    orderBy: {
-                        measuredAt: "desc"
-                    },
-                    take: 20,
-                    select: {
-                        bodyFatRate: true,
-                        muscleMass: true,
-                        chest: true,
-                        waist: true,
-                        arm: true,
-                        hip: true,
-                        shoulder: true,
-                        photos: true,
-                        notes: true,
-                        measuredAt: true,
-                        createdAt: true,
-                    }
-                },
-
-                sessions: {
-                    orderBy: { checkIn: "desc" },
-                    take: 20,
-                    select: { checkIn: true, checkOut: true, duration: true }
-                },
-                programs: {
-                    orderBy: { createdAt: "desc" },
-                    take: 10,
-                    select: { type: true, title: true, splitType: true, isActive: true, createdAt: true }
-                }
             }
         });
+    },
+
+    // GET MEASUREMENT PAGINATED FOR MEMBER 
+    async findMeasurementsPaginated(memberId: number, page: number = 1, limit: number = 10) {
+        const skip = (page - 1) * limit;
+        const [data, total] = await Promise.all([
+            prisma.memberMeasurement.findMany({
+                where: { memberId },
+                orderBy: { measuredAt: "desc" },
+                skip,
+                take: limit,
+                select: {
+                    publicId: true,
+                    bodyFatRate: true,
+                    muscleMass: true,
+                    chest: true,
+                    waist: true,
+                    arm: true,
+                    hip: true,
+                    shoulder: true,
+                    photos: true,
+                    notes: true,
+                    measuredAt: true,
+                    createdAt: true,
+                }
+            }),
+            prisma.memberMeasurement.count({ where: { memberId } })
+        ]);
+        return {
+            data,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        };
+    },
+
+    // GET SESSIONS PAGINATED FOR MEMBER 
+    async findSessionsPaginated(memberId: number, page: number = 1, limit: number = 10) {
+        const skip = (page - 1) * limit;
+        const [data, total] = await Promise.all([
+            prisma.session.findMany({
+                where: { memberId },
+                orderBy: { checkIn: "desc" },
+                skip,
+                take: limit,
+                select: { checkIn: true, checkOut: true, duration: true }
+            }),
+            prisma.session.count({ where: { memberId } })
+        ]);
+        return {
+            data,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        };
+    },
+
+    // GET PROGRAMS PAGINATED FOR MEMBER 
+    async findProgramsPaginated(memberId: number, page: number = 1, limit: number = 10) {
+        const skip = (page - 1) * limit;
+        const [data, total] = await Promise.all([
+            prisma.program.findMany({
+                where: { memberId },
+                orderBy: { createdAt: "desc" },
+                skip,
+                take: limit,
+                select: { publicId: true, type: true, title: true, splitType: true, isActive: true, createdAt: true }
+            }),
+            prisma.program.count({ where: { memberId } })
+        ]);
+        return {
+            data,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        };
     },
 
     async deleteWithRelations(memberId: number) {

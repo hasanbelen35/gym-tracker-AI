@@ -19,13 +19,7 @@ export const MemberProgramsCard: React.FC<MemberProgramsCardProps> = ({
                     <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-brand-500/10 text-brand-500 border border-brand-500/20">
                         {programs.length}
                     </span>
-                    <button
-                        onClick={onCreateClick}
-                        className="px-2.5 py-1 rounded-lg bg-brand-500 text-white text-xs font-semibold hover:opacity-90 transition-all shadow-sm flex items-center gap-1 cursor-pointer"
-                        title="Yeni Program Ekle"
-                    >
-                        <span>+ Yeni</span>
-                    </button>
+                   
                 </div>
             </div>
 

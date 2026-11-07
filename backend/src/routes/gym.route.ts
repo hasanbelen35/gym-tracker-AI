@@ -22,7 +22,28 @@ router.delete("/deleteMemberFromGym/:memberId", authenticate, authorizeGym, vali
 router.delete("/deleteTrainerFromGym/:trainerId", authenticate, authorizeGym, validate(trainerParamSchema), (req, res, next) => gym.removeTrainerFromGymController(req, res, next));
 
 // DETAILED PAGES ROUTES
-router.get("/getMemberDetail/:memberId", authenticate, authorizeGym, validate(memberParamSchema), (req, res, next) => gym.getMemberDetailController(req, res, next));
+// GET MEMBER PROFILE DATA ROUTE
+router.get("/members/:memberId/profile", authenticate, authorizeGym, validate(memberParamSchema), (req, res, next) => 
+    gym.getMemberProfileController(req, res, next)
+);
+
+// GET MEMBER MEASUREMENT PAGINATED DATA ROUTE
+router.get("/members/:memberId/measurements", authenticate, authorizeGym, validate(memberParamSchema), (req, res, next) => 
+    gym.getMemberMeasurementsController(req, res, next)
+);
+
+// GET MEMBER SESSIONS PAGINATED DATA ROUTE
+router.get("/members/:memberId/sessions", authenticate, authorizeGym, validate(memberParamSchema), (req, res, next) => 
+    gym.getMemberSessionsController(req, res, next)
+);
+
+// GET MEMBER PROGRAMS PAGINATED DATA ROUTE
+router.get("/members/:memberId/programs", authenticate, authorizeGym, validate(memberParamSchema), (req, res, next) => 
+    gym.getMemberProgramsController(req, res, next)
+);
+
+
+
 router.get("/getTrainerDetail/:trainerId", authenticate, authorizeGym, validate(trainerParamSchema), (req, res, next) => gym.getTrainerDetailController(req, res, next));
 
 // TRAINER PROCESSES
@@ -34,3 +55,4 @@ router.get("/getMembers", authenticate, authorizeGym, validate(getMembersByStatu
 router.get("/risk-analytics", authenticate, authorizeGym, (req, res, next) => gym.getRiskAnalytics(req, res, next));
 
 export default router;
+
