@@ -37,9 +37,26 @@ const initialState: GymState = {
     trainersLoading: false,
     trainersError: null,
 
+    // --- YENİ ÜYE DETAY & SAYFALAMA STATE YAPISI ---
     memberDetail: null,
     memberDetailLoading: false,
     memberDetailError: null,
+
+    memberMeasurements: [],
+    memberMeasurementsPagination: null,
+    memberMeasurementsLoading: false,
+    memberMeasurementsError: null,
+
+    memberSessions: [],
+    memberSessionsPagination: null,
+    memberSessionsLoading: false,
+    memberSessionsError: null,
+
+    memberPrograms: [],
+    memberProgramsPagination: null,
+    memberProgramsLoading: false,
+    memberProgramsError: null,
+    // ---------------------------------------------
 
     trainerDetail: null,
     trainerDetailLoading: false,
@@ -148,20 +165,91 @@ export const removeTrainerFromGym = createAsyncThunk(
     }
 );
 
-// GET MEMBER DETAIL
-export const fetchMemberDetail = createAsyncThunk(
-    "gym/fetchMemberDetail",
+// 1. GET MEMBER PROFILE DETAIL
+export const fetchMemberProfile = createAsyncThunk(
+    "gym/fetchMemberProfile",
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
             const response = await API.get(
-                `/gym/getMemberDetail/${memberPublicId}`
+                `/gym/members/${memberPublicId}/profile`
             );
-            console.log(response.data.data  )
             return response.data.data;
         } catch (error) {
             const err = error as AxiosError<ApiErrorResponse>;
             return rejectWithValue(
-                err.response?.data?.message || "Üye detayı alınamadı."
+                err.response?.data?.message || "Üye profili alınamadı."
+            );
+        }
+    }
+);
+
+// 2. GET MEMBER MEASUREMENTS (PAGINATED)
+export const fetchMemberMeasurements = createAsyncThunk(
+    "gym/fetchMemberMeasurements",
+    async (
+        { memberPublicId, page = 1, limit = 10 }: { memberPublicId: string; page?: number; limit?: number },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await API.get(
+                `/gym/members/${memberPublicId}/measurements?page=${page}&limit=${limit}`
+            );
+            return {
+                data: response.data.data.data,
+                pagination: response.data.data.pagination,
+            };
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(
+                err.response?.data?.message || "Üye ölçümleri alınamadı."
+            );
+        }
+    }
+);
+
+// 3. GET MEMBER SESSIONS (PAGINATED)
+export const fetchMemberSessions = createAsyncThunk(
+    "gym/fetchMemberSessions",
+    async (
+        { memberPublicId, page = 1, limit = 10 }: { memberPublicId: string; page?: number; limit?: number },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await API.get(
+                `/gym/members/${memberPublicId}/sessions?page=${page}&limit=${limit}`
+            );
+            return {
+                data: response.data.data.data,
+                pagination: response.data.data.pagination,
+            };
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(
+                err.response?.data?.message || "Üye seansları alınamadı."
+            );
+        }
+    }
+);
+
+// 4. GET MEMBER PROGRAMS (PAGINATED)
+export const fetchMemberPrograms = createAsyncThunk(
+    "gym/fetchMemberPrograms",
+    async (
+        { memberPublicId, page = 1, limit = 10 }: { memberPublicId: string; page?: number; limit?: number },
+        { rejectWithValue }
+    ) => {
+        try {
+            const response = await API.get(
+                `/gym/members/${memberPublicId}/programs?page=${page}&limit=${limit}`
+            );
+            return {
+                data: response.data.data.data,
+                pagination: response.data.data.pagination,
+            };
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+            return rejectWithValue(
+                err.response?.data?.message || "Üye programları alınamadı."
             );
         }
     }
@@ -264,7 +352,13 @@ const gymSlice = createSlice({
         },
         clearMemberDetail: (state) => {
             state.memberDetail = null;
+            state.memberMeasurements = [];
+            state.memberSessions = [];
+            state.memberPrograms = [];
             state.memberDetailError = null;
+            state.memberMeasurementsError = null;
+            state.memberSessionsError = null;
+            state.memberProgramsError = null;
         },
         clearTrainerDetail: (state) => {
             state.trainerDetail = null;
@@ -374,20 +468,93 @@ const gymSlice = createSlice({
                 "Antrenör silinemedi.";
         })
 
-        .addCase(fetchMemberDetail.pending, (state) => {
+        // 1. MEMBER PROFILE REDUCERS
+        .addCase(fetchMemberProfile.pending, (state) => {
             state.memberDetailLoading = true;
             state.memberDetailError = null;
         })
-        .addCase(fetchMemberDetail.fulfilled, (state, action) => {
+        .addCase(fetchMemberProfile.fulfilled, (state, action) => {
             state.memberDetailLoading = false;
             state.memberDetail = action.payload;
         })
-        .addCase(fetchMemberDetail.rejected, (state, action) => {
+        .addCase(fetchMemberProfile.rejected, (state, action) => {
             state.memberDetailLoading = false;
             state.memberDetailError =
                 (action.payload as string | undefined) ??
                 action.error.message ??
-                "Üye detayı alınamadı.";
+                "Üye profili alınamadı.";
+        })
+
+        // 2. MEMBER MEASUREMENTS REDUCERS (PAGINATED)
+        .addCase(fetchMemberMeasurements.pending, (state) => {
+            state.memberMeasurementsLoading = true;
+            state.memberMeasurementsError = null;
+        })
+        .addCase(fetchMemberMeasurements.fulfilled, (state, action) => {
+            state.memberMeasurementsLoading = false;
+            const { data, pagination } = action.payload;
+
+            state.memberMeasurements =
+                pagination.page > 1
+                    ? [...state.memberMeasurements, ...data]
+                    : data;
+
+            state.memberMeasurementsPagination = pagination;
+        })
+        .addCase(fetchMemberMeasurements.rejected, (state, action) => {
+            state.memberMeasurementsLoading = false;
+            state.memberMeasurementsError =
+                (action.payload as string | undefined) ??
+                action.error.message ??
+                "Üye ölçümleri alınamadı.";
+        })
+
+        // 3. MEMBER SESSIONS REDUCERS (PAGINATED)
+        .addCase(fetchMemberSessions.pending, (state) => {
+            state.memberSessionsLoading = true;
+            state.memberSessionsError = null;
+        })
+        .addCase(fetchMemberSessions.fulfilled, (state, action) => {
+            state.memberSessionsLoading = false;
+            const { data, pagination } = action.payload;
+
+            state.memberSessions =
+                pagination.page > 1
+                    ? [...state.memberSessions, ...data]
+                    : data;
+
+            state.memberSessionsPagination = pagination;
+        })
+        .addCase(fetchMemberSessions.rejected, (state, action) => {
+            state.memberSessionsLoading = false;
+            state.memberSessionsError =
+                (action.payload as string | undefined) ??
+                action.error.message ??
+                "Üye seansları alınamadı.";
+        })
+
+        // 4. MEMBER PROGRAMS REDUCERS (PAGINATED)
+        .addCase(fetchMemberPrograms.pending, (state) => {
+            state.memberProgramsLoading = true;
+            state.memberProgramsError = null;
+        })
+        .addCase(fetchMemberPrograms.fulfilled, (state, action) => {
+            state.memberProgramsLoading = false;
+            const { data, pagination } = action.payload;
+
+            state.memberPrograms =
+                pagination.page > 1
+                    ? [...state.memberPrograms, ...data]
+                    : data;
+
+            state.memberProgramsPagination = pagination;
+        })
+        .addCase(fetchMemberPrograms.rejected, (state, action) => {
+            state.memberProgramsLoading = false;
+            state.memberProgramsError =
+                (action.payload as string | undefined) ??
+                action.error.message ??
+                "Üye programları alınamadı.";
         })
 
         .addCase(fetchTrainerDetail.pending, (state) => {

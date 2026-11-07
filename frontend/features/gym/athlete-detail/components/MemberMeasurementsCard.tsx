@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { PaginationInfo } from "@/store/slices/gymSlice";
 
 interface MeasurementItem {
     bodyFatRate?: number | null;
@@ -19,19 +20,41 @@ interface MeasurementItem {
 
 interface MemberMeasurementsCardProps {
     measurements?: MeasurementItem[];
+    pagination?: PaginationInfo | null;
+    loading?: boolean;
     onAddNewClick?: () => void;
+    onPageChange?: (page: number) => void;
 }
 
 export const MemberMeasurementsCard: React.FC<MemberMeasurementsCardProps> = ({
     measurements = [],
+    pagination,
+    loading = false,
     onAddNewClick,
+    onPageChange,
 }) => {
     const [selectedIndex, setSelectedIndex] = useState<number>(0);
+    const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
     const activeMeasurement = measurements[selectedIndex] || measurements[0];
+    const hasMore = !!pagination && pagination.page < pagination.totalPages;
+
+    useEffect(() => {
+        const el = loadMoreRef.current;
+        if (!el || !hasMore || loading || !onPageChange || !pagination) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                onPageChange(pagination.page + 1);
+            }
+        });
+
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, [hasMore, loading, pagination, onPageChange]);
 
     return (
-        <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-nav flex flex-col">
+        <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-nav flex flex-col relative">
             {/* HEADER */}
             <div className="flex items-center justify-between mb-6 pb-3 border-b border-nav-border">
                 <h2 className="text-base font-semibold text-white flex items-center gap-2">
@@ -52,143 +75,155 @@ export const MemberMeasurementsCard: React.FC<MemberMeasurementsCardProps> = ({
                 )}
             </div>
 
-            {measurements.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                    <div className="md:col-span-4 flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
-                        <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Ölçüm Tarihleri</p>
-                        {measurements.map((item, index) => {
-                            const isSelected = selectedIndex === index;
-                            const dateStr = item.measuredAt || item.createdAt;
-                            return (
-                                <button
-                                    key={index}
-                                    onClick={() => setSelectedIndex(index)}
-                                    className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
-                                        isSelected
-                                            ? "bg-brand-500/10 border-brand-500 text-white shadow-sm"
-                                            : "bg-background border-nav-border text-gray-400 hover:text-white hover:border-gray-600"
-                                    }`}
-                                >
+            {loading && measurements.length === 0 ? (
+                <div className="flex items-center justify-center py-12 text-gray-400 text-xs animate-pulse">
+                    Ölçümler yükleniyor...
+                </div>
+            ) : measurements.length > 0 ? (
+                <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        {/* Sol Liste (Tarihler) */}
+                        <div className="md:col-span-4 flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
+                            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Ölçüm Tarihleri</p>
+                            {measurements.map((item, index) => {
+                                const isSelected = selectedIndex === index;
+                                const dateStr = item.measuredAt || item.createdAt;
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={() => setSelectedIndex(index)}
+                                        className={`w-full text-left p-3.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
+                                            isSelected
+                                                ? "bg-brand-500/10 border-brand-500 text-white shadow-sm"
+                                                : "bg-background border-nav-border text-gray-400 hover:text-white hover:border-gray-600"
+                                        }`}
+                                    >
+                                        <div>
+                                            <p className="text-xs font-semibold">
+                                                {dateStr
+                                                    ? new Date(dateStr).toLocaleDateString('tr-TR', {
+                                                          day: '2-digit',
+                                                          month: 'long',
+                                                          year: 'numeric',
+                                                      })
+                                                    : `Ölçüm #${index + 1}`}
+                                            </p>
+                                            <span className="text-[10px] opacity-60">
+                                                {dateStr ? new Date(dateStr).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                            </span>
+                                        </div>
+                                        <div className={`w-2 h-2 rounded-full ${isSelected ? "bg-brand-500 animate-pulse" : "bg-transparent"}`} />
+                                    </button>
+                                );
+                            })}
+
+                            {hasMore && <div ref={loadMoreRef} className="h-4 flex-none" />}
+
+                        
+                        </div>
+
+                        {/* Sağ Detay Alanı */}
+                        <div className="md:col-span-8 bg-background border border-nav-border rounded-2xl p-5 flex flex-col justify-between space-y-6">
+                            {activeMeasurement ? (
+                                <>
                                     <div>
-                                        <p className="text-xs font-semibold">
-                                            {dateStr
-                                                ? new Date(dateStr).toLocaleDateString('tr-TR', {
-                                                      day: '2-digit',
-                                                      month: 'long',
-                                                      year: 'numeric',
-                                                  })
-                                                : `Ölçüm #${measurements.length - index}`}
-                                        </p>
-                                        <span className="text-[10px] opacity-60">
-                                            {dateStr ? new Date(dateStr).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }) : ''}
-                                        </span>
-                                    </div>
-                                    <div className={`w-2 h-2 rounded-full ${isSelected ? "bg-brand-500 animate-pulse" : "bg-transparent"}`} />
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <div className="md:col-span-8 bg-background border border-nav-border rounded-2xl p-5 flex flex-col justify-between space-y-6">
-                        {activeMeasurement ? (
-                            <>
-                                <div>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <h3 className="text-sm font-bold text-white tracking-wide uppercase">Ölçüm Değerleri</h3>
-                                        <span className="text-xs text-gray-400">
-                                            {activeMeasurement.measuredAt
-                                                ? new Date(activeMeasurement.measuredAt).toLocaleDateString('tr-TR')
-                                                : ''}
-                                        </span>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                        <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
-                                            <p className="text-[11px] text-gray-400 font-medium">Yağ Oranı</p>
-                                            <p className="text-base font-bold text-white mt-0.5">
-                                                {activeMeasurement.bodyFatRate !== null && activeMeasurement.bodyFatRate !== undefined ? `%${activeMeasurement.bodyFatRate}` : "-"}
-                                            </p>
+                                        <div className="flex items-center justify-between mb-4">
+                                            <h3 className="text-sm font-bold text-white tracking-wide uppercase">Ölçüm Değerleri</h3>
+                                            <span className="text-xs text-gray-400">
+                                                {activeMeasurement.measuredAt
+                                                    ? new Date(activeMeasurement.measuredAt).toLocaleDateString('tr-TR')
+                                                    : ''}
+                                            </span>
                                         </div>
 
-                                        <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
-                                            <p className="text-[11px] text-gray-400 font-medium">Kas Kütlesi</p>
-                                            <p className="text-base font-bold text-white mt-0.5">
-                                                {activeMeasurement.muscleMass !== null && activeMeasurement.muscleMass !== undefined ? `${activeMeasurement.muscleMass} kg` : "-"}
-                                            </p>
-                                        </div>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                            <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
+                                                <p className="text-[11px] text-gray-400 font-medium">Yağ Oranı</p>
+                                                <p className="text-base font-bold text-white mt-0.5">
+                                                    {activeMeasurement.bodyFatRate !== null && activeMeasurement.bodyFatRate !== undefined ? `%${activeMeasurement.bodyFatRate}` : "-"}
+                                                </p>
+                                            </div>
 
-                                        <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
-                                            <p className="text-[11px] text-gray-400 font-medium">Göğüs</p>
-                                            <p className="text-base font-bold text-white mt-0.5">
-                                                {activeMeasurement.chest !== null && activeMeasurement.chest !== undefined ? `${activeMeasurement.chest} cm` : "-"}
-                                            </p>
-                                        </div>
+                                            <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
+                                                <p className="text-[11px] text-gray-400 font-medium">Kas Kütlesi</p>
+                                                <p className="text-base font-bold text-white mt-0.5">
+                                                    {activeMeasurement.muscleMass !== null && activeMeasurement.muscleMass !== undefined ? `${activeMeasurement.muscleMass} kg` : "-"}
+                                                </p>
+                                            </div>
 
-                                        <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
-                                            <p className="text-[11px] text-gray-400 font-medium">Bel</p>
-                                            <p className="text-base font-bold text-white mt-0.5">
-                                                {activeMeasurement.waist !== null && activeMeasurement.waist !== undefined ? `${activeMeasurement.waist} cm` : "-"}
-                                            </p>
-                                        </div>
+                                            <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
+                                                <p className="text-[11px] text-gray-400 font-medium">Göğüs</p>
+                                                <p className="text-base font-bold text-white mt-0.5">
+                                                    {activeMeasurement.chest !== null && activeMeasurement.chest !== undefined ? `${activeMeasurement.chest} cm` : "-"}
+                                                </p>
+                                            </div>
 
-                                        <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
-                                            <p className="text-[11px] text-gray-400 font-medium">Kol</p>
-                                            <p className="text-base font-bold text-white mt-0.5">
-                                                {activeMeasurement.arm !== null && activeMeasurement.arm !== undefined ? `${activeMeasurement.arm} cm` : "-"}
-                                            </p>
-                                        </div>
+                                            <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
+                                                <p className="text-[11px] text-gray-400 font-medium">Bel</p>
+                                                <p className="text-base font-bold text-white mt-0.5">
+                                                    {activeMeasurement.waist !== null && activeMeasurement.waist !== undefined ? `${activeMeasurement.waist} cm` : "-"}
+                                                </p>
+                                            </div>
 
-                                        <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
-                                            <p className="text-[11px] text-gray-400 font-medium">Kalça</p>
-                                            <p className="text-base font-bold text-white mt-0.5">
-                                                {activeMeasurement.hip !== null && activeMeasurement.hip !== undefined ? `${activeMeasurement.hip} cm` : "-"}
-                                            </p>
-                                        </div>
+                                            <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
+                                                <p className="text-[11px] text-gray-400 font-medium">Kol</p>
+                                                <p className="text-base font-bold text-white mt-0.5">
+                                                    {activeMeasurement.arm !== null && activeMeasurement.arm !== undefined ? `${activeMeasurement.arm} cm` : "-"}
+                                                </p>
+                                            </div>
 
-                                        <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
-                                            <p className="text-[11px] text-gray-400 font-medium">Omuz</p>
-                                            <p className="text-base font-bold text-white mt-0.5">
-                                                {activeMeasurement.shoulder !== null && activeMeasurement.shoulder !== undefined ? `${activeMeasurement.shoulder} cm` : "-"}
-                                            </p>
+                                            <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
+                                                <p className="text-[11px] text-gray-400 font-medium">Kalça</p>
+                                                <p className="text-base font-bold text-white mt-0.5">
+                                                    {activeMeasurement.hip !== null && activeMeasurement.hip !== undefined ? `${activeMeasurement.hip} cm` : "-"}
+                                                </p>
+                                            </div>
+
+                                            <div className="bg-nav-bg p-3 rounded-xl border border-nav-border">
+                                                <p className="text-[11px] text-gray-400 font-medium">Omuz</p>
+                                                <p className="text-base font-bold text-white mt-0.5">
+                                                    {activeMeasurement.shoulder !== null && activeMeasurement.shoulder !== undefined ? `${activeMeasurement.shoulder} cm` : "-"}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div className="space-y-4 pt-4 border-t border-nav-border">
-                                    {activeMeasurement.notes && (
-                                        <div>
-                                            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Eğitmen Notu</p>
-                                            <p className="text-xs text-gray-300 bg-nav-bg p-3 rounded-xl border border-nav-border leading-relaxed">
-                                                {activeMeasurement.notes}
-                                            </p>
-                                        </div>
-                                    )}
+                                    <div className="space-y-4 pt-4 border-t border-nav-border">
+                                        {activeMeasurement.notes && (
+                                            <div>
+                                                <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Eğitmen Notu</p>
+                                                <p className="text-xs text-gray-300 bg-nav-bg p-3 rounded-xl border border-nav-border leading-relaxed">
+                                                    {activeMeasurement.notes}
+                                                </p>
+                                            </div>
+                                        )}
 
-                                    {activeMeasurement.photos && (
-                                        <div>
-                                            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Ölçüm Fotoğrafları</p>
-                                            <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                                                {Array.isArray(activeMeasurement.photos) ? (
-                                                    activeMeasurement.photos.map((photoUrl: string, pIdx: number) => (
-                                                        <div key={pIdx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-nav-border flex-none bg-nav-bg">
-                                                            <Image src={photoUrl} alt="Ölçüm Fotoğrafı" fill className="object-cover" />
-                                                        </div>
-                                                    ))
-                                                ) : typeof activeMeasurement.photos === 'object' && activeMeasurement.photos !== null ? (
-                                                    Object.values(activeMeasurement.photos).map((photoUrl: unknown, pIdx: number) => (
-                                                        typeof photoUrl === 'string' && (
+                                        {activeMeasurement.photos && (
+                                            <div>
+                                                <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">Ölçüm Fotoğrafları</p>
+                                                <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                                                    {Array.isArray(activeMeasurement.photos) ? (
+                                                        activeMeasurement.photos.map((photoUrl: string, pIdx: number) => (
                                                             <div key={pIdx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-nav-border flex-none bg-nav-bg">
                                                                 <Image src={photoUrl} alt="Ölçüm Fotoğrafı" fill className="object-cover" />
                                                             </div>
-                                                        )
-                                                    ))
-                                                ) : null}
+                                                        ))
+                                                    ) : typeof activeMeasurement.photos === 'object' && activeMeasurement.photos !== null ? (
+                                                        Object.values(activeMeasurement.photos).map((photoUrl: unknown, pIdx: number) => (
+                                                            typeof photoUrl === 'string' && (
+                                                                <div key={pIdx} className="relative w-20 h-20 rounded-xl overflow-hidden border border-nav-border flex-none bg-nav-bg">
+                                                                    <Image src={photoUrl} alt="Ölçüm Fotoğrafı" fill className="object-cover" />
+                                                                </div>
+                                                            )
+                                                        ))
+                                                    ) : null}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </>
-                        ) : null}
+                                        )}
+                                    </div>
+                                </>
+                            ) : null}
+                        </div>
                     </div>
                 </div>
             ) : (

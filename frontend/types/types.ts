@@ -206,14 +206,13 @@ export interface PaginationInfo {
     limit: number;
     totalPages: number;
 }
-
 export interface GymState {
   profile: Gym | null;
   loading: boolean;
   error: string | null;
 
   members: Member[];
-  pagination: PaginationInfo | null; // <-- Buraya eklendi
+  pagination: PaginationInfo | null;
   membersLoading: boolean;
   membersError: string | null;
 
@@ -224,6 +223,22 @@ export interface GymState {
   memberDetail: Member | null;
   memberDetailLoading: boolean;
   memberDetailError: string | null;
+
+  memberMeasurements: MemberMeasurement[];
+  memberMeasurementsPagination: PaginationInfo | null;
+  memberMeasurementsLoading: boolean;
+  memberMeasurementsError: string | null;
+
+  memberSessions: Session[];
+  memberSessionsPagination: PaginationInfo | null;
+  memberSessionsLoading: boolean;
+  memberSessionsError: string | null;
+
+  memberPrograms: Program[];
+  memberProgramsPagination: PaginationInfo | null;
+  memberProgramsLoading: boolean;
+  memberProgramsError: string | null;
+  // ---------------------------------------------------
 
   trainerDetail: TrainerInfo | null;
   trainerDetailLoading: boolean;

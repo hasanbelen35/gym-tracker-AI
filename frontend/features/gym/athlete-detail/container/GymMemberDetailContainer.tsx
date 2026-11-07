@@ -2,7 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { fetchMemberDetail } from "@/store/slices/gymSlice"; 
+import { 
+    fetchMemberProfile, 
+    fetchMemberMeasurements, 
+    fetchMemberSessions, 
+    fetchMemberPrograms 
+} from "@/store/slices/gymSlice"; 
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeftIcon } from '@/icons/icon';
 
@@ -23,13 +28,18 @@ export default function GymMemberDetailContainer() {
     const params = useParams();
     const memberPublicId = params?.memberId as string || params?.memberPublicId as string;
     
-    const { memberDetail, memberDetailLoading, memberDetailError } = useAppSelector((state) => state.gym);
+    const { 
+        memberDetail, memberDetailLoading, memberDetailError,
+        memberMeasurements, memberMeasurementsPagination, memberMeasurementsLoading, memberMeasurementsError,
+        memberSessions, memberSessionsPagination, memberSessionsLoading, memberSessionsError,
+        memberPrograms, memberProgramsPagination, memberProgramsLoading, memberProgramsError
+    } = useAppSelector((state) => state.gym);
 
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
     useEffect(() => {
         if (memberPublicId) {
-            dispatch(fetchMemberDetail(memberPublicId))
+            dispatch(fetchMemberProfile(memberPublicId))
                 .unwrap()
                 .then(() => {
                     setSuccessMessage("Sporcu bilgileri başarıyla yüklendi.");
@@ -37,8 +47,26 @@ export default function GymMemberDetailContainer() {
                 .catch(() => {
                     setSuccessMessage(null);
                 });
+
+            dispatch(fetchMemberMeasurements({ memberPublicId, page: 1, limit: 10 }));
+            dispatch(fetchMemberSessions({ memberPublicId, page: 1, limit: 10 }));
+            dispatch(fetchMemberPrograms({ memberPublicId, page: 1, limit: 10 }));
         }
     }, [dispatch, memberPublicId]);
+
+    const handleMeasurementPageChange = (newPage: number) => {
+        dispatch(fetchMemberMeasurements({ memberPublicId, page: newPage, limit: 10 }));
+    };
+
+    const handleSessionPageChange = (newPage: number) => {
+        dispatch(fetchMemberSessions({ memberPublicId, page: newPage, limit: 10 }));
+    };
+
+    const handleProgramPageChange = (newPage: number) => {
+        dispatch(fetchMemberPrograms({ memberPublicId, page: newPage, limit: 10 }));
+    };
+
+    const overallError = memberDetailError || memberMeasurementsError || memberSessionsError || memberProgramsError;
 
     if (memberDetailError && !memberDetail) {
         return (
@@ -83,7 +111,7 @@ export default function GymMemberDetailContainer() {
         <div className="min-h-screen w-full bg-background text-foreground p-6 sm:p-10 transition-colors duration-200">
             <div className="max-w-5xl mx-auto space-y-6 animate-fadeIn">
 
-                <ErrorBox message={memberDetailError} />
+                <ErrorBox message={overallError} />
                 <SuccessBox message={successMessage} />
 
                 <div className="flex items-center justify-between">
@@ -101,25 +129,34 @@ export default function GymMemberDetailContainer() {
 
                 <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 sm:p-8 shadow-nav backdrop-blur-md space-y-6">
                     <MemberHeader member={memberDetail} getStatusBadge={getStatusBadge} />
-
                     <MemberStatsGrid member={memberDetail} getGenderLabel={getGenderLabel} />
-
                     <MemberMedicalNotes medicalNotes={memberDetail.medicalNotes} />
                 </div>
 
                 <MemberMeasurementsCard 
-                    measurements={memberDetail.measurements} 
+                    measurements={memberMeasurements} 
+                    pagination={memberMeasurementsPagination}
+                    loading={memberMeasurementsLoading}
+                    onPageChange={handleMeasurementPageChange}
                 />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <MemberProgramsCard
-                        programs={memberDetail.programs}
+                        programs={memberPrograms}
+                        pagination={memberProgramsPagination}
+                        loading={memberProgramsLoading}
+                        onPageChange={handleProgramPageChange}
                         memberPublicId={memberPublicId}
                         onProgramClick={(publicId) => router.push(`/gym/athletes/programDetail/${publicId}`)}
                         onCreateClick={() => router.push(`/gym/create-new-workout-program/${memberPublicId}`)}
                     />
 
-                    <MemberSessionsCard sessions={memberDetail.sessions} />
+                    <MemberSessionsCard 
+                        sessions={memberSessions} 
+                        pagination={memberSessionsPagination}
+                        loading={memberSessionsLoading}
+                        onPageChange={handleSessionPageChange}
+                    />
                 </div>
 
             </div>
