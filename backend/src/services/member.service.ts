@@ -1,35 +1,21 @@
-import prisma from "../lib/db";
+// ==========================================
+// MEMBER SERVICE
+// ==========================================
+
+import { memberRepository } from "../repository/member.repository";
 import { CompleteProfileInput } from '../types/types';
 import { logger } from "../config/logger";
 import { UpdateMemberProfileData } from '../types/member.types';
-import { CompleteWorkoutInput } from "../validations/workout.validations";
 import { AppError } from "../middleware/errorMiddleware";
 import { Prisma } from "@prisma/client";
 
 export class MemberService {
-    // GET MEMBER'S TRAINER DATA BY MEMBER ID CONTROLLER
-
     async getAssignedTrainerForMember(memberId: number) {
         AppError.assertMemberId(memberId);
 
         logger.info(`Fetching assigned trainer for member ID: ${memberId}`);
 
-        const member = await prisma.member.findUnique({
-            where: { id: memberId },
-            select: {
-                assignmentStatus: true,
-                trainer: {
-                    select: {
-                        id: true,
-                        publicId: true,
-                        name: true,
-                        surname: true,
-                        email: true,
-                        avatarUrl: true
-                    }
-                }
-            }
-        });
+        const member = await memberRepository.findByIdWithTrainer(memberId);
 
         if (!member) {
             logger.warn(`Assigned trainer fetch failed: Member not found with ID: ${memberId}`);
@@ -43,106 +29,53 @@ export class MemberService {
         };
     }
 
-    // UPDATE PROFILE MEMBER 
     async updateMemberProfile(memberId: number, data: CompleteProfileInput) {
         AppError.assertMemberId(memberId);
 
         logger.info(`Attempting to update profile for member ID: ${memberId}`);
 
-        const existingMember = await prisma.member.findUnique({
-            where: { id: memberId },
-        });
+        const existingMember = await memberRepository.findById(memberId);
 
         if (!existingMember) {
             logger.warn(`Profile update failed: Member not found with ID: ${memberId}`);
             throw new AppError(404, "Üye bulunamadı.");
         }
 
-        const updatedData: Prisma.MemberUpdateInput = {
+        const memberUpdateData: Prisma.MemberUpdateInput = {
             ...(data.age !== undefined && { age: data.age }),
             ...(data.height !== undefined && { height: data.height }),
             ...(data.weight !== undefined && { weight: data.weight }),
             ...(data.gender !== undefined && { gender: data.gender }),
             ...(data.medicalNotes !== undefined && { medicalNotes: data.medicalNotes }),
             ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
-            isProfileCompleted: true,
         };
 
-        const updatedMember = await prisma.member.update({
-            where: { id: memberId },
-            data: updatedData,
-            select: {
-                id: true,
-                publicId: true,
-                name: true,
-                surname: true,
-                email: true,
-                age: true,
-                height: true,
-                weight: true,
-                gender: true,
-                medicalNotes: true,
-                avatarUrl: true,
-                isProfileCompleted: true,
-                updatedAt: true
-            }
-        });
+        const profileUpdateData: Prisma.MemberProfileUpdateInput = {
+            ...(data.goal !== undefined && { goal: data.goal }),
+            ...(data.experienceLevel !== undefined && { experienceLevel: data.experienceLevel }),
+            ...(data.workoutDaysPerWeek !== undefined && { workoutDaysPerWeek: data.workoutDaysPerWeek }),
+            ...(data.sessionDuration !== undefined && { sessionDuration: data.sessionDuration }),
+            ...(data.equipmentAccess !== undefined && { equipmentAccess: data.equipmentAccess }),
+            ...(data.activityLevel !== undefined && { activityLevel: data.activityLevel }),
+            ...(data.additionalNotes !== undefined && { additionalNotes: data.additionalNotes }),
+        };
+
+        const updatedMember = await memberRepository.updateMemberWithProfileTransaction(
+            memberId, 
+            memberUpdateData, 
+            profileUpdateData
+        );
 
         logger.info(`Profile successfully updated for member ID: ${memberId}`);
         return updatedMember;
     }
 
-    // GET CURRENT MEMBER's DATA 
     async getCurrentMember(memberId: number) {
         AppError.assertMemberId(memberId);
 
         logger.info(`Fetching current profile data for member ID: ${memberId}`);
 
-        const member = await prisma.member.findUnique({
-            where: { id: memberId },
-            select: {
-                id: true,
-                publicId: true,
-                name: true,
-                surname: true,
-                email: true,
-                age: true,
-                height: true,
-                weight: true,
-                phone: true,
-                medicalNotes: true,
-                gender: true,
-                avatarUrl: true,
-                assignmentStatus: true,
-                isProfileCompleted: true,
-                gym: {
-                    select: {
-                        id: true,
-                        name: true,
-                    }
-                },
-                trainer: {
-                    select: {
-                        id: true,
-                        publicId: true,
-                        name: true,
-                        surname: true,
-                        email: true,
-                    }
-                },
-                sessions: {
-                    take: 5,
-                    orderBy: {
-                        checkIn: 'desc',
-                    },
-                    select: {
-                        id: true,
-                        checkIn: true,
-                        checkOut: true,
-                    },
-                }
-            }
-        });
+        const member = await memberRepository.findCurrentMemberWithRelations(memberId);
 
         if (!member) {
             logger.warn(`Current member fetch failed: Member not found with ID: ${memberId}`);
@@ -153,9 +86,7 @@ export class MemberService {
         
         return member;
     }
-    
-    
-    // get member programs paginated 
+
     async getMemberPrograms(
         memberId: number,
         options: { onlyActive?: boolean; page?: number; limit?: number } = {}
@@ -165,10 +96,7 @@ export class MemberService {
         const { onlyActive = false, page = 1, limit = 10 } = options;
         const skip = (page - 1) * limit;
 
-        const existingMember = await prisma.member.findUnique({
-            where: { id: memberId },
-            select: { id: true },
-        });
+        const existingMember = await memberRepository.findById(memberId);
 
         if (!existingMember) {
             throw new AppError(404, "Üye sistemde bulunamadı.");
@@ -180,62 +108,12 @@ export class MemberService {
         };
 
         const [programs, totalCount] = await Promise.all([
-            prisma.program.findMany({
-                where: whereCondition,
-                orderBy: { createdAt: 'desc' },
-                ...(!onlyActive && { skip, take: limit }),
-                select: {
-                    id: true,
-                    publicId: true,
-                    title: true,
-                    type: true,
-                    splitType: true,
-                    isActive: true,
-                    createdAt: true,
-                    archivedAt: true,
-                    days: {
-                        orderBy: { dayOrder: 'asc' },
-                        select: {
-                            id: true,
-                            publicId: true,
-                            dayName: true,
-                            dayOrder: true,
-                            isRestDay: true,
-                            exercises: {
-                                orderBy: { orderIndex: 'asc' },
-                                select: {
-                                    id: true,
-                                    publicId: true,
-                                    orderIndex: true,
-                                    notes: true,
-                                    exercise: {
-                                        select: {
-                                            id: true,
-                                            publicId: true,
-                                            name: true,
-                                            category: true,
-                                            targetMuscle: true,
-                                            gifUrl: true,
-                                        },
-                                    },
-                                    sets: {
-                                        orderBy: { setNumber: 'asc' },
-                                        select: {
-                                            id: true,
-                                            publicId: true,
-                                            setNumber: true,
-                                            targetReps: true,
-                                            targetWeight: true,
-                                            rir: true,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            }),
-            prisma.program.count({ where: whereCondition })
+            memberRepository.findProgramsPaginated(
+                whereCondition, 
+                onlyActive ? -1 : skip, 
+                onlyActive ? 0 : limit
+            ),
+            memberRepository.countPrograms(whereCondition)
         ]);
 
         return {
@@ -249,8 +127,6 @@ export class MemberService {
         };
     }
 
-    
-    // UPDATE MEMBER'S PROFILE BY ID  SERVICE 
     async updateMemberProfileService(
         memberId: number,
         data: UpdateMemberProfileData
@@ -259,51 +135,44 @@ export class MemberService {
 
         logger.info(`Attempting to update profile for member ID: ${memberId}`);
 
-        const existingMember = await prisma.member.findUnique({
-            where: { id: memberId },
-        });
+        const existingMember = await memberRepository.findById(memberId);
 
         if (!existingMember) {
             logger.warn(`Member profile update failed: Member not found with ID: ${memberId}`);
             throw new AppError(404, "Üye bulunamadı.");
         }
 
-        const updatedMember = await prisma.member.update({
-            where: { id: memberId },
-            data: {
-                ...(data.name !== undefined && { name: data.name }),
-                ...(data.surname !== undefined && { surname: data.surname }),
-                ...(data.gender !== undefined && { gender: data.gender }),
-                ...(data.phone !== undefined && { phone: data.phone }),
-                ...(data.age !== undefined && { age: data.age }),
-                ...(data.height !== undefined && { height: data.height }),
-                ...(data.weight !== undefined && { weight: data.weight }),
-                ...(data.medicalNotes !== undefined && { medicalNotes: data.medicalNotes }),
-            },
-            select: {
-                id: true,
-                publicId: true,
-                name: true,
-                surname: true,
-                email: true,
-                phone: true,
-                gender: true,
-                age: true,
-                height: true,
-                weight: true,
-                avatarUrl: true,
-                medicalNotes: true,
-                assignmentStatus: true,
-                updatedAt: true,
-            },
-        });
+        const updateData: Prisma.MemberUpdateInput = {
+            ...(data.name !== undefined && { name: data.name }),
+            ...(data.surname !== undefined && { surname: data.surname }),
+            ...(data.gender !== undefined && { gender: data.gender }),
+            ...(data.phone !== undefined && { phone: data.phone }),
+            ...(data.age !== undefined && { age: data.age }),
+            ...(data.height !== undefined && { height: data.height }),
+            ...(data.weight !== undefined && { weight: data.weight }),
+            ...(data.medicalNotes !== undefined && { medicalNotes: data.medicalNotes }),
+        };
+
+        const selectFields: Prisma.MemberSelect = {
+            id: true,
+            publicId: true,
+            name: true,
+            surname: true,
+            email: true,
+            phone: true,
+            gender: true,
+            age: true,
+            height: true,
+            weight: true,
+            avatarUrl: true,
+            medicalNotes: true,
+            assignmentStatus: true,
+            updatedAt: true,
+        };
+
+        const updatedMember = await memberRepository.updateMember(memberId, updateData, selectFields);
 
         logger.info(`Successfully updated profile for member ID: ${memberId}`);
         return updatedMember;
     }
-
-
-
-
-    // LOG WORKOUTS
 }

@@ -7,6 +7,15 @@ export interface CompleteProfileInput {
     gender?: Gender;
     medicalNotes?: string;
     avatarUrl?: string;
+
+    goal?: 'MUSCLE_GAIN' | 'FAT_LOSS' | 'STRENGTH' | 'GENERAL_FITNESS';
+    experienceLevel?: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+    workoutDaysPerWeek?: number;
+    sessionDuration?: number;
+    equipmentAccess?: 'GYM' | 'HOME' | 'BODYWEIGHT';
+    activityLevel?: 'SEDENTARY' | 'MODERATE' | 'ACTIVE';
+    injuries?: string;
+    additionalNotes?: string;
 }
 
 export interface CreateMeasurementType {
