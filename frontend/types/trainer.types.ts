@@ -1,5 +1,5 @@
 
-import { Member, MemberMeasurement } from '@/types/types'
+import { Member, MemberMeasurement, Session, Program } from '@/types/types'
 // TRAINER PROFILE PAGE REFUX INTERFACE
 export interface TrainerProfile {
     id: number;
@@ -18,14 +18,32 @@ export interface TrainerProfile {
     };
 };
 
-// trainer state
+export interface PaginationMeta {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+};
+
 export interface TrainerState {
     pendingMembers: Member[];
     approvedMembers: Member[];
     availableMembers: Member[];
-    selectedMemberDetail: Member | null;
+
+    selectedMemberProfile: Member | null;
+
     measurements: MemberMeasurement[];
+    measurementsPagination: PaginationMeta | null;
     measurementsLoading: boolean;
+
+    sessions: Session[];
+    sessionsPagination: PaginationMeta | null;
+    sessionsLoading: boolean;
+
+    programs: Program[];
+    programsPagination: PaginationMeta | null;
+    programsLoading: boolean;
+
     loading: boolean;
     error: string | null;
 

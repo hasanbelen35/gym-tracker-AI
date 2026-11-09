@@ -19,11 +19,24 @@ const initialState: TrainerState = {
     pendingMembers: [],
     approvedMembers: [],
     availableMembers: [],
-    selectedMemberDetail: null,
+    
+    selectedMemberProfile: null,
+    
     measurements: [],
+    measurementsPagination: null,
     measurementsLoading: false,
+
+    sessions: [],
+    sessionsPagination: null,
+    sessionsLoading: false,
+
+    programs: [],
+    programsPagination: null,
+    programsLoading: false,
+
     loading: false,
     error: null,
+    
     trainerProfile: {
         id: 0,
         name: '',
@@ -35,7 +48,6 @@ const initialState: TrainerState = {
         },
     },
 };
-
 export const fetchTrainerProfile = createAsyncThunk<
     TrainerProfile,
     void,
@@ -88,14 +100,55 @@ export const cancelAssignment = createAsyncThunk(
     }
 );
 
-export const fetchMemberDetail = createAsyncThunk(
-    'trainer/fetchMemberDetail',
+
+// GET MEMBER'S PROFILE DATA
+export const fetchMemberProfileByTrainer = createAsyncThunk(
+    'trainer/fetchMemberProfile',
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
-            const response = await API.get(`/trainer/my-members/${memberPublicId}`);
+            const response = await API.get(`/trainer/my-members/${memberPublicId}/profile`);
             return response.data.data;
         } catch (error) {
-            return handleApiError(error, rejectWithValue, 'Üye detayı alınırken bir hata oluştu.');
+            return handleApiError(error, rejectWithValue, 'Üye profili alınırken bir hata oluştu.');
+        }
+    }
+);
+
+// GET MEMBER'S MEASUREMENT PAGINATED DATA
+export const fetchMemberMeasurementsByTrainer = createAsyncThunk(
+    'trainer/fetchMemberMeasurements',
+    async ({ memberPublicId, page = 1, limit = 10 }: { memberPublicId: string; page?: number; limit?: number }, { rejectWithValue }) => {
+        try {
+            const response = await API.get(`/trainer/my-members/${memberPublicId}/measurements?page=${page}&limit=${limit}`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error, rejectWithValue, 'Üye ölçümleri alınırken bir hata oluştu.');
+        }
+    }
+);
+
+// GET MEMBER'S SESSIONS PAGINATED DATA
+export const fetchMemberSessionsByTrainer = createAsyncThunk(
+    'trainer/fetchMemberSessions',
+    async ({ memberPublicId, page = 1, limit = 10 }: { memberPublicId: string; page?: number; limit?: number }, { rejectWithValue }) => {
+        try {
+            const response = await API.get(`/trainer/my-members/${memberPublicId}/sessions?page=${page}&limit=${limit}`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error, rejectWithValue, 'Üye seansları alınırken bir hata oluştu.');
+        }
+    }
+);
+
+// GET MEMBER'S PROGRAMS PAGINATED DATA
+export const fetchMemberProgramsByTrainer = createAsyncThunk(
+    'trainer/fetchMemberPrograms',
+    async ({ memberPublicId, page = 1, limit = 10 }: { memberPublicId: string; page?: number; limit?: number }, { rejectWithValue }) => {
+        try {
+            const response = await API.get(`/trainer/my-members/${memberPublicId}/programs?page=${page}&limit=${limit}`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error, rejectWithValue, 'Üye programları alınırken bir hata oluştu.');
         }
     }
 );
@@ -177,13 +230,19 @@ const trainerSlice = createSlice({
     initialState,
     reducers: {
         clearSelectedMember: (state) => {
-            state.selectedMemberDetail = null;
+            state.selectedMemberProfile = null;
             state.measurements = [];
+            state.measurementsPagination = null;
+            state.sessions = [];
+            state.sessionsPagination = null;
+            state.programs = [];
+            state.programsPagination = null;
             state.error = null;
         },
     },
     extraReducers: (builder) => {
         builder
+            // 1. Trainer Profile
             .addCase(fetchTrainerProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -197,6 +256,7 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // 2. Members By Status
             .addCase(fetchMembersByStatus.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -218,6 +278,7 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // 3. Request Assignment
             .addCase(requestAssignment.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -230,6 +291,7 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // 4. Cancel Assignment
             .addCase(cancelAssignment.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -242,19 +304,75 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            .addCase(fetchMemberDetail.pending, (state) => {
+            // 5. Member Profile By Trainer
+            .addCase(fetchMemberProfileByTrainer.pending, (state) => {
                 state.loading = true;
                 state.error = null;
             })
-            .addCase(fetchMemberDetail.fulfilled, (state, action) => {
+            .addCase(fetchMemberProfileByTrainer.fulfilled, (state, action) => {
                 state.loading = false;
-                state.selectedMemberDetail = action.payload;
+                state.selectedMemberProfile = action.payload;
             })
-            .addCase(fetchMemberDetail.rejected, (state, action) => {
+            .addCase(fetchMemberProfileByTrainer.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             })
 
+            // 6. Measurements By Trainer (Paginated / Infinite Scroll)
+            .addCase(fetchMemberMeasurementsByTrainer.pending, (state) => {
+                state.measurementsLoading = true;
+            })
+            .addCase(fetchMemberMeasurementsByTrainer.fulfilled, (state, action) => {
+                state.measurementsLoading = false;
+                if (action.meta.arg.page === 1) {
+                    state.measurements = action.payload.data;
+                } else {
+                    state.measurements = [...state.measurements, ...action.payload.data];
+                }
+                state.measurementsPagination = action.payload.pagination;
+            })
+            .addCase(fetchMemberMeasurementsByTrainer.rejected, (state, action) => {
+                state.measurementsLoading = false;
+                state.error = action.payload as string;
+            })
+
+            // 7. Sessions By Trainer (Paginated / Infinite Scroll)
+            .addCase(fetchMemberSessionsByTrainer.pending, (state) => {
+                state.sessionsLoading = true;
+            })
+            .addCase(fetchMemberSessionsByTrainer.fulfilled, (state, action) => {
+                state.sessionsLoading = false;
+                if (action.meta.arg.page === 1) {
+                    state.sessions = action.payload.data;
+                } else {
+                    state.sessions = [...state.sessions, ...action.payload.data];
+                }
+                state.sessionsPagination = action.payload.pagination;
+            })
+            .addCase(fetchMemberSessionsByTrainer.rejected, (state, action) => {
+                state.sessionsLoading = false;
+                state.error = action.payload as string;
+            })
+
+            // 8. Programs By Trainer (Paginated / Infinite Scroll)
+            .addCase(fetchMemberProgramsByTrainer.pending, (state) => {
+                state.programsLoading = true;
+            })
+            .addCase(fetchMemberProgramsByTrainer.fulfilled, (state, action) => {
+                state.programsLoading = false;
+                if (action.meta.arg.page === 1) {
+                    state.programs = action.payload.data;
+                } else {
+                    state.programs = [...state.programs, ...action.payload.data];
+                }
+                state.programsPagination = action.payload.pagination;
+            })
+            .addCase(fetchMemberProgramsByTrainer.rejected, (state, action) => {
+                state.programsLoading = false;
+                state.error = action.payload as string;
+            })
+
+            // 9. Add Member Measurement
             .addCase(addMemberMeasurement.pending, (state) => {
                 state.error = null;
             })
@@ -267,19 +385,7 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            .addCase(fetchMemberMeasurements.pending, (state) => {
-                state.measurementsLoading = true;
-                state.error = null;
-            })
-            .addCase(fetchMemberMeasurements.fulfilled, (state, action) => {
-                state.measurementsLoading = false;
-                state.measurements = action.payload || [];
-            })
-            .addCase(fetchMemberMeasurements.rejected, (state, action) => {
-                state.measurementsLoading = false;
-                state.error = action.payload as string;
-            })
-
+            // 10. Delete Member Measurement
             .addCase(deleteMemberMeasurement.pending, (state) => {
                 state.error = null;
             })
@@ -292,6 +398,7 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // 11. Complete Trainer Profile
             .addCase(completeTrainerProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -304,6 +411,7 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // 12. Update Trainer Profile
             .addCase(updateTrainerProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -320,7 +428,7 @@ const trainerSlice = createSlice({
             .addCase(updateTrainerProfile.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
-            })
+            });
     },
 });
 
