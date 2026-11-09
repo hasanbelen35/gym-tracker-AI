@@ -64,6 +64,7 @@ export interface TrainerInfo {
 
 export interface Session {
   id?: number;
+  publicId?: string;
   memberId?: number;
   memberName?: string;
   gymId?: number;

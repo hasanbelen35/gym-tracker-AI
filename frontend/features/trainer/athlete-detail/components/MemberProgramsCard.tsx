@@ -1,15 +1,32 @@
-import React from "react";
+import React, { useRef } from "react";
 import { IconArrowRight } from '@/icons/icon';
 import { MemberProgramsCardProps } from '@/features/trainer/athlete-detail/types';
 
+interface ExtendedMemberProgramsProps extends MemberProgramsCardProps {
+    onLoadMore?: () => void;
+    hasMore?: boolean;
+    loading?: boolean;
+}
 
-export const MemberProgramsCard: React.FC<MemberProgramsCardProps> = ({
+export const MemberProgramsCard: React.FC<ExtendedMemberProgramsProps> = ({
     programs = [],
     onProgramClick,
     onCreateClick,
+    onLoadMore,
+    hasMore = false,
+    loading = false,
 }) => {
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+        if (scrollHeight - scrollTop <= clientHeight + 20 && hasMore && !loading && onLoadMore) {
+            onLoadMore();
+        }
+    };
+
     return (
-        <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-nav flex flex-col h-[42vh]">
+        <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-nav flex flex-col h-[42vh] custom-scrollbar">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-nav-border">
                 <h2 className="text-base font-semibold flex items-center gap-2">
                     <span className="p-1.5 rounded-lg bg-brand-100 text-brand-dark">
@@ -31,20 +48,31 @@ export const MemberProgramsCard: React.FC<MemberProgramsCardProps> = ({
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+            <div 
+                ref={scrollRef}
+                onScroll={handleScroll}
+                className="flex-1 overflow-y-auto space-y-3 pr-1"
+            >
                 {programs.length > 0 ? (
-                    programs.map((program, index) => (
-                        <div
-                            key={program.id || index}
-                            onClick={() => program.publicId && onProgramClick(program.publicId)}
-                            className="p-3.5 rounded-xl cursor-pointer bg-background border border-nav-border hover:border-brand-500/50 transition-all flex items-center justify-between group"
-                        >
-                            <span className="font-medium text-sm group-hover:text-brand-500 transition-colors">
-                                {program.title || `Antrenman Programı #${index + 1}`}
-                            </span>
-                            <IconArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                        </div>
-                    ))
+                    <>
+                        {programs.map((program, index) => (
+                            <div
+                                key={program.publicId || program.id || index}
+                                onClick={() => program.publicId && onProgramClick(program.publicId)}
+                                className="p-3.5 rounded-xl cursor-pointer bg-background border border-nav-border hover:border-brand-500/50 transition-all flex items-center justify-between group"
+                            >
+                                <span className="font-medium text-sm group-hover:text-brand-500 transition-colors">
+                                    {program.title || `Antrenman Programı #${index + 1}`}
+                                </span>
+                                <IconArrowRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                            </div>
+                        ))}
+                        {loading && (
+                            <div className="text-center py-2 text-xs opacity-60 animate-pulse">
+                                Yükleniyor...
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className="h-full flex flex-col items-center justify-center text-center py-10 opacity-60">
                         <p className="text-sm">Kayıtlı antrenman programı bulunmuyor.</p>

@@ -3,17 +3,19 @@ import { useAppDispatch, useAppSelector } from "@/store/store";
 import {
     addMemberMeasurement,
     deleteMemberMeasurement,
-    fetchMemberMeasurements
+    fetchMemberMeasurementsByTrainer
 } from "@/store/slices/trainerSlice";
 import { CreateMeasurementPayload } from "@/types/types";
 import { useAuth } from "@/hooks/useAuth";
 import { INITIAL_FORM_STATE } from "../constants/measurement.config";
 
+const MEASUREMENTS_PAGE_LIMIT = 10;
+
 export const useMeasurementManager = (memberPublicId: string) => {
     const dispatch = useAppDispatch();
     const { user } = useAuth();
 
-    const { measurements, measurementsLoading } = useAppSelector(
+    const { measurements, measurementsLoading, measurementsPagination } = useAppSelector(
         (state) => state.trainer
     );
 
@@ -27,13 +29,39 @@ export const useMeasurementManager = (memberPublicId: string) => {
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [deleteError, setDeleteError] = useState<string | null>(null);
 
+    // FETCH FIRST PAGE WHEN MEMBER CHANGES
     useEffect(() => {
         if (memberPublicId) {
-            dispatch(fetchMemberMeasurements(memberPublicId));
+            dispatch(
+                fetchMemberMeasurementsByTrainer({
+                    memberPublicId,
+                    page: 1,
+                    limit: MEASUREMENTS_PAGE_LIMIT
+                })
+            );
         }
     }, [dispatch, memberPublicId]);
 
     const safeMeasurements = Array.isArray(measurements) ? measurements : [];
+
+    // CURRENT PAGE IS DERIVED FROM REDUX PAGINATION DATA
+    const currentPage = measurementsPagination?.page ?? 1;
+    const hasMore = measurementsPagination
+        ? currentPage < measurementsPagination.totalPages
+        : false;
+
+    // LOAD NEXT PAGE OF MEASUREMENTS
+    const onLoadMore = () => {
+        if (!memberPublicId || !hasMore || measurementsLoading) return;
+
+        dispatch(
+            fetchMemberMeasurementsByTrainer({
+                memberPublicId,
+                page: currentPage + 1,
+                limit: MEASUREMENTS_PAGE_LIMIT
+            })
+        );
+    };
 
     const selectedMeasurement =
         safeMeasurements.find((m) => m.id === selectedId) ||
@@ -116,6 +144,16 @@ export const useMeasurementManager = (memberPublicId: string) => {
             if (addMemberMeasurement.fulfilled.match(resultAction)) {
                 setIsAddModalOpen(false);
                 setFormData(INITIAL_FORM_STATE);
+                setSelectedId(null);
+
+                // REFETCH FIRST PAGE SO LIST AND PAGINATION STAY IN SYNC
+                dispatch(
+                    fetchMemberMeasurementsByTrainer({
+                        memberPublicId,
+                        page: 1,
+                        limit: MEASUREMENTS_PAGE_LIMIT
+                    })
+                );
             } else if (addMemberMeasurement.rejected.match(resultAction)) {
                 setFormError((resultAction.payload as string) || "Ölçüm eklenirken bir hata oluştu.");
             }
@@ -173,6 +211,8 @@ export const useMeasurementManager = (memberPublicId: string) => {
     return {
         safeMeasurements,
         measurementsLoading,
+        hasMore,
+        onLoadMore,
         selectedMeasurement,
         selectedId,
         selectMeasurement,

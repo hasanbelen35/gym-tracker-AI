@@ -17,6 +17,8 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
     const {
         safeMeasurements,
         measurementsLoading,
+        hasMore,
+        onLoadMore,
         selectedMeasurement,
         selectMeasurement,
         isAddModalOpen,
@@ -36,8 +38,16 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
         formatDate,
     } = useMeasurementManager(memberPublicId);
 
+    // TRIGGER NEXT PAGE WHEN LIST SCROLLS NEAR THE BOTTOM
+    const handleListScroll = (e: React.UIEvent<HTMLDivElement>) => {
+        const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+        if (scrollHeight - scrollTop <= clientHeight + 20 && hasMore && !measurementsLoading) {
+            onLoadMore();
+        }
+    };
+
     return (
-        <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-nav">
+        <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 shadow-nav custom-scrollbar">
             <div className="flex items-center justify-between mb-6 pb-3 border-b border-nav-border">
                 <h2 className="text-base font-semibold flex items-center gap-2">
                     <span className="p-1.5 rounded-lg bg-brand-100 text-brand-dark">
@@ -63,28 +73,38 @@ export const MemberMeasurementsSection: React.FC<MemberMeasurementsSectionProps>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="flex flex-col space-y-2 max-h-87.5 overflow-y-auto pr-1">
+                    <div
+                        onScroll={handleListScroll}
+                        className="flex flex-col space-y-2 max-h-87.5 overflow-y-auto pr-1"
+                    >
                         <p className="text-xs font-semibold opacity-50 px-1 uppercase tracking-wider mb-1">
                             Ölçüm Tarihleri
                         </p>
 
                         {safeMeasurements.length > 0 ? (
-                            safeMeasurements.map((m, idx) => {
-                                const isSelected = selectedMeasurement?.id === m.id;
-                                const displayDate = formatDate(m.measuredAt || m.createdAt);
+                            <>
+                                {safeMeasurements.map((m, idx) => {
+                                    const isSelected = selectedMeasurement?.id === m.id;
+                                    const displayDate = formatDate(m.measuredAt || m.createdAt);
 
-                                return (
-                                    <MeasurementItem
-                                        key={m.id || idx}
-                                        measurement={m}
-                                        isSelected={isSelected}
-                                        displayDate={displayDate}
-                                        index={idx}
-                                        totalCount={safeMeasurements.length}
-                                        onSelect={() => m.id !== undefined && selectMeasurement(m.id)}
-                                    />
-                                );
-                            })
+                                    return (
+                                        <MeasurementItem
+                                            key={m.id || idx}
+                                            measurement={m}
+                                            isSelected={isSelected}
+                                            displayDate={displayDate}
+                                            index={idx}
+                                            totalCount={safeMeasurements.length}
+                                            onSelect={() => m.id !== undefined && selectMeasurement(m.id)}
+                                        />
+                                    );
+                                })}
+                                {measurementsLoading && (
+                                    <div className="text-center py-2 text-xs opacity-60 animate-pulse">
+                                        Daha fazla yükleniyor...
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="p-6 text-center bg-background border border-nav-border rounded-xl opacity-60 flex flex-col items-center justify-center space-y-2">
                                 <p className="text-xs">Henüz kayıtlı ölçüm bulunmuyor.</p>

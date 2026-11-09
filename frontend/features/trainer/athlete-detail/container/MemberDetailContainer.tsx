@@ -1,7 +1,12 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { fetchMemberDetail } from "@/store/slices/trainerSlice";
+import { 
+    fetchMemberProfileByTrainer, 
+    fetchMemberSessionsByTrainer, 
+    fetchMemberProgramsByTrainer,
+    clearSelectedMember 
+} from "@/store/slices/trainerSlice";
 import { fetchMemberAIAnalysis } from "@/store/slices/aiSlice";
 import { clearAIAnalysis, clearAIError } from "@/store/slices/aiSlice";
 import { useParams, useRouter } from "next/navigation";
@@ -25,15 +30,41 @@ export const MemberDetail: React.FC = () => {
     const router = useRouter();
     const params = useParams();
     const memberPublicId = params?.memberPublicId as string;
-    const { selectedMemberDetail, loading, error } = useAppSelector((state) => state.trainer);
+    
+    const { 
+        selectedMemberProfile, 
+        sessions, 
+        sessionsPagination,
+        sessionsLoading,
+        programs, 
+        programsPagination,
+        programsLoading,
+        loading, 
+        error 
+    } = useAppSelector((state) => state.trainer);
 
     const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+    // CURRENT PAGES ARE DERIVED FROM REDUX PAGINATION DATA
+    const currentProgramPage = programsPagination?.page ?? 1;
+    const currentSessionPage = sessionsPagination?.page ?? 1;
+
+    const hasMorePrograms = programsPagination
+        ? currentProgramPage < programsPagination.totalPages
+        : false;
+    const hasMoreSessions = sessionsPagination
+        ? currentSessionPage < sessionsPagination.totalPages
+        : false;
+
+    // FETCH PROFILE, SESSIONS AND PROGRAMS WHEN MEMBER CHANGES (MEASUREMENTS ARE FETCHED INSIDE THEIR OWN FEATURE)
     useEffect(() => {
         if (memberPublicId) {
-            dispatch(fetchMemberDetail(memberPublicId))
-                .unwrap()
+            Promise.all([
+                dispatch(fetchMemberProfileByTrainer(memberPublicId)).unwrap(),
+                dispatch(fetchMemberSessionsByTrainer({ memberPublicId, page: 1, limit: 10 })).unwrap(),
+                dispatch(fetchMemberProgramsByTrainer({ memberPublicId, page: 1, limit: 10 })).unwrap(),
+            ])
                 .then(() => {
                     setSuccessMessage("Sporcu bilgileri başarıyla yüklendi.");
                 })
@@ -41,7 +72,25 @@ export const MemberDetail: React.FC = () => {
                     setSuccessMessage(null);
                 });
         }
+
+        return () => {
+            dispatch(clearSelectedMember());
+        };
     }, [dispatch, memberPublicId]);
+
+    // INFINITE SCROLL: LOAD NEXT PAGE OF PROGRAMS
+    const handleLoadMorePrograms = () => {
+        if (hasMorePrograms && !programsLoading) {
+            dispatch(fetchMemberProgramsByTrainer({ memberPublicId, page: currentProgramPage + 1, limit: 10 }));
+        }
+    };
+
+    // INFINITE SCROLL: LOAD NEXT PAGE OF SESSIONS
+    const handleLoadMoreSessions = () => {
+        if (hasMoreSessions && !sessionsLoading) {
+            dispatch(fetchMemberSessionsByTrainer({ memberPublicId, page: currentSessionPage + 1, limit: 10 }));
+        }
+    };
 
     const handleRunAIAnalysis = () => {
         dispatch(clearAIAnalysis());
@@ -52,7 +101,7 @@ export const MemberDetail: React.FC = () => {
         }
     };
 
-    if (error && !selectedMemberDetail) {
+    if (error && !selectedMemberProfile) {
         return (
             <div className="min-h-screen w-full bg-background text-foreground p-6 sm:p-10 flex items-center justify-center">
                 <div className="max-w-md w-full space-y-4">
@@ -68,7 +117,7 @@ export const MemberDetail: React.FC = () => {
         );
     }
 
-    if (!selectedMemberDetail) {
+    if (!selectedMemberProfile) {
         return loading ? <Loading /> : null;
     }
 
@@ -108,29 +157,37 @@ export const MemberDetail: React.FC = () => {
 
                     <div className="flex items-center gap-3">
                         <AIAnalyzeButton onClick={handleRunAIAnalysis} />
-                        {getStatusBadge(selectedMemberDetail.assignmentStatus)}
+                        {getStatusBadge(selectedMemberProfile.assignmentStatus)}
                     </div>
                 </div>
 
                 <div className="bg-nav-bg border border-nav-border rounded-2xl p-6 sm:p-8 shadow-nav backdrop-blur-md space-y-6">
-                    <MemberHeader member={selectedMemberDetail} getStatusBadge={getStatusBadge} />
+                    <MemberHeader member={selectedMemberProfile} getStatusBadge={getStatusBadge} />
 
-                    <MemberStatsGrid member={selectedMemberDetail} getGenderLabel={getGenderLabel} />
+                    <MemberStatsGrid member={selectedMemberProfile} getGenderLabel={getGenderLabel} />
 
-                    <MemberMedicalNotes medicalNotes={selectedMemberDetail.medicalNotes} />
+                    <MemberMedicalNotes medicalNotes={selectedMemberProfile.medicalNotes} />
                 </div>
 
                 <MemberMeasurementsSection memberPublicId={memberPublicId} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <MemberProgramsCard
-                        programs={selectedMemberDetail.programs}
+                        programs={programs}
                         memberPublicId={memberPublicId}
                         onProgramClick={(publicId) => router.push(`/trainer/athletes/programDetail/${publicId}`)}
                         onCreateClick={() => router.push(`/trainer/create-new-workout-program/${memberPublicId}`)}
+                        onLoadMore={handleLoadMorePrograms}
+                        hasMore={hasMorePrograms}
+                        loading={programsLoading}
                     />
 
-                    <MemberSessionsCard sessions={selectedMemberDetail.sessions} />
+                    <MemberSessionsCard 
+                        sessions={sessions}
+                        onLoadMore={handleLoadMoreSessions}
+                        hasMore={hasMoreSessions}
+                        loading={sessionsLoading}
+                    />
                 </div>
 
             </div>

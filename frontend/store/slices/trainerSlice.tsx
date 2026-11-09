@@ -19,9 +19,9 @@ const initialState: TrainerState = {
     pendingMembers: [],
     approvedMembers: [],
     availableMembers: [],
-    
+
     selectedMemberProfile: null,
-    
+
     measurements: [],
     measurementsPagination: null,
     measurementsLoading: false,
@@ -36,7 +36,7 @@ const initialState: TrainerState = {
 
     loading: false,
     error: null,
-    
+
     trainerProfile: {
         id: 0,
         name: '',
@@ -116,7 +116,7 @@ export const fetchMemberProfileByTrainer = createAsyncThunk(
 
 // GET MEMBER'S MEASUREMENT PAGINATED DATA
 export const fetchMemberMeasurementsByTrainer = createAsyncThunk(
-    'trainer/fetchMemberMeasurements',
+    'trainer/fetchMemberMeasurementsByTrainer',
     async ({ memberPublicId, page = 1, limit = 10 }: { memberPublicId: string; page?: number; limit?: number }, { rejectWithValue }) => {
         try {
             const response = await API.get(`/trainer/my-members/${memberPublicId}/measurements?page=${page}&limit=${limit}`);
@@ -161,18 +161,6 @@ export const addMemberMeasurement = createAsyncThunk(
             return response.data.data;
         } catch (error) {
             return handleApiError(error, rejectWithValue, 'Ölçüm eklenirken bir hata oluştu.');
-        }
-    }
-);
-
-export const fetchMemberMeasurements = createAsyncThunk(
-    'trainer/fetchMemberMeasurements',
-    async (memberPublicId: string, { rejectWithValue }) => {
-        try {
-            const response = await API.get(`/trainer/my-members/getMembersMeasurements/${memberPublicId}`);
-            return response.data.data;
-        } catch (error) {
-            return handleApiError(error, rejectWithValue, 'Ölçümler alınırken bir hata oluştu.');
         }
     }
 );
@@ -324,7 +312,7 @@ const trainerSlice = createSlice({
             })
             .addCase(fetchMemberMeasurementsByTrainer.fulfilled, (state, action) => {
                 state.measurementsLoading = false;
-                if (action.meta.arg.page === 1) {
+                if ((action.meta.arg.page ?? 1) === 1) {
                     state.measurements = action.payload.data;
                 } else {
                     state.measurements = [...state.measurements, ...action.payload.data];
@@ -342,7 +330,7 @@ const trainerSlice = createSlice({
             })
             .addCase(fetchMemberSessionsByTrainer.fulfilled, (state, action) => {
                 state.sessionsLoading = false;
-                if (action.meta.arg.page === 1) {
+                if ((action.meta.arg.page ?? 1) === 1) {
                     state.sessions = action.payload.data;
                 } else {
                     state.sessions = [...state.sessions, ...action.payload.data];
@@ -360,7 +348,7 @@ const trainerSlice = createSlice({
             })
             .addCase(fetchMemberProgramsByTrainer.fulfilled, (state, action) => {
                 state.programsLoading = false;
-                if (action.meta.arg.page === 1) {
+                if ((action.meta.arg.page ?? 1) === 1) {
                     state.programs = action.payload.data;
                 } else {
                     state.programs = [...state.programs, ...action.payload.data];
@@ -393,6 +381,9 @@ const trainerSlice = createSlice({
                 state.measurements = state.measurements.filter(
                     (m: MemberMeasurement) => m.publicId !== action.payload
                 );
+                if (state.measurementsPagination) {
+                    state.measurementsPagination.total = Math.max(0, state.measurementsPagination.total - 1);
+                }
             })
             .addCase(deleteMemberMeasurement.rejected, (state, action) => {
                 state.error = action.payload as string;
