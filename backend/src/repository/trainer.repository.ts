@@ -36,14 +36,20 @@ export const trainerMemberRepo = {
         });
     },
 
-    // SET MEMBER AS PENDING FOR TRAINER
+    // SET MEMBER AS PENDING ONLY IF STILL UNASSIGNED (RETURNS NULL WHEN STATE CHANGED)
     async setPendingAssignment(memberId: number, trainerId: number) {
-        return await prisma.member.update({
-            where: { id: memberId },
+        const result = await prisma.member.updateMany({
+            where: { id: memberId, assignmentStatus: 'UNASSIGNED' },
             data: {
                 trainerId: trainerId,
                 assignmentStatus: 'PENDING',
-            },
+            }
+        });
+
+        if (result.count === 0) return null;
+
+        return await prisma.member.findUnique({
+            where: { id: memberId },
             select: {
                 id: true,
                 publicId: true,
@@ -55,14 +61,24 @@ export const trainerMemberRepo = {
         });
     },
 
-    // CLEAR MEMBER ASSIGNMENT AND SET UNASSIGNED
-    async clearAssignment(memberId: number) {
-        return await prisma.member.update({
-            where: { id: memberId },
+    // CLEAR ASSIGNMENT ONLY IF MEMBER STILL BELONGS TO TRAINER (RETURNS NULL WHEN STATE CHANGED)
+    async clearAssignment(memberId: number, trainerId: number) {
+        const result = await prisma.member.updateMany({
+            where: {
+                id: memberId,
+                trainerId: trainerId,
+                assignmentStatus: { in: ['PENDING', 'ASSIGNED'] }
+            },
             data: {
                 trainerId: null,
                 assignmentStatus: 'UNASSIGNED',
-            },
+            }
+        });
+
+        if (result.count === 0) return null;
+
+        return await prisma.member.findUnique({
+            where: { id: memberId },
             select: {
                 id: true,
                 publicId: true,
@@ -82,6 +98,7 @@ export const trainerMemberRepo = {
                 gym: { publicId: gymPublicId },
                 assignmentStatus: status
             },
+            orderBy: { name: 'asc' },
             select: {
                 id: true,
                 publicId: true,
@@ -93,7 +110,6 @@ export const trainerMemberRepo = {
             }
         });
     },
-
 
     // FIND MEMBER'S DETAILED PROFILE DATA
     async findAssignedProfile(trainerId: number, memberPublicId: string) {
@@ -152,6 +168,7 @@ export const trainerMemberRepo = {
                     arm: true,
                     hip: true,
                     shoulder: true,
+                    photos: true,
                     notes: true,
                     measuredAt: true,
                     createdAt: true
@@ -251,9 +268,6 @@ export const trainerMemberRepo = {
         };
     },
 
-
-
-
     // FIND ASSIGNED MEMBER ID FOR AUTHORIZATION CHECK
     async findAssignedIdByPublicId(trainerId: number, memberPublicId: string) {
         return await prisma.member.findFirst({
@@ -315,6 +329,7 @@ export const trainerMeasurementRepo = {
             },
             select: {
                 id: true,
+                publicId: true,
                 memberId: true,
                 bodyFatRate: true,
                 muscleMass: true,
@@ -325,6 +340,7 @@ export const trainerMeasurementRepo = {
                 shoulder: true,
                 photos: true,
                 notes: true,
+                measuredAt: true,
                 createdAt: true
             }
         });
@@ -336,15 +352,20 @@ export const trainerMeasurementRepo = {
             where: {
                 publicId: measurementPublicId,
                 memberId: memberId
+            },
+            select: {
+                id: true,
+                publicId: true
             }
         });
     },
 
-    // DELETE MEASUREMENT BY PUBLIC ID
-    async deleteByPublicId(measurementPublicId: string) {
-        return await prisma.memberMeasurement.delete({
+    // DELETE MEASUREMENT SCOPED TO MEMBER (RETURNS DELETED COUNT)
+    async deleteByPublicId(memberId: number, measurementPublicId: string) {
+        return await prisma.memberMeasurement.deleteMany({
             where: {
-                publicId: measurementPublicId
+                publicId: measurementPublicId,
+                memberId: memberId
             }
         });
     }
@@ -352,10 +373,11 @@ export const trainerMeasurementRepo = {
 
 // TRAINER PROFILE PROCESSES
 export const trainerProfileRepo = {
-    // FIND TRAINER BY ID
+    // CHECK TRAINER EXISTENCE (RETURNS ONLY ID, NEVER THE PASSWORD HASH)
     async findById(trainerId: number) {
         return await prisma.trainer.findUnique({
             where: { id: trainerId },
+            select: { id: true },
         });
     },
 
@@ -485,7 +507,6 @@ export const trainerProgramRepo = {
                 title: true,
                 isActive: true,
                 archivedAt: true,
-
             },
         });
     }
