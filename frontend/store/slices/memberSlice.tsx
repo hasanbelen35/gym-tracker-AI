@@ -5,13 +5,21 @@ import { API } from "@/lib/api";
 import { handleApiError } from "../apiErrorHandler";
 import { UpdateMemberProfileData } from "@/features/member/profile/types";
 
-interface UpdateProfilePayload {
+interface CompleteProfilePayload {
     age?: number;
     height?: number;
     weight?: number;
     gender?: "MALE" | "FEMALE";
     medicalNotes?: string;
     avatarUrl?: string;
+    goal?: "MUSCLE_GAIN" | "FAT_LOSS" | "STRENGTH" | "GENERAL_FITNESS";
+    experienceLevel?: "BEGINNER" | "INTERMEDIATE" | "ADVANCED";
+    workoutDaysPerWeek?: number;
+    sessionDuration?: number;
+    equipmentAccess?: "GYM" | "HOME" | "BODYWEIGHT";
+    activityLevel?: "SEDENTARY" | "MODERATE" | "ACTIVE";
+    injuries?: string;
+    additionalNotes?: string;
 }
 
 const initialState: MemberState = {
@@ -30,6 +38,10 @@ const initialState: MemberState = {
         totalPages: 1,
     },
 };
+
+// ==========================================
+// ASYNC THUNKS
+// ==========================================
 
 export const fetchCurrentMember = createAsyncThunk(
     "member/fetchCurrentMember",
@@ -79,9 +91,25 @@ export const fetchMemberPrograms = createAsyncThunk(
     }
 );
 
+export const completeMemberProfile = createAsyncThunk(
+    'member/completeProfile',
+    async (data: CompleteProfilePayload, { rejectWithValue }) => {
+        try {
+            const response = await API.put('/member/profile/complete', data);
+            return response.data.data;
+        } catch (error) {
+            return handleApiError(
+                error,
+                rejectWithValue,
+                "Profil tamamlanırken bir hata oluştu."
+            );
+        }
+    }
+);
+
 export const updateMemberProfile = createAsyncThunk(
     'member/updateProfile',
-    async (data: UpdateMemberProfileData | UpdateProfilePayload, { rejectWithValue }) => {
+    async (data: UpdateMemberProfileData, { rejectWithValue }) => {
         try {
             const response = await API.put('/member/edit-profile', data);
             return response.data.data;
@@ -94,6 +122,10 @@ export const updateMemberProfile = createAsyncThunk(
         }
     }
 );
+
+// ==========================================
+// SLICE DEFINITION
+// ==========================================
 
 const memberSlice = createSlice({
     name: "member",
@@ -153,6 +185,22 @@ const memberSlice = createSlice({
                 }
             })
             .addCase(fetchMemberPrograms.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload as string;
+            })
+            .addCase(completeMemberProfile.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(completeMemberProfile.fulfilled, (state, action) => {
+                state.loading = false;
+                if (state.profile) {
+                    state.profile = { ...state.profile, ...action.payload };
+                } else {
+                    state.profile = action.payload;
+                }
+            })
+            .addCase(completeMemberProfile.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
             })
