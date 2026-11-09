@@ -83,28 +83,106 @@ export class TrainerController {
         }
     };
 
-    // GET MEMBER'S DETAIL ASSIGNED
-    getAssignedMemberDetailController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+
+    // GET MEMBER'S PROFILE DATA BY TRAINER CONTROLLER
+    getAssignedMemberProfileController = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
             const trainerId = req.user!.id;
             const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
 
-            logger.info(`Trainer ID ${trainerId} fetching details for member publicId: ${memberPublicId}`);
+            logger.info(`Trainer ID ${trainerId} fetching profile for member publicId: ${memberPublicId}`);
 
-            const member = await trainerService.getMemberDetail(trainerId, memberPublicId);
+            const profile = await trainerService.getMemberProfile(trainerId, memberPublicId);
 
-            logger.info(`Successfully fetched details for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
+            logger.info(`Successfully fetched profile for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
             return res.status(200).json({
                 success: true,
-                data: member
+                data: profile
             });
         } catch (error) {
-            logger.error("Error in getAssignedMemberDetailController controller", {
+            logger.error("Error in getAssignedMemberProfileController controller", {
                 error: error instanceof Error ? error.message : error
             });
             next(error);
         }
     };
+
+    // GET MEMBER'S MEASUREMENT PAGINATED DATA BY TRAINER CONTROLLER
+    getAssignedMemberMeasurementsController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user!.id;
+            const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+
+            logger.info(`Trainer ID ${trainerId} fetching measurements (page: ${page}, limit: ${limit}) for member publicId: ${memberPublicId}`);
+
+            const result = await trainerService.getMemberMeasurementsPaginated(trainerId, memberPublicId, page, limit);
+
+            logger.info(`Successfully fetched measurements for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
+            return res.status(200).json({
+                success: true,
+                ...result // data ve pagination objesini doğrudan döner
+            });
+        } catch (error) {
+            logger.error("Error in getAssignedMemberMeasurementsController controller", {
+                error: error instanceof Error ? error.message : error
+            });
+            next(error);
+        }
+    };
+
+    // GET MEMBER'S SESSION PAGINATED DATA BY TRAINER CONTROLLER
+    getAssignedMemberSessionsController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user!.id;
+            const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+
+            logger.info(`Trainer ID ${trainerId} fetching sessions (page: ${page}, limit: ${limit}) for member publicId: ${memberPublicId}`);
+
+            const result = await trainerService.getMemberSessionsPaginated(trainerId, memberPublicId, page, limit);
+
+            logger.info(`Successfully fetched sessions for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
+            return res.status(200).json({
+                success: true,
+                ...result
+            });
+        } catch (error) {
+            logger.error("Error in getAssignedMemberSessionsController controller", {
+                error: error instanceof Error ? error.message : error
+            });
+            next(error);
+        }
+    };
+
+    // GET MEMBER'S PROGRAMS PAGINATED DATA BY TRAINER CONTROLLER
+    getAssignedMemberProgramsController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user!.id;
+            const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+
+            logger.info(`Trainer ID ${trainerId} fetching programs (page: ${page}, limit: ${limit}) for member publicId: ${memberPublicId}`);
+
+            const result = await trainerService.getMemberProgramsPaginated(trainerId, memberPublicId, page, limit);
+
+            logger.info(`Successfully fetched programs for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
+            return res.status(200).json({
+                success: true,
+                ...result
+            });
+        } catch (error) {
+            logger.error("Error in getAssignedMemberProgramsController controller", {
+                error: error instanceof Error ? error.message : error
+            });
+            next(error);
+        }
+    };
+
+
     // ADD MEASUREMENT DATAS TO ASSIGNED MEMBERS
     addMemberMeasurement = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {

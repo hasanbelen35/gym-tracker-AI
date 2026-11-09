@@ -29,12 +29,27 @@ router.delete("/cancelAssignment", authenticate, authorizeTrainer, validate(requ
 router.get("/getMembers/:gymId", authenticate, authorizeTrainer, validate(getTrainerMembersByStatusQuerySchema), (req, res, next) =>
     trainer.getMembersByStatus(req, res, next)
 );
-
-// get member's detailed data
-router.get("/my-members/:memberPublicId", authenticate, authorizeTrainer, validate(trainerMemberParamSchema), (req, res, next) =>
-    trainer.getAssignedMemberDetailController(req, res, next)
+// -------------------------------------------------------------------------------------------- MEMBER PROFILE ------------------------------------------------------------------------------------
+// GET MEMBER'S PROFILE DATA BY TRAINER ROUTE
+router.get("/my-members/:memberPublicId/profile", authenticate, authorizeTrainer, validate(trainerMemberParamSchema), (req, res, next) =>
+    trainer.getAssignedMemberProfileController(req, res, next)
 );
 
+// GET MEMBER'S MEASUREMENTS PAGINATED DATA BY TRAINER ROUTE
+router.get("/my-members/:memberPublicId/measurements", authenticate, authorizeTrainer, validate(trainerMemberParamSchema), (req, res, next) =>
+    trainer.getAssignedMemberMeasurementsController(req, res, next)
+);
+
+// GET MEMBER'S SESSIONS PAGINATED DATA BY TRAINER ROUTE
+router.get("/my-members/:memberPublicId/sessions", authenticate, authorizeTrainer, validate(trainerMemberParamSchema), (req, res, next) =>
+    trainer.getAssignedMemberSessionsController(req, res, next)
+);
+
+// GET MEMBER'S PROGRAMS PAGINATED DATA BY TRAINER ROUTE
+router.get("/my-members/:memberPublicId/programs", authenticate, authorizeTrainer, validate(trainerMemberParamSchema), (req, res, next) =>
+    trainer.getAssignedMemberProgramsController(req, res, next)
+);
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // add measurement to assigned member
 router.post("/my-members/addMeasurement/:memberPublicId", authenticate, authorizeTrainer, validate(createMeasurementSchema), (req, res, next) =>
     trainer.addMemberMeasurement(req, res, next)
@@ -71,3 +86,5 @@ router.put("/programs/:programPublicId/activate", authenticate, authorizeTrainer
 );
 
 export default router;
+
+//             const response = await API.get(`/trainer/my-members/${memberPublicId}`);
