@@ -1,25 +1,81 @@
 import { z } from "zod";
 import { Gender } from "@prisma/client";
 
-export const complateMemberProfileSchema = z.object({
-  body: z.object({
-    age: z.number().int().min(1, "Yaş en az 1 olmalıdır").max(120, "Geçerli bir yaş giriniz").optional(),
-    height: z.number().positive("Boy pozitif bir sayı olmalıdır").optional(),
-    weight: z.number().positive("Kilo pozitif bir sayı olmalıdır").optional(),
 
-    gender: z.enum([Gender.MALE, Gender.FEMALE], {
-      message: "Geçerli bir cinsiyet seçiniz (MALE, FEMALE)"
-    }).optional(),
 
-    medicalNotes: z.string().max(1000, "Sağlık notları en fazla 1000 karakter olabilir").optional(),
+// CONVERT EMPTY STRINGS FROM FORMS TO UNDEFINED
+const emptyToUndefined = (value: unknown) =>
+    typeof value === "string" && value.trim() === "" ? undefined : value;
 
-    avatarUrl: z.string()
-      .refine((val) => !val || URL.canParse(val), {
-        message: "Geçerli bir URL olmalıdır",
-      })
-      .optional(),
-  }),
+// OPTIONAL NUMBER WITH RANGE CHECK
+const optionalNumber = (label: string, min: number, max: number, integer = false) => {
+    let schema = z.coerce
+        .number()
+        .min(min, `${label} en az ${min} olmalıdır.`)
+        .max(max, `${label} en fazla ${max} olabilir.`);
+
+    if (integer) {
+        schema = schema.int(`${label} tam sayı olmalıdır.`);
+    }
+
+    return z.preprocess(emptyToUndefined, schema.optional());
+};
+
+// OPTIONAL TRIMMED TEXT WITH MAX LENGTH
+const optionalText = (label: string, max: number) =>
+    z.preprocess(
+        emptyToUndefined,
+        z.string().trim().max(max, `${label} en fazla ${max} karakter olabilir.`).optional()
+    );
+
+export const completeProfileSchema = z.object({
+    body: z
+        .strictObject({
+            age: optionalNumber("Yaş", 10, 100, true),
+            height: optionalNumber("Boy", 50, 250),
+            weight: optionalNumber("Kilo", 20, 400),
+            gender: z.preprocess(emptyToUndefined, z.enum(["MALE", "FEMALE"]).optional()),
+            medicalNotes: optionalText("Tıbbi notlar", 1000),
+
+            avatarUrl: z
+                .union([
+                    z.literal(""),
+                    z
+                        .url({
+                            protocol: /^https?$/,
+                            error: "Geçerli bir http veya https bağlantısı giriniz.",
+                        })
+                        .max(2048, "Avatar bağlantısı çok uzun."),
+                ])
+                .optional(),
+
+            goal: z.preprocess(
+                emptyToUndefined,
+                z.enum(["MUSCLE_GAIN", "FAT_LOSS", "STRENGTH", "GENERAL_FITNESS"]).optional()
+            ),
+            experienceLevel: z.preprocess(
+                emptyToUndefined,
+                z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]).optional()
+            ),
+            workoutDaysPerWeek: optionalNumber("Haftalık antrenman günü", 1, 7, true),
+            sessionDuration: optionalNumber("Antrenman süresi", 15, 180, true),
+            equipmentAccess: z.preprocess(
+                emptyToUndefined,
+                z.enum(["GYM", "HOME", "BODYWEIGHT"]).optional()
+            ),
+            activityLevel: z.preprocess(
+                emptyToUndefined,
+                z.enum(["SEDENTARY", "MODERATE", "ACTIVE"]).optional()
+            ),
+            additionalNotes: optionalText("Ek notlar", 1000),
+        })
+        .refine(
+            (body) => Object.values(body).some((value) => value !== undefined),
+            "En az bir alan doldurulmalıdır."
+        ),
 });
+
+export type CompleteProfileBody = z.infer<typeof completeProfileSchema>["body"];
 
 
 export const updateMemberProfileSchema = z.object({

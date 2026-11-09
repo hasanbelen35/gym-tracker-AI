@@ -2,7 +2,7 @@ import { Router } from "express";
 import { MemberController } from '../controllers/member.controller';
 import { authenticate, authorizeMember } from "../middleware/auth.middleware";
 import { validate } from "../middleware/validate.middleware";
-import { complateMemberProfileSchema, updateMemberProfileSchema } from "../validations/MemberValidations";
+import { completeProfileSchema, updateMemberProfileSchema } from "../validations/MemberValidations";
 import { completeWorkoutSchema } from "../validations/workout.validations";
 const router = Router();
 const member = new MemberController();
@@ -15,9 +15,10 @@ router.put(
   "/profile/complete",
   authenticate,
   authorizeMember,
-  validate(complateMemberProfileSchema),
+  validate(completeProfileSchema),
   (req, res, next) => member.updateProfileController(req, res, next)
 );
+
 // GET MEMBER CURRENT PROFILE DATA
 router.get("/me", authenticate, authorizeMember, (req, res, next) => member.getCurrentMemberController(req, res, next));
 // GET MEMBER WORKOUTS PROGRAMS  

@@ -28,13 +28,29 @@ export class MemberController {
             next(error);
         }
     }
+
     // UPDATE MEMBER PROFILE CONTROLLER
     async updateProfileController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const userId = req.user!.id;
             logger.info(`Member ID ${userId} attempting to update profile`);
 
-            const { age, height, weight, gender, medicalNotes, avatarUrl } = req.body;
+            const {
+                age,
+                height,
+                weight,
+                gender,
+                medicalNotes,
+                avatarUrl,
+                goal,
+                experienceLevel,
+                workoutDaysPerWeek,
+                sessionDuration,
+                equipmentAccess,
+                activityLevel,
+                injuries,
+                additionalNotes
+            } = req.body;
 
             const parseNumber = (val: any): number | undefined => {
                 if (val === undefined || val === null || val === "") return undefined;
@@ -49,6 +65,14 @@ export class MemberController {
                 gender,
                 medicalNotes,
                 avatarUrl,
+                goal,
+                experienceLevel,
+                workoutDaysPerWeek: parseNumber(workoutDaysPerWeek),
+                sessionDuration: parseNumber(sessionDuration),
+                equipmentAccess,
+                activityLevel,
+                injuries,
+                additionalNotes,
             });
 
             logger.info(`Profile successfully updated for member ID: ${userId}`);
@@ -65,6 +89,7 @@ export class MemberController {
             next(error);
         }
     }
+
     // GET CURRENT MEMBER'S DATA CONTROLLER
     async getCurrentMemberController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
@@ -86,8 +111,8 @@ export class MemberController {
             next(error);
         }
     }
-// GET MEMBER'S WORKOUT PROGRAM CONTROLLER
-   async getMyProgramsController(req: AuthRequest, res: Response, next: NextFunction) {
+    // GET MEMBER'S WORKOUT PROGRAM CONTROLLER
+    async getMyProgramsController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const memberId = req.user!.id;
 
@@ -117,7 +142,7 @@ export class MemberController {
             next(error);
         }
     }
-    
+
     // UPDATE MEMBER'S PROFILE BY ID  CONTROLLER 
     async updateMemberProfileController(req: AuthRequest, res: Response, next: NextFunction) {
         try {
