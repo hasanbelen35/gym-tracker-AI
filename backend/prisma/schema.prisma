@@ -50,6 +50,32 @@ enum SetLogStatus {
   SKIPPED
 }
 
+// MEMBER PROFILE ENUMS
+enum Goal {
+  MUSCLE_GAIN
+  FAT_LOSS
+  STRENGTH
+  GENERAL_FITNESS
+}
+
+enum ExperienceLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum EquipmentAccess {
+  GYM
+  HOME
+  BODYWEIGHT
+}
+
+enum ActivityLevel {
+  SEDENTARY     
+  MODERATE       
+  ACTIVE         
+}
+
 model Gym {
   id              Int                    @id @default(autoincrement())
   publicId        String                 @unique @default(uuid())
@@ -116,7 +142,30 @@ model Member {
   measurements       MemberMeasurement[]
   dietPrograms       DietProgram[]
   workoutLogs        WorkoutLog[]
+  profile           MemberProfile?
 }
+
+model MemberProfile {
+  id                 Int       @id @default(autoincrement())
+  memberId           Int       @unique
+  
+  goal               Goal?     
+  experienceLevel    ExperienceLevel? 
+  workoutDaysPerWeek Int?      
+  sessionDuration    Int?      
+  equipmentAccess    EquipmentAccess? 
+  activityLevel      ActivityLevel?   
+  additionalNotes    String?
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  member             Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
+}
+
+
+
+
 
 model MemberMeasurement {
   id          Int      @id @default(autoincrement())
