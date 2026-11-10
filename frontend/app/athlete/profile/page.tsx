@@ -1,11 +1,11 @@
 
-import ProfilePage from '@/features/member/profile/container/ProfileContainer'
+import MemberProfileContainer from '@/features/member/profile/container/MemberProfileContainer'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <ProfilePage />
+      <MemberProfileContainer />
     </div>
   )
 }
