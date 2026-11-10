@@ -9,6 +9,7 @@ import {
     trainerMeasurementRepo,
     trainerProfileRepo,
     trainerProgramRepo,
+    workoutLogRepository,
 } from "../repository/trainer.repository";
 
 // NORMALIZE PAGINATION INPUT TO SAFE VALUES
@@ -52,7 +53,7 @@ export class TrainerService {
             throw new AppError(400, `Bu üye şu anda atama talebi oluşturmaya uygun değil. (Mevcut Durum: ${member.assignmentStatus})`);
         }
 
-        const updatedMember = await trainerMemberRepo.setPendingAssignment(member.id, trainerId);
+        const updatedMember = await trainerMemberRepo.setPendingAssignment(member.id, trainerId, targetGymPublicId);
 
         if (!updatedMember) {
             logger.warn(`Request assignment failed: Member state changed during request for publicId: ${memberPublicId}`);
@@ -214,6 +215,38 @@ export class TrainerService {
         return await trainerMemberRepo.findMemberPrograms(trainerId, memberPublicId, safe.page, safe.limit);
     }
 
+    // GET MEMBER'S WORKOUT LOGS DATA PAGINATED
+    async getMemberWorkoutLogsPaginated(trainerId: number, memberPublicId: string, page: number = 1, limit: number = 10) {
+        AppError.assertTrainerId(trainerId);
+        AppError.assertMemberPublicId(memberPublicId);
+
+        const safe = normalizePagination(page, limit);
+        const skip = (safe.page - 1) * safe.limit;
+
+        const isAssigned = await workoutLogRepository.isMemberAssignedToTrainer(memberPublicId, trainerId);
+        if (!isAssigned) {
+            logger.warn(`Workout logs access failed: Member publicId ${memberPublicId} is not assigned to trainer ID ${trainerId}`);
+            throw new AppError(404, "Üye bulunamadı veya bu üyenin antrenman geçmişine erişim yetkiniz yok.");
+        }
+
+        logger.info(`Fetching paginated workout logs for member publicId: ${memberPublicId} by trainer ID: ${trainerId} (Page: ${safe.page}, Limit: ${safe.limit})`);
+
+        const [workoutLogs, totalCount] = await Promise.all([
+            workoutLogRepository.findMemberWorkoutLogsPaginated(trainerId, memberPublicId, skip, safe.limit),
+            workoutLogRepository.countMemberWorkoutLogs(trainerId, memberPublicId)
+        ]);
+
+        return {
+            data: workoutLogs,
+            pagination: {
+                page: safe.page,
+                limit: safe.limit,
+                total: totalCount,
+                totalPages: Math.ceil(totalCount / safe.limit)
+            }
+        };
+    }
+
     // ADD MEASUREMENTS TO MEMBERS
     async addMemberMeasurement(
         trainerId: number,
@@ -270,14 +303,14 @@ export class TrainerService {
             throw new AppError(404, "Üye bulunamadı veya bu üyenin ölçümlerini silme yetkiniz yok.");
         }
 
-        const measurement = await trainerMeasurementRepo.findByPublicId(member.id, measurementPublicId);
+        const measurement = await trainerMeasurementRepo.findByPublicId(trainerId, memberPublicId, measurementPublicId);
 
         if (!measurement) {
             logger.warn(`Delete measurement failed: Measurement record not found with publicId: ${measurementPublicId}`);
             throw new AppError(404, "Ölçüm kaydı bulunamadı.");
         }
 
-        const result = await trainerMeasurementRepo.deleteByPublicId(member.id, measurementPublicId);
+        const result = await trainerMeasurementRepo.deleteByPublicId(trainerId, memberPublicId, measurementPublicId);
 
         if (result.count === 0) {
             throw new AppError(404, "Ölçüm kaydı bulunamadı.");
@@ -358,13 +391,12 @@ export class TrainerService {
 
         logger.info(`Trainer ID: ${trainerId} attempting to activate program ${programPublicId}`);
 
-        const targetProgram = await trainerProgramRepo.findAssignedMemberProgram(trainerId, programPublicId);
+        const activatedProgram = await trainerProgramRepo.activate(trainerId, programPublicId);
 
-        if (!targetProgram) {
-            throw new AppError(404, "Program bulunamadı.");
+        if (!activatedProgram) {
+            logger.warn(`Activate program failed: Program ${programPublicId} not found or unauthorized for trainer ID: ${trainerId}`);
+            throw new AppError(404, "Program bulunamadı veya bu programı aktifleştirme yetkiniz yok.");
         }
-
-        const activatedProgram = await trainerProgramRepo.activate(targetProgram.id);
 
         logger.info(`Successfully activated program ${programPublicId} by trainer ID: ${trainerId}`);
         return activatedProgram;

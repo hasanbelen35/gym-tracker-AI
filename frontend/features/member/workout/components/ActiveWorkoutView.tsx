@@ -12,7 +12,7 @@ import { WorkoutSetRow } from "./WorkoutSetRow";
 import { EditSetModal } from "./EditSetModal";
 import { useWorkoutTimer } from "../hook/useWorkoutTimer";
 import ConfirmModal from "@/components/ConfirmModel";
-import { ErrorBox } from "@/components/ui/ErrorBox"; 
+import { ErrorBox } from "@/components/ui/ErrorBox";
 
 export interface ExerciseDetail {
     id: number;
@@ -59,7 +59,7 @@ export type UpdateSetHandler = (
 interface ActiveWorkoutViewProps {
     session: WorkoutSession;
     onUpdateSet: UpdateSetHandler;
-    onFinishSession: () => void;
+    onFinishSession: (memberNote?: string) => void;
     actionLoading: boolean;
     errorMessage?: string | null;
 }
@@ -71,26 +71,17 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
     actionLoading,
     errorMessage,
 }) => {
-    const [selectedExercise, setSelectedExercise] =
-        useState<SelectedExerciseState | null>(null);
-
-    const [editingSetData, setEditingSetData] =
-        useState<EditingSetData | null>(null);
-
-    const [isConfirmModalOpen, setIsConfirmModalOpen] =
-        useState(false);
-
+    const [selectedExercise, setSelectedExercise] = useState<SelectedExerciseState | null>(null);
+    const [editingSetData, setEditingSetData] = useState<EditingSetData | null>(null);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [showSuccessBox, setShowSuccessBox] = useState(false);
+    const [memberNote, setMemberNote] = useState("");
 
-    const [localSetUpdates, setLocalSetUpdates] = useState<
-        Record<string, Partial<SetLog>>
-    >({});
+    const [localSetUpdates, setLocalSetUpdates] = useState<Record<string, Partial<SetLog>>>({});
 
     const { formattedTime } = useWorkoutTimer(session.startedAt);
 
-    const workoutExercises = (
-        session.workoutDay?.exercises ?? []
-    ) as unknown as WorkoutExerciseRelation[];
+    const workoutExercises = (session.workoutDay?.exercises ?? []) as unknown as WorkoutExerciseRelation[];
 
     const handleUpdateSet: UpdateSetHandler = (
         exerciseLogId,
@@ -141,19 +132,18 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
 
         setEditingSetData(null);
     };
-
     const handleFinishSession = () => {
         setIsConfirmModalOpen(false);
         setShowSuccessBox(true); 
 
         setTimeout(() => {
-            onFinishSession();
-        }, 1200);
+            onFinishSession(memberNote);
+        }, 1500);
     };
 
     return (
         <div className="relative bg-nav-bg border border-brand-400/30 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
-            
+
             {showSuccessBox && (
                 <div className="absolute inset-0 z-50 bg-background/90 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in duration-300">
                     <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-500 text-3xl mb-4 animate-bounce">
@@ -164,13 +154,13 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
                         Antrenman başarıyla tamamlandı ve verilerin kaydediliyor...
                     </p>
                     <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                         Kayıt İşlemi Tamamlanıyor
                     </div>
                 </div>
             )}
 
-            <ErrorBox message={errorMessage ?? null} />
+            {errorMessage && <ErrorBox message={errorMessage} />}
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-nav-border">
                 <div>
@@ -190,13 +180,10 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
 
                         <span className="text-xs text-foreground/50">
                             Başlangıç:{" "}
-                            {new Date(session.startedAt).toLocaleTimeString(
-                                [],
-                                {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                }
-                            )}
+                            {new Date(session.startedAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}
                         </span>
                     </div>
                 </div>
@@ -207,8 +194,22 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
                     disabled={actionLoading || showSuccessBox}
                     className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow transition-all disabled:opacity-50 cursor-pointer"
                 >
-                    Antrenmanı Bitir ve Kaydet 
+                    Antrenmanı Bitir ve Kaydet
                 </button>
+            </div>
+
+            {/* Antrenör İçin Not Alanı (Opsiyonel) */}
+            <div className="bg-background/40 border border-nav-border rounded-2xl p-4 space-y-2">
+                <label className="text-xs font-bold text-foreground/70 block">
+                    Antrenman Notun (İsteğe Bağlı)
+                </label>
+                <input
+                    type="text"
+                    value={memberNote}
+                    onChange={(e) => setMemberNote(e.target.value)}
+                    placeholder="Örn: Omuzlarım bugün biraz yorgundu, 3. sette ağırlığı düşürdüm."
+                    className="w-full text-xs px-3.5 py-2.5 rounded-xl bg-background border border-nav-border text-foreground placeholder:text-foreground/40 focus:outline-none focus:border-brand-500 transition"
+                />
             </div>
 
             <div className="space-y-6">
@@ -219,8 +220,7 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
                             exLog.exerciseName.toLowerCase()
                     );
 
-                    const exerciseDetails =
-                        originalExerciseData?.exercise;
+                    const exerciseDetails = originalExerciseData?.exercise;
 
                     return (
                         <div
@@ -270,18 +270,14 @@ export const ActiveWorkoutView: React.FC<ActiveWorkoutViewProps> = ({
                                             exerciseLogId={exLog.id}
                                             onUpdateSet={handleUpdateSet}
                                             onOpenEditModal={(targetSet) => {
-                                                const targetKey =
-                                                    `${exLog.id}-${targetSet.setNumber}`;
+                                                const targetKey = `${exLog.id}-${targetSet.setNumber}`;
 
                                                 setEditingSetData({
                                                     exerciseLogId: exLog.id,
-                                                    exerciseName:
-                                                        exLog.exerciseName,
+                                                    exerciseName: exLog.exerciseName,
                                                     set: {
                                                         ...targetSet,
-                                                        ...localSetUpdates[
-                                                            targetKey
-                                                        ],
+                                                        ...localSetUpdates[targetKey],
                                                     },
                                                 });
                                             }}

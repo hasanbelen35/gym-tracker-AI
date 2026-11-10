@@ -36,10 +36,14 @@ export const trainerMemberRepo = {
         });
     },
 
-    // SET MEMBER AS PENDING ONLY IF STILL UNASSIGNED (RETURNS NULL WHEN STATE CHANGED)
-    async setPendingAssignment(memberId: number, trainerId: number) {
+    // SET MEMBER AS PENDING ONLY IF STILL UNASSIGNED AND IN SAME GYM
+    async setPendingAssignment(memberId: number, trainerId: number, gymPublicId: string) {
         const result = await prisma.member.updateMany({
-            where: { id: memberId, assignmentStatus: 'UNASSIGNED' },
+            where: { 
+                id: memberId, 
+                assignmentStatus: 'UNASSIGNED',
+                gym: { publicId: gymPublicId }
+            },
             data: {
                 trainerId: trainerId,
                 assignmentStatus: 'PENDING',
@@ -61,7 +65,7 @@ export const trainerMemberRepo = {
         });
     },
 
-    // CLEAR ASSIGNMENT ONLY IF MEMBER STILL BELONGS TO TRAINER (RETURNS NULL WHEN STATE CHANGED)
+    // CLEAR ASSIGNMENT ONLY IF MEMBER STILL BELONGS TO TRAINER
     async clearAssignment(memberId: number, trainerId: number) {
         const result = await prisma.member.updateMany({
             where: {
@@ -300,7 +304,7 @@ export const trainerMemberRepo = {
 
 // TRAINER MEASUREMENT PROCESSES
 export const trainerMeasurementRepo = {
-    // CREATE MEASUREMENT FOR MEMBER
+    // CREATE MEASUREMENT FOR ASSIGNED MEMBER ONLY
     async create(memberId: number, dto: CreateMeasurementType) {
         const {
             bodyFatRate,
@@ -346,12 +350,16 @@ export const trainerMeasurementRepo = {
         });
     },
 
-    // FIND MEASUREMENT BY PUBLIC ID FOR MEMBER
-    async findByPublicId(memberId: number, measurementPublicId: string) {
+    // FIND MEASUREMENT BY PUBLIC ID SCOPED TO ASSIGNED MEMBER & TRAINER
+    async findByPublicId(trainerId: number, memberPublicId: string, measurementPublicId: string) {
         return await prisma.memberMeasurement.findFirst({
             where: {
                 publicId: measurementPublicId,
-                memberId: memberId
+                member: {
+                    publicId: memberPublicId,
+                    trainerId: trainerId,
+                    assignmentStatus: 'ASSIGNED'
+                }
             },
             select: {
                 id: true,
@@ -360,12 +368,16 @@ export const trainerMeasurementRepo = {
         });
     },
 
-    // DELETE MEASUREMENT SCOPED TO MEMBER (RETURNS DELETED COUNT)
-    async deleteByPublicId(memberId: number, measurementPublicId: string) {
+    // DELETE MEASUREMENT SCOPED TO ASSIGNED MEMBER & TRAINER
+    async deleteByPublicId(trainerId: number, memberPublicId: string, measurementPublicId: string) {
         return await prisma.memberMeasurement.deleteMany({
             where: {
                 publicId: measurementPublicId,
-                memberId: memberId
+                member: {
+                    publicId: memberPublicId,
+                    trainerId: trainerId,
+                    assignmentStatus: 'ASSIGNED'
+                }
             }
         });
     }
@@ -373,7 +385,6 @@ export const trainerMeasurementRepo = {
 
 // TRAINER PROFILE PROCESSES
 export const trainerProfileRepo = {
-    // CHECK TRAINER EXISTENCE (RETURNS ONLY ID, NEVER THE PASSWORD HASH)
     async findById(trainerId: number) {
         return await prisma.trainer.findUnique({
             where: { id: trainerId },
@@ -381,7 +392,6 @@ export const trainerProfileRepo = {
         });
     },
 
-    // FIND TRAINER PROFILE WITH GYM
     async findProfileWithGym(trainerId: number) {
         return await prisma.trainer.findUnique({
             where: { id: trainerId },
@@ -406,7 +416,6 @@ export const trainerProfileRepo = {
         });
     },
 
-    // COMPLETE TRAINER PROFILE
     async completeProfile(
         trainerId: number,
         data: {
@@ -427,7 +436,6 @@ export const trainerProfileRepo = {
                 ...(data.height !== undefined && { height: data.height }),
                 ...(data.weight !== undefined && { weight: data.weight }),
                 ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
-
                 isProfileCompleted: true,
             },
             select: {
@@ -446,7 +454,6 @@ export const trainerProfileRepo = {
         });
     },
 
-    // UPDATE TRAINER PROFILE
     async updateProfile(trainerId: number, data: UpdateTrainerProfileData) {
         return await prisma.trainer.update({
             where: { id: trainerId },
@@ -493,10 +500,23 @@ export const trainerProgramRepo = {
         });
     },
 
-    // ACTIVATE PROGRAM AND CLEAR ARCHIVE DATE
-    async activate(programId: number) {
+    // ACTIVATE PROGRAM AND CLEAR ARCHIVE DATE (SAFE WITH TRAINER & ASSIGNED MEMBER SCOPING)
+    async activate(trainerId: number, programPublicId: string) {
+        const program = await prisma.program.findFirst({
+            where: {
+                publicId: programPublicId,
+                member: {
+                    trainerId,
+                    assignmentStatus: 'ASSIGNED',
+                },
+            },
+            select: { id: true },
+        });
+
+        if (!program) return null;
+
         return await prisma.program.update({
-            where: { id: programId },
+            where: { id: program.id },
             data: {
                 isActive: true,
                 archivedAt: null,
@@ -510,4 +530,96 @@ export const trainerProgramRepo = {
             },
         });
     }
+};
+
+// ==========================================
+// WORKOUT LOG REPOSITORY
+// ==========================================
+
+export const workoutLogRepository = {
+    // Üyenin bu antrenöre atanıp atanmadığını kontrol eder (Yetki Doğrulama)
+    async isMemberAssignedToTrainer(memberPublicId: string, trainerId: number): Promise<boolean> {
+        const member = await prisma.member.findFirst({
+            where: {
+                publicId: memberPublicId,
+                trainerId: trainerId,
+                assignmentStatus: 'ASSIGNED'
+            },
+            select: { id: true },
+        });
+        return !!member;
+    },
+
+    // ASSIGNED ÜYENİN ANTRENMAN LOGLARINI PAGINATED GETİRİR
+    async findMemberWorkoutLogsPaginated(trainerId: number, memberPublicId: string, skip: number, limit: number) {
+        const where = {
+            member: {
+                publicId: memberPublicId,
+                trainerId: trainerId,
+                assignmentStatus: 'ASSIGNED' as const
+            }
+        };
+
+        return await prisma.workoutLog.findMany({
+            where,
+            orderBy: { startedAt: 'desc' },
+            ...(skip >= 0 && limit > 0 && { skip, take: limit }),
+            select: {
+                id: true,
+                publicId: true,
+                startedAt: true,
+                completedAt: true,
+                durationMinutes: true,
+                status: true,
+                memberNote: true,
+                aiFeedback: true,
+                workoutDay: {
+                    select: {
+                        id: true,
+                        publicId: true,
+                        dayName: true,
+                        dayOrder: true,
+                    },
+                },
+                exerciseLogs: {
+                    orderBy: { orderIndex: 'asc' },
+                    select: {
+                        id: true,
+                        publicId: true,
+                        exerciseName: true,
+                        orderIndex: true,
+                        notes: true,
+                        setLogs: {
+                            orderBy: { setNumber: 'asc' },
+                            select: {
+                                id: true,
+                                publicId: true,
+                                setNumber: true,
+                                targetReps: true,
+                                targetWeight: true,
+                                targetRir: true,
+                                actualReps: true,
+                                actualWeight: true,
+                                actualRir: true,
+                                status: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    },
+
+    // ASSIGNED ÜYENİN TOPLAM ANTRENMAN KAYDI SAYISINI DÖNER
+    async countMemberWorkoutLogs(trainerId: number, memberPublicId: string): Promise<number> {
+        return await prisma.workoutLog.count({
+            where: {
+                member: {
+                    publicId: memberPublicId,
+                    trainerId: trainerId,
+                    assignmentStatus: 'ASSIGNED'
+                }
+            },
+        });
+    },
 };

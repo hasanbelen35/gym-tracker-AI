@@ -75,6 +75,7 @@ export interface WorkoutSession {
 
 interface WorkoutLogState {
     activeSession: WorkoutSession | null;
+    isCompletedToday: boolean;
     loading: boolean;
     actionLoading: boolean;
     error: string | null;
@@ -82,6 +83,7 @@ interface WorkoutLogState {
 
 const initialState: WorkoutLogState = {
     activeSession: null,
+    isCompletedToday: false,
     loading: false,
     actionLoading: false,
     error: null,
@@ -95,10 +97,10 @@ const prepareNewSession = (
         ...exerciseLog,
         setLogs: exerciseLog.setLogs.map((set) => ({
             ...set,
-            status: "PENDING",
-            actualReps: null,
-            actualWeight: null,
-            actualRir: null,
+            status: set.status || "PENDING",
+            actualReps: set.actualReps ?? null,
+            actualWeight: set.actualWeight ?? null,
+            actualRir: set.actualRir ?? null,
         })),
     })),
 });
@@ -128,17 +130,42 @@ export const fetchActiveSession = createAsyncThunk<
     }
 );
 
+export const checkDayCompletedToday = createAsyncThunk<
+    boolean,
+    number | undefined,
+    { rejectValue: string }
+>(
+    "workoutLog/checkDayCompletedToday",
+    async (workoutDayId, { rejectWithValue }) => {
+        try {
+            const url = workoutDayId
+                ? `/member/workoutLog/check-day/${workoutDayId}`
+                : `/member/workoutLog/check-today`;
+
+            const response = await API.get(url, { withCredentials: true });
+            return response.data.isCompletedToday ?? false;
+        } catch (error) {
+            const err = error as AxiosError<ApiErrorResponse>;
+
+            return rejectWithValue(
+                err.response?.data?.message ||
+                    "Tamamlanma durumu kontrol edilemedi."
+            );
+        }
+    }
+);
+
 export const startWorkoutSession = createAsyncThunk<
     WorkoutSession,
-    void,
+    { workoutDayId?: number } | undefined,
     { rejectValue: string }
 >(
     "workoutLog/startWorkoutSession",
-    async (_, { rejectWithValue }) => {
+    async (params, { rejectWithValue }) => {
         try {
             const response = await API.post(
                 "/member/workoutLog/start",
-                {},
+                { workoutDayId: params?.workoutDayId },
                 { withCredentials: true }
             );
 
@@ -273,7 +300,8 @@ const workoutLogSlice = createSlice({
 
     extraReducers: (builder) => {
         builder
-            .addCase(fetchActiveSession.pending, (state) => {  
+            // FETCH ACTIVE SESSION
+            .addCase(fetchActiveSession.pending, (state) => { 
                 state.loading = true;
                 state.error = null;
             })
@@ -291,12 +319,19 @@ const workoutLogSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // CHECK DAY COMPLETED TODAY
+            .addCase(checkDayCompletedToday.fulfilled, (state, action) => {
+                state.isCompletedToday = action.payload;
+            })
+
+            // START WORKOUT SESSION
             .addCase(startWorkoutSession.pending, (state) => {
                 state.actionLoading = true;
                 state.error = null;
             })
             .addCase(startWorkoutSession.fulfilled, (state, action) => {
                 state.actionLoading = false;
+                state.isCompletedToday = false;
                 state.activeSession = prepareNewSession(action.payload);
             })
             .addCase(startWorkoutSession.rejected, (state, action) => {
@@ -304,6 +339,7 @@ const workoutLogSlice = createSlice({
                 state.error = action.payload as string;
             })
 
+            // FINISH WORKOUT SESSION
             .addCase(finishWorkoutSession.pending, (state) => {
                 state.actionLoading = true;
                 state.error = null;
@@ -311,6 +347,7 @@ const workoutLogSlice = createSlice({
             .addCase(finishWorkoutSession.fulfilled, (state) => {
                 state.actionLoading = false;
                 state.activeSession = null;
+                state.isCompletedToday = true;
             })
             .addCase(finishWorkoutSession.rejected, (state, action) => {
                 state.actionLoading = false;

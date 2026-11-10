@@ -7,7 +7,7 @@ const workoutLogService = new WorkoutLogService();
 
 export class WorkoutLogController {
 
-    // check active session
+    // Active session kontrolü
     async getActiveSession(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const memberId = req.user?.id;
@@ -25,13 +25,15 @@ export class WorkoutLogController {
         }
     }
 
-    //start session to today's day name 
+    // Antrenman oturumunu başlatma (İsteğe bağlı workoutDayId body'den veya params'tan gelebilir)
     async startSession(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const memberId = req.user?.id;
-            logger.info(`Member ID ${memberId} attempting to start a new workout session`);
+            const { workoutDayId } = req.body; // Kullanıcının tıkladığı günün ID'si
 
-            const session = await workoutLogService.startWorkoutSession(memberId!);
+            logger.info(`Member ID ${memberId} attempting to start a new workout session for dayId: ${workoutDayId ?? 'auto'}`);
+
+            const session = await workoutLogService.startWorkoutSession(memberId!, workoutDayId ? Number(workoutDayId) : undefined);
 
             logger.info(`Successfully started workout session for member ID: ${memberId}`);
             return res.status(201).json({
@@ -47,7 +49,7 @@ export class WorkoutLogController {
         }
     }
 
-    // collect data from states and wrıte db each of them
+    // Antrenman oturumunu tamamlama
     async finishSession(req: AuthRequest, res: Response, next: NextFunction) {
         try {
             const memberId = req.user?.id;
@@ -67,6 +69,23 @@ export class WorkoutLogController {
             logger.error("Error in finishSession controller", {
                 error: error instanceof Error ? error.message : error
             });
+            next(error);
+        }
+    }
+
+    // Frontend için: Belirtilen günün bugün tamamlanıp tamamlanmadığını kontrol eden endpoint
+    async checkDayCompletedToday(req: AuthRequest, res: Response, next: NextFunction) {
+        try {
+            const memberId = req.user?.id;
+            const { workoutDayId } = req.params;
+
+            const isCompleted = await workoutLogService.isDayCompletedToday(memberId!, Number(workoutDayId));
+
+            return res.status(200).json({
+                success: true,
+                isCompletedToday: isCompleted
+            });
+        } catch (error) {
             next(error);
         }
     }

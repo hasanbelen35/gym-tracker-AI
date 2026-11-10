@@ -262,37 +262,45 @@ const memberSlice = createSlice({
             })
 
             // FETCH MEMBER PROGRAMS (PAGINATED)
-            .addCase(fetchMemberPrograms.pending, (state) => {
-                state.loading = true;
-                state.error = null;
-            })
             .addCase(fetchMemberPrograms.fulfilled, (state, action) => {
                 state.loading = false;
                 const { data, pagination, params } = action.payload;
 
                 if (params?.onlyActive) {
                     const archivedOnly = state.programs.filter((p) => !p.isActive);
-                    state.programs = [...data, ...archivedOnly];
+                    const combined = [...data, ...archivedOnly];
+
+                    const uniqueProgramsMap = new Map();
+                    combined.forEach((prog) => {
+                        const key = prog.id ?? prog.publicId;
+                        if (key) uniqueProgramsMap.set(key, prog);
+                    });
+
+                    state.programs = Array.from(uniqueProgramsMap.values());
                 } else {
                     const currentPage = params?.page || 1;
 
                     if (currentPage === 1) {
-                        const activeOnly = state.programs.filter((p) => p.isActive);
-                        state.programs = [...activeOnly, ...data];
+                        const combined = [...state.programs.filter((p) => p.isActive), ...data];
+                        const uniqueProgramsMap = new Map();
+                        combined.forEach((prog) => {
+                            const key = prog.id ?? prog.publicId;
+                            if (key) uniqueProgramsMap.set(key, prog);
+                        });
+                        state.programs = Array.from(uniqueProgramsMap.values());
                     } else {
-                        const existingIds = new Set(state.programs.map((p) => p.id));
-                        const newItems = data.filter((p: DetailedProgram) => !existingIds.has(p.id));
+                        const existingKeys = new Set(
+                            state.programs.map((p) => String(p.id ?? p.publicId))
+                        );
+                        const newItems = data.filter(
+                            (p: DetailedProgram) => !existingKeys.has(String(p.id ?? p.publicId))
+                        );
                         state.programs = [...state.programs, ...newItems];
                     }
 
                     state.pagination = pagination;
                 }
             })
-            .addCase(fetchMemberPrograms.rejected, (state, action) => {
-                state.loading = false;
-                state.error = action.payload as string;
-            })
-
             // FETCH MEMBER SESSIONS (PAGINATED)
             .addCase(fetchMemberSessions.pending, (state) => {
                 state.loading = true;

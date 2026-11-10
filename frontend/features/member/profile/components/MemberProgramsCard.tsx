@@ -3,7 +3,6 @@
 import React, { useEffect, useRef } from "react";
 import { MemberProgramsCardProps } from '@/features/member/profile/types';
 
-
 export const MemberProgramsCard: React.FC<MemberProgramsCardProps> = ({
     programs = [],
     pagination,
@@ -52,25 +51,35 @@ export const MemberProgramsCard: React.FC<MemberProgramsCardProps> = ({
                         </div>
                     ) : programs.length > 0 ? (
                         <>
-                            {programs.map((program, index) => (
-                                <div
-                                    key={program.id || program.publicId || index}
-                                    onClick={() => program.publicId && onProgramClick && onProgramClick(program.publicId)}
-                                    className="p-3.5 rounded-xl cursor-pointer bg-background border border-nav-border hover:border-brand-500/50 transition-all flex items-center justify-between group"
-                                >
-                                    <div className="space-y-0.5">
-                                        <span className="font-medium text-sm text-gray-200 group-hover:text-brand-500 transition-colors block">
-                                            {program.title || `Antrenman Programı #${index + 1}`}
-                                        </span>
-                                        <div className="flex items-center gap-2 text-[10px] text-gray-400">
-                                            {program.type && <span className="uppercase">{program.type}</span>}
-                                            {program.splitType && <span>• {program.splitType}</span>}
-                                            {program.isActive && <span className="text-emerald-500 font-bold">• Aktif</span>}
+                            {programs.map((program, index) => {
+                                const programKey = program.publicId 
+                                    ? `${program.publicId}-${index}` 
+                                    : program.id 
+                                    ? `${program.id}-${index}` 
+                                    : `program-${index}`;
+
+                                return (
+                                    <div
+                                        key={programKey}
+                                        onClick={() => program.publicId && onProgramClick && onProgramClick(program.publicId)}
+                                        className="p-3.5 rounded-xl cursor-pointer bg-background border border-nav-border hover:border-brand-500/50 transition-all flex items-center justify-between group"
+                                    >
+                                        <div className="space-y-0.5">
+                                            <span className="font-medium text-sm text-gray-200 group-hover:text-brand-500 transition-colors block">
+                                                {program.title || `Antrenman Programı #${index + 1}`}
+                                            </span>
+                                            <div className="flex items-center gap-2 text-[10px] text-gray-400">
+                                                {program.type && <span className="uppercase">{program.type}</span>}
+                                                {program.splitType && <span>• {program.splitType}</span>}
+                                                {program.isActive && <span className="text-emerald-500 font-bold">• Aktif</span>}
+                                            </div>
                                         </div>
+                                        <span className="text-xs text-gray-500 group-hover:text-brand-500 transition-colors">
+                                            Görüntüle →
+                                        </span>
                                     </div>
-                                    <span className="text-xs text-gray-500 group-hover:text-brand-500 transition-colors">Görüntüle →</span>
-                                </div>
-                            ))}
+                                );
+                            })}
 
                             {hasMore && <div ref={loadMoreRef} className="h-4" />}
                         </>

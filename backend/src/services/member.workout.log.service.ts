@@ -18,7 +18,6 @@ export interface FinishWorkoutInput {
 
 export class WorkoutLogService {
 
-    // 
     async getActiveSession(memberId: number) {
         AppError.assertMemberId(memberId);
 
@@ -55,8 +54,35 @@ export class WorkoutLogService {
         return activeSession;
     }
 
-    // 
-    async startWorkoutSession(memberId: number) {
+    /**
+     */
+    async isDayCompletedToday(memberId: number, workoutDayId: number): Promise<boolean> {
+        AppError.assertMemberId(memberId);
+
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const completedCount = await prisma.workoutLog.count({
+            where: {
+                memberId,
+                workoutDayId,
+                status: "COMPLETED",
+                completedAt: {
+                    gte: startOfDay,
+                    lte: endOfDay,
+                },
+            },
+        });
+
+        return completedCount > 0;
+    }
+
+    /**
+     */
+    async startWorkoutSession(memberId: number, requestedWorkoutDayId?: number) {
         AppError.assertMemberId(memberId);
 
         const existingActive = await this.getActiveSession(memberId);
@@ -91,20 +117,36 @@ export class WorkoutLogService {
             throw new AppError(404, "Aktif bir antrenman programınız bulunamadı.");
         }
 
-        const todayName = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date());
+        let targetDay;
 
-        let targetDay = activeProgram.days.find(
-            (day) => day.dayName.toLowerCase() === todayName.toLowerCase() ||
-                day.dayName.toLowerCase().includes(todayName.toLowerCase())
-        );
+        if (requestedWorkoutDayId) {
+            targetDay = activeProgram.days.find((d) => d.id === requestedWorkoutDayId);
+            if (!targetDay) {
+                throw new AppError(404, "Seçilen antrenman günü programınızda bulunamadı.");
+            }
+        } else {
+            const todayName = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(new Date());
+            targetDay = activeProgram.days.find(
+                (day) => day.dayName.toLowerCase() === todayName.toLowerCase() ||
+                    day.dayName.toLowerCase().includes(todayName.toLowerCase())
+            );
 
-        if (!targetDay) {
-            const dayIndex = new Date().getDay();
-            targetDay = activeProgram.days.find(d => d.dayOrder === (dayIndex === 0 ? 7 : dayIndex)) || activeProgram.days[0];
+            if (!targetDay) {
+                const dayIndex = new Date().getDay();
+                targetDay = activeProgram.days.find(d => d.dayOrder === (dayIndex === 0 ? 7 : dayIndex)) || activeProgram.days[0];
+            }
         }
 
         if (!targetDay || targetDay.isRestDay) {
-            throw new AppError(400, "Bugün için planlanmış aktif bir antrenman günü bulunamadı veya bugün dinlenme günü.");
+            throw new AppError(400, "Seçilen antrenman günü bulunamadı veya bugün dinlenme günü.");
+        }
+
+        const isCompletedToday = await this.isDayCompletedToday(memberId, targetDay.id);
+        if (isCompletedToday) {
+            throw new AppError(
+                400,
+                "Bu antrenman gününü bugün zaten tamamladınız. Aynı günü bugün tekrar başlatamazsınız."
+            );
         }
 
         const newSession = await prisma.$transaction(async (tx) => {
@@ -161,7 +203,6 @@ export class WorkoutLogService {
         return newSession;
     }
 
-    //
     async finishWorkoutSession(memberId: number, data: FinishWorkoutInput) {
         AppError.assertMemberId(memberId);
 
@@ -179,7 +220,6 @@ export class WorkoutLogService {
         const durationMinutes = Math.round((completedAt.getTime() - new Date(session.startedAt).getTime()) / 60000);
 
         const updatedSession = await prisma.$transaction(async (tx) => {
-            // Frontend'den gelen toplu set loglarını veritabanına işliyoruz
             if (exerciseLogs && exerciseLogs.length > 0) {
                 for (const exLog of exerciseLogs) {
                     for (const setLog of exLog.setLogs) {

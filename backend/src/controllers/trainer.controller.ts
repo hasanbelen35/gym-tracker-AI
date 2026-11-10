@@ -33,6 +33,7 @@ export class TrainerController {
             next(error);
         }
     };
+
     // CANCEL REQUEST TO ASSIGN MEMBER 
     cancelMyAssignmentRequest = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
@@ -83,7 +84,6 @@ export class TrainerController {
         }
     };
 
-
     // GET MEMBER'S PROFILE DATA BY TRAINER CONTROLLER
     getAssignedMemberProfileController = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
@@ -122,7 +122,7 @@ export class TrainerController {
             logger.info(`Successfully fetched measurements for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
             return res.status(200).json({
                 success: true,
-                ...result // data ve pagination objesini doğrudan döner
+                ...result
             });
         } catch (error) {
             logger.error("Error in getAssignedMemberMeasurementsController controller", {
@@ -182,12 +182,35 @@ export class TrainerController {
         }
     };
 
+    // GET MEMBER'S WORKOUT LOGS PAGINATED DATA BY TRAINER CONTROLLER
+    getAssignedMemberWorkoutLogsController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user!.id;
+            const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 10;
+
+            logger.info(`Trainer ID ${trainerId} fetching workout logs (page: ${page}, limit: ${limit}) for member publicId: ${memberPublicId}`);
+
+            const result = await trainerService.getMemberWorkoutLogsPaginated(trainerId, memberPublicId, page, limit);
+
+            logger.info(`Successfully fetched workout logs for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
+            return res.status(200).json({
+                success: true,
+                ...result
+            });
+        } catch (error) {
+            logger.error("Error in getAssignedMemberWorkoutLogsController controller", {
+                error: error instanceof Error ? error.message : error
+            });
+            next(error);
+        }
+    };
 
     // ADD MEASUREMENT DATAS TO ASSIGNED MEMBERS
     addMemberMeasurement = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
             const trainerId = req.user!.id;
-
             const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
 
             logger.info(`Trainer ID ${trainerId} adding measurement for member publicId: ${memberPublicId}`);
@@ -241,15 +264,9 @@ export class TrainerController {
     // GET MEASUREMENT DATAS FROM ASSIGNED MEMBERS
     getMemberMeasurements = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
-            logger.info(`Trainer ID ${trainerId} fetching measurements for member`);
-
-            if (!trainerId) {
-                logger.warn("Get member measurements failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
-
-            const memberPublicId = req.params.memberPublicId as string;
+            const trainerId = req.user!.id;
+            const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
+            
             logger.info(`Trainer ID ${trainerId} fetching measurements for member publicId: ${memberPublicId}`);
 
             const measurements = await trainerService.getMemberMeasurements(trainerId, memberPublicId);
@@ -257,7 +274,9 @@ export class TrainerController {
             logger.info(`Successfully fetched measurements for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
             return res.status(200).json({ success: true, data: measurements });
         } catch (error) {
-            logger.error("Error in getMemberMeasurements controller", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in getMemberMeasurements controller", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
@@ -265,20 +284,13 @@ export class TrainerController {
     // DELETE MEMBER'S MEASUREMENT BY PUBLIC ID
     deleteMemberMeasurement = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
-            logger.info(`Trainer ID ${trainerId} attempting to delete member measurement`);
-
-            if (!trainerId) {
-                logger.warn("Delete member measurement failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
-
-            const memberPublicId = req.params.memberPublicId as string;
-            const measurementPublicId = req.params.measurementPublicId as string;
+            const trainerId = req.user!.id;
+            const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
+            const measurementPublicId = String(req.params.measurementPublicId || "");
 
             if (!measurementPublicId) {
                 logger.warn(`Delete member measurement failed: Measurement ID is required for member publicId: ${memberPublicId} and trainer ID: ${trainerId}`);
-                return res.status(400).json({ success: false, message: "Measurement ID is required." });
+                throw new AppError(400, "Measurement ID is required.");
             }
 
             logger.info(`Trainer ID ${trainerId} deleting measurement publicId: ${measurementPublicId} for member publicId: ${memberPublicId}`);
@@ -288,7 +300,9 @@ export class TrainerController {
             logger.info(`Measurement successfully deleted: ${measurementPublicId} for member publicId: ${memberPublicId} by trainer ID: ${trainerId}`);
             return res.status(200).json({ success: true, message: "Measurement deleted successfully." });
         } catch (error) {
-            logger.error("Error in deleteMemberMeasurement controller", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in deleteMemberMeasurement controller", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
@@ -296,13 +310,8 @@ export class TrainerController {
     // COMPLETE TRAINER PROFILE CONTROLLER
     completeTrainerProfileController = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
+            const trainerId = req.user!.id;
             logger.info(`Trainer ID ${trainerId} attempting to complete profile`);
-
-            if (!trainerId) {
-                logger.warn("Complete trainer profile failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
 
             const { phone, gender, age, height, weight, avatarUrl } = req.body;
 
@@ -322,7 +331,9 @@ export class TrainerController {
                 data: updatedProfile,
             });
         } catch (error) {
-            logger.error("Error in completeTrainerProfileController", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in completeTrainerProfileController", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
@@ -330,13 +341,8 @@ export class TrainerController {
     // GET TRAINER'S DETAILED PROFILE DATA BY ID 
     getTrainerProfileController = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
+            const trainerId = req.user!.id;
             logger.info(`Trainer ID ${trainerId} attempting to fetch profile`);
-
-            if (!trainerId) {
-                logger.warn("Get trainer profile failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
 
             const profile = await trainerService.getTrainerProfileWithGym(trainerId);
 
@@ -347,7 +353,9 @@ export class TrainerController {
                 data: profile,
             });
         } catch (error) {
-            logger.error("Error in getTrainerProfileController", { error: error instanceof Error ? error.message : error });
+            logger.error("Error in getTrainerProfileController", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
@@ -355,13 +363,8 @@ export class TrainerController {
     // UPDATE TRAINER'S DETAILED PROFILE DATA
     updateTrainerProfileController = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
+            const trainerId = req.user!.id;
             logger.info(`Trainer ID ${trainerId} attempting to update profile`);
-
-            if (!trainerId) {
-                logger.warn("Update trainer profile failed: Unauthorized access, missing trainer ID");
-                return res.status(401).json({ success: false, message: "Unauthorized access." });
-            }
 
             const updateData = {
                 name: req.body.name,
@@ -383,21 +386,17 @@ export class TrainerController {
                 data: updatedProfile,
             });
         } catch (error) {
-            logger.error("Error in updateTrainerProfileController", { error: error instanceof Error ? error.message : error });
-
-            if (error instanceof Error && error.message === "Trainer not found") {
-                return res.status(404).json({ success: false, message: "Trainer not found." });
-            }
-
+            logger.error("Error in updateTrainerProfileController", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
 
-    // TODO : ALLL BACKEND RERENDER AFTER LIKE THIS ARCH
     // ACTIVATE ARCHIVED MEMBER PROGRAM CONTROLLER
     activateProgramController = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const trainerId = req.user?.id;
+            const trainerId = req.user!.id;
             const { programPublicId } = req.params;
 
             AppError.assertTrainerId(trainerId);
@@ -411,8 +410,10 @@ export class TrainerController {
                 data: activatedProgram,
             });
         } catch (error) {
+            logger.error("Error in activateProgramController", {
+                error: error instanceof Error ? error.message : error
+            });
             next(error);
         }
     };
-
 }

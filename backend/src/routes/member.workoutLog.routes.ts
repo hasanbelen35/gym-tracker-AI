@@ -3,14 +3,22 @@ import { WorkoutLogController } from "../controllers/member.workoutLog.controlle
 import { authenticate, authorizeMember } from "../middleware/auth.middleware";
 
 const router = Router();
-const workoutLog = new WorkoutLogController();
+const workoutLogController = new WorkoutLogController();
 
 // GET ACTIVE WORKOUT SESSION 
 router.get(
     "/active",
     authenticate,
     authorizeMember,
-    (req, res, next) => workoutLog.getActiveSession(req, res, next)
+    (req, res, next) => workoutLogController.getActiveSession(req, res, next)
+);
+
+// CHECK IF A SPECIFIC DAY IS COMPLETED TODAY 
+router.get(
+    "/check-day/:workoutDayId",
+    authenticate,
+    authorizeMember,
+    (req, res, next) => workoutLogController.checkDayCompletedToday(req, res, next)
 );
 
 // START WORKOUT SESSION 
@@ -18,7 +26,7 @@ router.post(
     "/start",
     authenticate,
     authorizeMember,
-    (req, res, next) => workoutLog.startSession(req, res, next)
+    (req, res, next) => workoutLogController.startSession(req, res, next)
 );
 
 // FINISH WORKOUT SESSION 
@@ -26,7 +34,7 @@ router.post(
     "/finish",
     authenticate,
     authorizeMember,
-    (req, res, next) => workoutLog.finishSession(req, res, next)
+    (req, res, next) => workoutLogController.finishSession(req, res, next)
 );
 
 export default router;
