@@ -34,6 +34,10 @@ const initialState: TrainerState = {
     programsPagination: null,
     programsLoading: false,
 
+    workoutLogs: [],
+    workoutLogsPagination: null,
+    workoutLogsLoading: false,
+
     loading: false,
     error: null,
 
@@ -48,6 +52,7 @@ const initialState: TrainerState = {
         },
     },
 };
+
 export const fetchTrainerProfile = createAsyncThunk<
     TrainerProfile,
     void,
@@ -99,7 +104,6 @@ export const cancelAssignment = createAsyncThunk(
         }
     }
 );
-
 
 // GET MEMBER'S PROFILE DATA
 export const fetchMemberProfileByTrainer = createAsyncThunk(
@@ -153,6 +157,19 @@ export const fetchMemberProgramsByTrainer = createAsyncThunk(
     }
 );
 
+// GET MEMBER'S WORKOUT LOGS PAGINATED DATA
+export const fetchAssignedMemberWorkoutLogs = createAsyncThunk(
+    'trainer/fetchAssignedMemberWorkoutLogs',
+    async ({ memberPublicId, page = 1, limit = 10 }: { memberPublicId: string; page?: number; limit?: number }, { rejectWithValue }) => {
+        try {
+            const response = await API.get(`/trainer/my-members/${memberPublicId}/workout-logs?page=${page}&limit=${limit}`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error, rejectWithValue, 'Üyenin antrenman geçmişi alınırken bir hata oluştu.');
+        }
+    }
+);
+
 export const addMemberMeasurement = createAsyncThunk(
     'trainer/addMemberMeasurement',
     async ({ memberPublicId, measurementData }: AddMeasurementArgs, { rejectWithValue }) => {
@@ -200,6 +217,7 @@ export const updateTrainerProfile = createAsyncThunk(
         }
     }
 );
+
 export const activateMemberProgram = createAsyncThunk(
     'trainer/activateMemberProgram',
     async (programPublicId: string, { rejectWithValue }) => {
@@ -207,7 +225,7 @@ export const activateMemberProgram = createAsyncThunk(
             const response = await API.put(`/trainer/programs/${programPublicId}/activate`);
             return response.data.data;
         } catch (error) {
-            console.log(error)
+            console.log(error);
             return handleApiError(error, rejectWithValue, 'Program aktifleştirilirken bir hata oluştu.');
         }
     }
@@ -225,6 +243,9 @@ const trainerSlice = createSlice({
             state.sessionsPagination = null;
             state.programs = [];
             state.programsPagination = null;
+            state.workoutLogs = [];
+            state.workoutLogsPagination = null;
+            state.workoutLogsLoading = false;
             state.error = null;
         },
     },
@@ -360,7 +381,25 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // 9. Add Member Measurement
+            // 9. Workout Logs By Trainer (Paginated / Infinite Scroll)
+            .addCase(fetchAssignedMemberWorkoutLogs.pending, (state) => {
+                state.workoutLogsLoading = true;
+            })
+            .addCase(fetchAssignedMemberWorkoutLogs.fulfilled, (state, action) => {
+                state.workoutLogsLoading = false;
+                if ((action.meta.arg.page ?? 1) === 1) {
+                    state.workoutLogs = action.payload.data;
+                } else {
+                    state.workoutLogs = [...state.workoutLogs, ...action.payload.data];
+                }
+                state.workoutLogsPagination = action.payload.pagination;
+            })
+            .addCase(fetchAssignedMemberWorkoutLogs.rejected, (state, action) => {
+                state.workoutLogsLoading = false;
+                state.error = action.payload as string;
+            })
+
+            // 10. Add Member Measurement
             .addCase(addMemberMeasurement.pending, (state) => {
                 state.error = null;
             })
@@ -373,7 +412,7 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // 10. Delete Member Measurement
+            // 11. Delete Member Measurement
             .addCase(deleteMemberMeasurement.pending, (state) => {
                 state.error = null;
             })
@@ -389,7 +428,7 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // 11. Complete Trainer Profile
+            // 12. Complete Trainer Profile
             .addCase(completeTrainerProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;
@@ -402,7 +441,7 @@ const trainerSlice = createSlice({
                 state.error = action.payload as string;
             })
 
-            // 12. Update Trainer Profile
+            // 13. Update Trainer Profile
             .addCase(updateTrainerProfile.pending, (state) => {
                 state.loading = true;
                 state.error = null;

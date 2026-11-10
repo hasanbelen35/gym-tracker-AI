@@ -1,11 +1,11 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { 
-    fetchMemberProfileByTrainer, 
-    fetchMemberSessionsByTrainer, 
+import {
+    fetchMemberProfileByTrainer,
+    fetchMemberSessionsByTrainer,
     fetchMemberProgramsByTrainer,
-    clearSelectedMember 
+    clearSelectedMember
 } from "@/store/slices/trainerSlice";
 import { fetchMemberAIAnalysis } from "@/store/slices/aiSlice";
 import { clearAIAnalysis, clearAIError } from "@/store/slices/aiSlice";
@@ -24,23 +24,24 @@ import { AIAnalyzeButton } from "@/components/AIAnalyzeButton";
 import Loading from "@/components/Loading";
 import { ErrorBox } from "@/components/ui/ErrorBox";
 import { SuccessBox } from "@/components/ui/SuccessBox";
+import { MemberWorkoutLogsSection } from "../components/MemberWorkoutLogsSection";
 
 export const MemberDetail: React.FC = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const params = useParams();
     const memberPublicId = params?.memberPublicId as string;
-    
-    const { 
-        selectedMemberProfile, 
-        sessions, 
+
+    const {
+        selectedMemberProfile,
+        sessions,
         sessionsPagination,
         sessionsLoading,
-        programs, 
+        programs,
         programsPagination,
         programsLoading,
-        loading, 
-        error 
+        loading,
+        error
     } = useAppSelector((state) => state.trainer);
 
     const [isAIDrawerOpen, setIsAIDrawerOpen] = useState(false);
@@ -182,7 +183,7 @@ export const MemberDetail: React.FC = () => {
                         loading={programsLoading}
                     />
 
-                    <MemberSessionsCard 
+                    <MemberSessionsCard
                         sessions={sessions}
                         onLoadMore={handleLoadMoreSessions}
                         hasMore={hasMoreSessions}
@@ -190,7 +191,10 @@ export const MemberDetail: React.FC = () => {
                     />
                 </div>
 
+                <MemberWorkoutLogsSection memberPublicId={memberPublicId} />
+
             </div>
+
 
             <AIAnalysisDrawer
                 isOpen={isAIDrawerOpen}

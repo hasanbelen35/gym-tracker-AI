@@ -1,6 +1,6 @@
+import { Member, MemberMeasurement, Session, Program } from '@/types/types';
 
-import { Member, MemberMeasurement, Session, Program } from '@/types/types'
-// TRAINER PROFILE PAGE REFUX INTERFACE
+// TRAINER PROFILE PAGE REDUX INTERFACE
 export interface TrainerProfile {
     id: number;
     name: string;
@@ -16,14 +16,55 @@ export interface TrainerProfile {
     gym: {
         name: string;
     };
-};
+}
 
 export interface PaginationMeta {
     page: number;
     limit: number;
     total: number;
     totalPages: number;
-};
+}
+
+// WORKOUT LOG SUB-TYPES
+export interface ExerciseSetLog {
+    id: number;
+    publicId: string;
+    setNumber: number;
+    targetReps?: string | null;
+    targetWeight?: number | null;
+    targetRir?: number | null;
+    actualReps?: number | null;
+    actualWeight?: number | null;
+    actualRir?: number | null;
+    status: string;
+}
+
+export interface ExerciseLog {
+    id: number;
+    publicId: string;
+    exerciseName: string;
+    orderIndex: number;
+    notes?: string | null;
+    setLogs: ExerciseSetLog[];
+}
+
+export interface WorkoutLog {
+    id: number;
+    publicId: string;
+    startedAt: string;
+    completedAt?: string | null;
+    durationMinutes?: number | null;
+    status: string;
+    memberNote?: string | null;
+    aiFeedback?: string | null;
+    workoutDay?: {
+        id: number;
+        publicId: string;
+        dayName: string;
+        dayOrder: number;
+    } | null;
+    exerciseLogs: ExerciseLog[];
+}
 
 export interface TrainerState {
     pendingMembers: Member[];
@@ -43,6 +84,10 @@ export interface TrainerState {
     programs: Program[];
     programsPagination: PaginationMeta | null;
     programsLoading: boolean;
+
+    workoutLogs: WorkoutLog[];
+    workoutLogsPagination: PaginationMeta | null;
+    workoutLogsLoading: boolean;
 
     loading: boolean;
     error: string | null;
