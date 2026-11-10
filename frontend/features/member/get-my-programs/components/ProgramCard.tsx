@@ -16,14 +16,14 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
     const trainingDays = days.filter((d) => !d.isRestDay).length;
     const totalExercises = days.reduce((acc, d) => acc + (d.exercises?.length || 0), 0);
 
-    const archivedDate =
-        isArchived && program.archivedAt
-            ? new Date(program.archivedAt).toLocaleDateString('tr-TR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-            })
-            : null;
+    const dateToDisplay = program.archivedAt || program.createdAt;
+    const formattedDate = dateToDisplay
+        ? new Date(dateToDisplay).toLocaleDateString('tr-TR', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+          })
+        : null;
 
     /* ARCHIVE CARD */
     if (isArchived) {
@@ -52,9 +52,9 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
                                     .filter(Boolean)
                                     .join(', ')}
                             </p>
-                            {archivedDate && (
+                            {formattedDate && (
                                 <p className="text-[11px] text-foreground/40">
-                                    {archivedDate} tarihinde arşivlendi
+                                    {program.archivedAt ? `${formattedDate} tarihinde arşivlendi` : `${formattedDate}`}
                                 </p>
                             )}
                         </div>
@@ -78,8 +78,8 @@ export const ProgramCard: React.FC<ProgramCardProps> = ({
         );
     }
 
+    /* ACTIVE CARD */
     return (
-        /* ACTIVE CARD */
         <article className="ui-fade-up overflow-hidden rounded-2xl border border-brand-500/30 bg-nav-bg shadow-lg shadow-brand-500/5">
             <div className="h-1 bg-linear-to-r from-brand-500 via-brand-400 to-brand-500" />
 

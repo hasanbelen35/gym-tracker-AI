@@ -1,3 +1,6 @@
+// ==========================================
+// API & ERROR TYPES
+// ==========================================
 
 interface ApiErrorDetail {
   field: string;
@@ -11,6 +14,16 @@ export interface ApiErrorResponse {
   details?: ApiErrorDetail[];
 }
 
+export interface PaginationInfo {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+// ==========================================
+// NAVIGATION & PORTAL TYPES
+// ==========================================
 
 export interface LeftNavDataType {
   name: string;
@@ -32,7 +45,69 @@ export interface PortalData {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface PortalDataRegister extends PortalData { }
+export interface PortalDataRegister extends PortalData {}
+
+// ==========================================
+// ENUMS & MEMBER PROFILE TYPES
+// ==========================================
+
+export type Goal = 'MUSCLE_GAIN' | 'FAT_LOSS' | 'STRENGTH' | 'GENERAL_FITNESS';
+export type ExperienceLevel = 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+export type EquipmentAccess = 'GYM' | 'HOME' | 'BODYWEIGHT';
+export type ActivityLevel = 'SEDENTARY' | 'MODERATE' | 'ACTIVE';
+
+export interface MemberProfileData {
+  id?: number;
+  memberId?: number;
+  goal?: Goal | null;
+  experienceLevel?: ExperienceLevel | null;
+  workoutDaysPerWeek?: number | null;
+  sessionDuration?: number | null;
+  equipmentAccess?: EquipmentAccess | null;
+  activityLevel?: ActivityLevel | null;
+  additionalNotes?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CompleteProfilePayload {
+  age?: number;
+  height?: number;
+  weight?: number;
+  gender?: 'MALE' | 'FEMALE';
+  medicalNotes?: string;
+  avatarUrl?: string;
+  goal?: Goal;
+  experienceLevel?: ExperienceLevel;
+  workoutDaysPerWeek?: number;
+  sessionDuration?: number;
+  equipmentAccess?: EquipmentAccess;
+  activityLevel?: ActivityLevel;
+  additionalNotes?: string;
+}
+
+export interface UpdateMemberProfileData {
+  name?: string;
+  surname?: string;
+  gender?: 'MALE' | 'FEMALE';
+  phone?: string;
+  age?: number;
+  height?: number;
+  weight?: number;
+  medicalNotes?: string;
+}
+
+// ==========================================
+// GYM & TRAINER TYPES
+// ==========================================
+
+export interface Gym {
+  id: number | string;
+  name: string;
+  publicId?: string;
+  email?: string;
+  length?: number;
+}
 
 export interface Trainer {
   id: number;
@@ -53,14 +128,29 @@ export interface Trainer {
   programs?: Program[];
   createdAt?: string;
 }
+
 export interface TrainerInfo {
   id: number;
   publicId: string;
   name: string;
   surname: string;
   email: string;
+  avatarUrl?: string | null;
   myMembers?: Member[];
 }
+
+export interface CompleteTrainerProfileData {
+  phone?: string;
+  gender?: string;
+  age?: number;
+  height?: number;
+  weight?: number;
+  avatarUrl?: string;
+}
+
+// ==========================================
+// SESSION & MEASUREMENT TYPES
+// ==========================================
 
 export interface Session {
   id?: number;
@@ -70,18 +160,68 @@ export interface Session {
   gymId?: number;
   checkIn: string;
   checkOut?: string | null;
-  duration?: number;
+  duration?: number | null;
   gym?: {
     name: string;
   };
 }
 
-export interface Gym {
-  length: number;
-  id: number | string;
+export interface MemberMeasurement {
+  id?: number;
+  publicId: string;
+  memberId?: number;
+  bodyFatRate?: number | null;
+  muscleMass?: number | null;
+  chest?: number | null;
+  waist?: number | null;
+  arm?: number | null;
+  hip?: number | null;
+  shoulder?: number | null;
+  photos?: string[];
+  notes?: string | null;
+  measuredAt?: string;
+  createdAt?: string;
+}
+
+export interface CreateMeasurementPayload {
+  bodyFatRate?: number;
+  muscleMass?: number;
+  chest?: number;
+  waist?: number;
+  arm?: number;
+  hip?: number;
+  shoulder?: number;
+  photos?: string[];
+  notes?: string;
+}
+
+export interface DeleteMeasurementArgs {
+  trainerId: number;
+  memberPublicId: string;
+  measurementPublicId: string;
+}
+
+export interface AddMeasurementArgs {
+  memberPublicId: string;
+  measurementData: CreateMeasurementPayload;
+}
+
+// ==========================================
+// PROGRAM & EXERCISE TYPES
+// ==========================================
+
+export interface Exercise {
+  id: number;
+  publicId: string;
   name: string;
-  publicId?: string;
-  email?: string;
+  category?: string;
+  bodyPart?: string;
+  equipment?: string;
+  targetMuscle?: string;
+  instructions?: string;
+  instruction_steps?: string;
+  gifUrl?: string;
+  createdAt?: string;
 }
 
 export interface SetInput {
@@ -89,31 +229,38 @@ export interface SetInput {
   reps: number | string;
   weight: number;
 }
+
 export interface ProgramExerciseInput {
   exercisePublicId: string;
   sets: SetInput[];
   order: number;
 }
-
 export interface ProgramDayInput {
-  dayNumber: number;
+  dayNumber?: number;  
+  dayOrder?: number;   
   dayName: string;
-  exercises: ProgramExerciseInput[];
+  isRestDay?: boolean;
+  exercises?: Exercise[];
+  [key: string]: unknown;
 }
-
 export interface Program {
   id?: number;
   publicId?: string;
   title?: string;
   description?: string;
+  type?: string;
+  splitType?: string;
   isActive?: boolean;
+  createdAt?: string;
   archivedAt?: string | null;
-  exercises?: Exercise[];
-  days?: ProgramDayInput[];
+  days?: ProgramDayInput[] ;
   [key: string]: unknown;
 }
 
-// diet program
+// ==========================================
+// DIET PROGRAM TYPES
+// ==========================================
+
 export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK';
 
 export interface MealItem {
@@ -161,6 +308,10 @@ export interface DietProgram {
   days?: DietDay[];
 }
 
+// ==========================================
+// MEMBER ENTITY TYPE
+// ==========================================
+
 export interface Member {
   id: number;
   publicId: string;
@@ -176,37 +327,29 @@ export interface Member {
   avatarUrl?: string | null;
   medicalNotes?: string | null;
   assignmentStatus?: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
+  isProfileCompleted?: boolean;
   gymId?: number;
   gym?: Gym;
   trainerId?: number | null;
   trainer?: TrainerInfo | null;
+  profile?: MemberProfileData | null;
   programs?: Program[];
   dietPrograms?: DietProgram[];
   sessions?: Session[];
   measurements?: MemberMeasurement[];
   createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface Exercise {
-  id: number;
-  publicId: string;
-  name: string;
-  category?: string;
-  bodyPart?: string;
-  equipment?: string;
-  targetMuscle?: string;
-  instructions?: string;
-  instruction_steps: string;
-  gifUrl?: string;
-  createdAt: string;
+// ==========================================
+// REDUX STATE SLICE TYPES
+// ==========================================
+
+export interface FetchMembersArgs {
+  gymId: string;
+  status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED';
 }
 
-export interface PaginationInfo {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-}
 export interface GymState {
   profile: Gym | null;
   loading: boolean;
@@ -239,7 +382,6 @@ export interface GymState {
   memberProgramsPagination: PaginationInfo | null;
   memberProgramsLoading: boolean;
   memberProgramsError: string | null;
-  // ---------------------------------------------------
 
   trainerDetail: TrainerInfo | null;
   trainerDetailLoading: boolean;
@@ -268,38 +410,21 @@ export interface SessionState {
   error: string | null;
   history: Session[];
 }
+
 export interface MemberState {
-    trainer: TrainerInfo | null;
-    assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
-    profile: {
-        name?: string;
-        surname?: string;
-        email?: string;
-        age?: number | null;
-        height?: number | null;
-        weight?: number | null;
-        phone?: string | null;
-        medicalNotes?: string | null;
-        gender?: 'MALE' | 'FEMALE' | null;
-        assignmentStatus?: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED';
-        gym?: {
-            name: string;
-        };
-        trainer?: TrainerInfo | null;
-        sessions?: Session[];
-        [key: string]: unknown;
-    } | null;
-    programs: Program[]; // 'any[]' yerine gerçek Program tipi
-    pagination: {
-        total: number;
-        page: number;
-        limit: number;
-        totalPages: number;
-    };
-    loading: boolean;
-    error: string | null;
-    workoutLogLoading: boolean;      
-    workoutLogSuccess: boolean;
+  trainer: TrainerInfo | null;
+  assignmentStatus: 'ASSIGNED' | 'PENDING' | 'UNASSIGNED' | null;
+  profile: Member | null;
+  programs: Program[];
+  pagination: PaginationInfo;
+  sessions: Session[];
+  sessionsPagination: PaginationInfo;
+  measurements: MemberMeasurement[];
+  measurementsPagination: PaginationInfo;
+  loading: boolean;
+  error: string | null;
+  workoutLogLoading: boolean;
+  workoutLogSuccess: boolean;
 }
 
 export interface ExerciseState {
@@ -312,58 +437,4 @@ export interface ExerciseState {
     equipment: string;
     targetMuscle: string;
   };
-}
-
-export interface MemberMeasurement {
-  id?: number;
-  publicId: string;
-  memberId?: number;
-  bodyFatRate?: number | null;
-  muscleMass?: number | null;
-  chest?: number | null;
-  waist?: number | null;
-  arm?: number | null;
-  hip?: number | null;
-  shoulder?: number | null;
-  photos?: string[];
-  notes?: string | null;
-  measuredAt?: string;
-  createdAt?: string;
-}
-
-export interface CreateMeasurementPayload {
-  bodyFatRate?: number;
-  muscleMass?: number;
-  chest?: number;
-  waist?: number;
-  arm?: number;
-  hip?: number;
-  shoulder?: number;
-  photos?: string[];
-  notes?: string;
-}
-
-export interface DeleteMeasurementArgs {
-  trainerId: number;
-  memberPublicId: string;
-  measurementPublicId: string;
-}
-
-export interface FetchMembersArgs {
-  gymId: string;
-  status: 'PENDING' | 'ASSIGNED' | 'UNASSIGNED';
-}
-
-export interface AddMeasurementArgs {
-  memberPublicId: string;
-  measurementData: CreateMeasurementPayload;
-}
-
-export interface CompleteTrainerProfileData {
-  phone?: string;
-  gender?: string;
-  age?: number;
-  height?: number;
-  weight?: number;
-  avatarUrl?: string;
 }

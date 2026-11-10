@@ -15,33 +15,27 @@ export const MyProgramsContainer: React.FC = () => {
     const router = useRouter();
 
     const [archivePage, setArchivePage] = useState(1);
-    const [isFetchingMore, setIsFetchingMore] = useState(false);
 
     useEffect(() => {
-        dispatch(fetchMemberPrograms({ onlyActive: true }));
-    }, [dispatch]);
-
-    useEffect(() => {
-        dispatch(fetchMemberPrograms({ onlyActive: false, page: archivePage, limit: 10 }))
-            .unwrap()
-            .then(() => setIsFetchingMore(false))
-            .catch(() => setIsFetchingMore(false));
+        dispatch(fetchMemberPrograms({ onlyActive: false, page: archivePage, limit: 10 }));
     }, [dispatch, archivePage]);
 
+    const isFetchingMore = loading && archivePage > 1;
+
     const activeProgram = useMemo(
-        () => programs.find((p) => p.isActive && !p.archivedAt),
+        () => programs.find((p) => p.isActive),
         [programs]
     );
 
     const archivedPrograms = useMemo(
         () =>
             programs
-                .filter((p) => !!p.archivedAt)
-                .sort(
-                    (a, b) =>
-                        new Date(b.archivedAt as string).getTime() -
-                        new Date(a.archivedAt as string).getTime()
-                ),
+                .filter((p) => !p.isActive || !!p.archivedAt)
+                .sort((a, b) => {
+                    const dateA = a.archivedAt ? new Date(a.archivedAt).getTime() : new Date(a.createdAt).getTime();
+                    const dateB = b.archivedAt ? new Date(b.archivedAt).getTime() : new Date(b.createdAt).getTime();
+                    return dateB - dateA;
+                }),
         [programs]
     );
 
@@ -49,8 +43,7 @@ export const MyProgramsContainer: React.FC = () => {
         const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
         
         if (scrollHeight - scrollTop <= clientHeight + 20) {
-            if (!isFetchingMore && archivePage < pagination.totalPages) {
-                setIsFetchingMore(true);
+            if (!loading && archivePage < pagination.totalPages) {
                 setArchivePage((prev) => prev + 1);
             }
         }
@@ -123,7 +116,7 @@ export const MyProgramsContainer: React.FC = () => {
 
                     {activeProgram ? (
                         <ProgramCard
-                            key={activeProgram.publicId}
+                            key={activeProgram.publicId ?? activeProgram.id}
                             program={activeProgram}
                             variant="active"
                             defaultOpen
@@ -158,7 +151,7 @@ export const MyProgramsContainer: React.FC = () => {
 
                                     return (
                                         <div
-                                            key={`${program.publicId ?? i}-${i}`}
+                                            key={`${program.publicId ?? program.id}-${i}`}
                                             style={{ '--delay': `${(i % 10) * 50}ms` } as React.CSSProperties}
                                             className="ui-slide-right"
                                         >

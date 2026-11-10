@@ -83,7 +83,7 @@ export const MemberMeasurementsCard: React.FC<MemberMeasurementsCardProps> = ({
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                         {/* Sol Liste (Tarihler) */}
-                        <div className="md:col-span-4 flex flex-col gap-2 max-h-[320px] overflow-y-auto pr-1 custom-scrollbar">
+                        <div className="md:col-span-4 flex flex-col gap-2 max-h-80 overflow-y-auto pr-1 custom-scrollbar">
                             <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-1">Ölçüm Tarihleri</p>
                             {measurements.map((item, index) => {
                                 const isSelected = selectedIndex === index;
