@@ -39,8 +39,8 @@ export const trainerMemberRepo = {
     // SET MEMBER AS PENDING ONLY IF STILL UNASSIGNED AND IN SAME GYM
     async setPendingAssignment(memberId: number, trainerId: number, gymPublicId: string) {
         const result = await prisma.member.updateMany({
-            where: { 
-                id: memberId, 
+            where: {
+                id: memberId,
                 assignmentStatus: 'UNASSIGNED',
                 gym: { publicId: gymPublicId }
             },
@@ -140,10 +140,23 @@ export const trainerMemberRepo = {
                 avatarUrl: true,
                 gym: {
                     select: { id: true, name: true }
+                },
+                profile: {
+                    select: {
+                        goal: true,
+                        experienceLevel: true,
+                        workoutDaysPerWeek: true,
+                        sessionDuration: true,
+                        equipmentAccess: true,
+                        activityLevel: true,
+                        additionalNotes: true,
+                    }
+
                 }
             }
         });
     },
+
 
     // PAGINATED MEASUREMENTS DATA
     async findMemberMeasurements(trainerId: number, memberPublicId: string, page: number = 1, limit: number = 10) {

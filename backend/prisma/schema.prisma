@@ -113,6 +113,7 @@ model Trainer {
   myMembers          Member[]
   programs           Program[]
   dietPrograms       DietProgram[]
+  performanceCache TrainerMemberPerformanceCache?
 }
 
 model Member {
@@ -143,6 +144,7 @@ model Member {
   dietPrograms       DietProgram[]
   workoutLogs        WorkoutLog[]
   profile           MemberProfile?
+  performanceSummary MemberPerformanceSummary?
 }
 
 model MemberProfile {
@@ -391,4 +393,39 @@ model GymRiskAnalyticsCache {
   lastCalculatedAt DateTime @default(now())
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+// TRAINER - MEMBER PERFORMANCE ANALYZE TABLE AND CACHE
+
+enum PerformanceTrend {
+  RISING
+  STABLE
+  DECLINING
+}
+
+model TrainerMemberPerformanceCache {
+  id               Int      @id @default(autoincrement())
+  trainerId        Int      
+  summary          Json     
+  risingMembers    Json     
+  stableMembers    Json     
+  decliningMembers Json     
+  lastCalculatedAt DateTime @default(now())
+
+  trainer          Trainer  @relation(fields: [trainerId], references: [id], onDelete: Cascade)
+
+  @@unique([trainerId])
+}
+
+model MemberPerformanceSummary {
+  id               Int              @id @default(autoincrement())
+  memberId         Int              @unique
+  trainerId        Int?     
+  performanceScore Int              // 0 - 100 
+  trendStatus      PerformanceTrend 
+  riskReason       String?  
+  aiSummary        String?          @db.Text 
+  lastAnalyzedAt   DateTime         @default(now())
+
+  member           Member           @relation(fields: [memberId], references: [id], onDelete: Cascade)
 }
