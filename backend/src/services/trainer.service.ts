@@ -11,6 +11,7 @@ import {
     trainerProgramRepo,
     workoutLogRepository,
 } from "../repository/trainer.repository";
+import { getOrCalculateTrainerPerformance } from "./ai/TrainerMemberPerformanceService";
 
 // NORMALIZE PAGINATION INPUT TO SAFE VALUES
 const normalizePagination = (page?: number, limit?: number) => {
@@ -400,5 +401,18 @@ export class TrainerService {
 
         logger.info(`Successfully activated program ${programPublicId} by trainer ID: ${trainerId}`);
         return activatedProgram;
+    }
+
+    // FETCH CACHE DATA FROM DB MEMBER GROPİNG ANALYZE SERVICE
+    async getGroupedMemberCacheService(trainerId: number) {
+        AppError.assertTrainerId(trainerId);
+
+        logger.info(`Trainer ID: ${trainerId} requesting member performance dashboard`);
+
+        const data = await getOrCalculateTrainerPerformance(trainerId);
+
+        logger.info(`Performance dashboard served for trainer ID: ${trainerId} (source: ${data.source})`);
+        
+        return data;
     }
 }

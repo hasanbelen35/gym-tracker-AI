@@ -266,7 +266,7 @@ export class TrainerController {
         try {
             const trainerId = req.user!.id;
             const memberPublicId = String(req.params.memberPublicId || req.params.memberId || "");
-            
+
             logger.info(`Trainer ID ${trainerId} fetching measurements for member publicId: ${memberPublicId}`);
 
             const measurements = await trainerService.getMemberMeasurements(trainerId, memberPublicId);
@@ -411,6 +411,28 @@ export class TrainerController {
             });
         } catch (error) {
             logger.error("Error in activateProgramController", {
+                error: error instanceof Error ? error.message : error
+            });
+            next(error);
+        }
+    };
+
+    // GET TRAINER MEMBER PERFORMANCE grouped data CONTROLLER
+    getPerformanceDashboardController = async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const trainerId = req.user!.id;
+
+            AppError.assertTrainerId(trainerId);
+
+            const dashboard = await trainerService.getGroupedMemberCacheService(trainerId);
+
+            return res.status(200).json({
+                success: true,
+                message: "Member performance dashboard successfully retrieved.",
+                data: dashboard,
+            });
+        } catch (error) {
+            logger.error("Error in getPerformanceDashboardController", {
                 error: error instanceof Error ? error.message : error
             });
             next(error);

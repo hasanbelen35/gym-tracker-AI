@@ -173,4 +173,12 @@ router.put(
     (req, res, next) => trainer.activateProgramController(req, res, next)
 );
 
+// GET TRAINER MEMBER PERFORMANCE DASHBOARD 
+router.get(
+    "/performance/dashboard",
+    authenticate,
+    authorizeTrainer,
+    (req, res, next) => trainer.getPerformanceDashboardController(req, res, next)
+);
+
 export default router;
