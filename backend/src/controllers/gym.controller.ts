@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { GymService } from "../services/gym.service";
 import { AuthRequest } from "../middleware/auth.middleware";
 import { logger } from "../config/logger";
-import { getOrCalculateGymRiskAnalytics } from "../services/ai/GymAIService";
+import { getOrCalculateGymRiskAnalytics } from "../services/ai/GymRiskCalculateService";
 import { AppError } from "../middleware/errorMiddleware";
 
 const gymService = new GymService();
@@ -187,31 +187,6 @@ export class GymController {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // ----------------------------------------------------------------------------------------------------------------
 
     // GET ALL TRAINER FROM GYM CONTROLLER
     async getAllTrainersController(req: AuthRequest, res: Response, next: NextFunction) {
