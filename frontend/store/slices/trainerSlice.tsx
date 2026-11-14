@@ -111,6 +111,7 @@ export const fetchMemberProfileByTrainer = createAsyncThunk(
     async (memberPublicId: string, { rejectWithValue }) => {
         try {
             const response = await API.get(`/trainer/my-members/${memberPublicId}/profile`);
+            console.log(response.data.data)
             return response.data.data;
         } catch (error) {
             return handleApiError(error, rejectWithValue, 'Üye profili alınırken bir hata oluştu.');

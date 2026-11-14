@@ -124,7 +124,7 @@ export const trainerMemberRepo = {
                 assignmentStatus: 'ASSIGNED'
             },
             select: {
-                id: true,
+              
                 publicId: true,
                 name: true,
                 surname: true,

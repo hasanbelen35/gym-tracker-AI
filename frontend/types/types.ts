@@ -311,7 +311,7 @@ export interface DietProgram {
 // ==========================================
 // MEMBER ENTITY TYPE
 // ==========================================
-
+// --- MEMBER INTERFACE ---
 export interface Member {
   id: number;
   publicId: string;
@@ -339,6 +339,15 @@ export interface Member {
   measurements?: MemberMeasurement[];
   createdAt?: string;
   updatedAt?: string;
+}
+export interface MemberProfileData {
+  goal?: Goal | null;
+  experienceLevel?: ExperienceLevel | null;
+  workoutDaysPerWeek?: number | null;
+  sessionDuration?: number | null;
+  equipmentAccess?: EquipmentAccess | null;
+  activityLevel?: ActivityLevel | null;
+  additionalNotes?: string | null;
 }
 
 // ==========================================
